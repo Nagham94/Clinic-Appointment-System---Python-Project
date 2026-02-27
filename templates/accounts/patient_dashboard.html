@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% block title %}Patient Dashboard - ClinicLife{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <div class="dashboard-card"
+        style="margin-bottom: 2rem; border-left: 5px solid var(--primary); display: flex; justify-content: space-between; align-items: start;">
+        <div>
+            <h2 style="margin-bottom: 0.5rem;">Welcome, {{ user.get_full_name|default:user.username }}</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1.5rem;">
+                <div>
+                    <span style="color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase;">Phone</span>
+                    <p style="font-weight: 600;">{{ user.patientprofile.phone|default:"Not provided" }}</p>
+                </div>
+                <div>
+                    <span style="color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase;">Birth
+                        Date</span>
+                    <p style="font-weight: 600;">{{ user.patientprofile.date_of_birth|default:"Not provided" }}</p>
+                </div>
+                <div style="grid-column: span 1;">
+                    <span
+                        style="color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase;">Address</span>
+                    <p style="font-size: 0.95rem;">{{ user.patientprofile.address|default:"Not provided" }}</p>
+                </div>
+            </div>
+        </div>
+        <a href="{% url 'update_profile' %}" class="btn-primary"
+            style="text-decoration: none; padding: 0.75rem 1.5rem; font-size: 0.9rem;">
+            <i class="fa-solid fa-user-pen" style="margin-right: 8px;"></i> Edit Profile
+        </a>
+    </div>
+
+    <div class="dashboard-grid"
+        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+        <div class="dashboard-card">
+            <h3>Quick Actions</h3>
+            <ul style="list-style: none; padding: 0;">
+                <li style="margin-bottom: 0.75rem;"><button class="btn-primary">Book New Appointment</button></li>
+                <li><button class="btn-primary" style="background: #64748b;">View My Appointments</button></li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}
