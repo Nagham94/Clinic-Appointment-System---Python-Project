@@ -15,9 +15,12 @@ notes written by the doctor -> optional (can be empty)
 """
 class Consultation(models.Model):
 
-    appointment = models.OneToOneField(Appointment, on_delete=models.CASCADE)
+    appointment = models.OneToOneField(
+        Appointment,
+        on_delete=models.CASCADE
+    )
     diagnosis = models.TextField()
-    notes = models.TextField(blank=True, null=True)
+    notes = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -35,7 +38,10 @@ add name, dosage, duration of the medicine
 """
 class Prescription(models.Model):
 
-    consultation = models.ForeignKey(Consultation, on_delete=models.CASCADE)
+    consultation = models.ForeignKey(
+        Consultation,
+        on_delete=models.CASCADE
+    )
     drug_name = models.CharField(max_length=100)
     dosage = models.CharField(max_length=100)
     duration = models.CharField(max_length=100)
