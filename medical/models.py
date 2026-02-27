@@ -1,5 +1,6 @@
 from django.db import models
 from appointments.models import Appointment
+from django.conf import settings
 
 # Create your models here.
 """
@@ -40,7 +41,8 @@ class Prescription(models.Model):
 
     consultation = models.ForeignKey(
         Consultation,
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        related_name='prescriptions'
     )
     drug_name = models.CharField(max_length=100)
     dosage = models.CharField(max_length=100)
@@ -60,7 +62,12 @@ add the name of the test -> the same test can be requested in more that one cons
 """
 class RequestedTest(models.Model):
 
-    consultation = models.ForeignKey(Consultation, on_delete=models.CASCADE)
+    consultation = models.ForeignKey(
+        Consultation,
+        on_delete=models.CASCADE,
+        related_name='tests'
+    )
+
     test_name = models.CharField(max_length=150)
 
     def __str__(self):
