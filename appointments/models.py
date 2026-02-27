@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import User
+from django.conf import settings
 from django.utils import timezone
 
 # Create your models here.
@@ -17,41 +17,49 @@ reason for the appointment -> optional
 """
 class Appointment(models.Model):
 
-    STATUS_CHOICES = [
-        ('REQUESTED', 'Requested'),
-        ('CONFIRMED', 'Confirmed'),
-        ('CHECKED_IN', 'Checked In'),
-        ('COMPLETED', 'Completed'),
-        ('CANCELLED', 'Cancelled'),
-        ('NO_SHOW', 'No Show'),
-    ]
+    class Status(models.TextChoices):
+        REQUESTED = 'REQUESTED', 'Requested'
+        CONFIRMED = 'CONFIRMED', 'Confirmed'
+        CHECKED_IN = 'CHECKED_IN', 'Checked In'
+        COMPLETED = 'COMPLETED', 'Completed'
+        CANCELLED = 'CANCELLED', 'Cancelled'
+        NO_SHOW = 'NO_SHOW', 'No Show'
 
     patient = models.ForeignKey(
-        User,
+        settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        related_name='patient_appointments'
+        related_name='patient_appointments',
+        limit_choices_to={'role': 'PATIENT'}
     )
 
     doctor = models.ForeignKey(
-        User,
+        settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        related_name='doctor_appointments'
+        related_name='doctor_appointments',
+        limit_choices_to={'role': 'DOCTOR'}
     )
 
     start_datetime = models.DateTimeField()
     end_datetime = models.DateTimeField()
+
     status = models.CharField(
         max_length=20,
-        choices=STATUS_CHOICES,
-        default='REQUESTED'
+        choices=Status.choices,
+        default=Status.REQUESTED
     )
+
+    reason = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    reason = models.CharField(max_length=255, blank=True)
 
     class Meta:
         ordering = ['start_datetime']
-        unique_together = ('doctor', 'start_datetime')
+        constraints = [
+            models.UniqueConstraint(
+                fields=['doctor', 'start_datetime'],
+                name='unique_doctor_start_time'
+            )
+        ]
 
     def __str__(self):
-        return f"{self.patient.username} with {self.doctor.username}"
+        return f"{self.patient} with {self.doctor}"
