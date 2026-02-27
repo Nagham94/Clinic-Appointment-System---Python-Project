@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Clinic System{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/accounts.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+    {% if not hide_nav %}
+    <nav class="navbar">
+        <div class="nav-logo">CLINIC<span>LIFE</span></div>
+        <div class="nav-links">
+            <a href="{% url 'home' %}" class="nav-item">Home</a>
+            {% if user.is_authenticated %}
+            <a href="{% url 'dashboard_redirect' %}" class="nav-item">Dashboard</a>
+            <a href="{% url 'update_profile' %}" class="nav-item">Profile</a>
+            <a href="{% url 'logout' %}" class="nav-item logout-link" style="color: #f87171;">Logout</a>
+            {% else %}
+            <a href="{% url 'login' %}" class="nav-item">Login</a>
+            <a href="{% url 'register' %}" class="nav-item highlight">Register</a>
+            {% endif %}
+        </div>
+    </nav>
+    <style>
+        .nav-logo span {
+            color: var(--accent);
+        }
+
+        .highlight {
+            background: var(--primary);
+            padding: 0.5rem 1.25rem !important;
+            border-radius: 0.75rem;
+            color: white !important;
+        }
+
+        .highlight:hover {
+            filter: brightness(1.2);
+        }
+    </style>
+    {% endif %}
+
+    <div class="messages-container">
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+            {{ message }}
+        </div>
+        {% endfor %}
+        {% endif %}
+    </div>
+
+    {% block content %}
+    {% endblock %}
+
+    {% block extra_js %}{% endblock %}
+</body>
+
+</html>

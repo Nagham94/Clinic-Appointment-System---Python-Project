@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block title %}Receptionist Dashboard - ClinicLife{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <div class="dashboard-card">
+        <h2>Receptionist Portal</h2>
+        <p>Manage patient check-ins, doctors' schedules, and system bookings.</p>
+    </div>
+
+    <div class="dashboard-grid"
+        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+        <div class="dashboard-card">
+            <h3>Pending Bookings</h3>
+            <p style="color: var(--text-muted);">0 New Requests</p>
+        </div>
+        <div class="dashboard-card">
+            <h3>Manage Queue</h3>
+            <button class="btn-primary">Open Queue Manager</button>
+        </div>
+        <div class="dashboard-card">
+            <h3>My Profile</h3>
+            <p style="font-weight: 600; margin-bottom: 1rem;">{{ user.username }}</p>
+            <a href="{% url 'update_profile' %}" class="btn-primary"
+                style="text-decoration: none; display: inline-block;">Update Profile</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

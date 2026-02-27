@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% block title %}Admin Analytics - ClinicLife{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <div class="dashboard-card" style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); color: white;">
+        <h2 style="color: white; margin-bottom: 0.5rem;">Custom Admin Dashboard</h2>
+        <p style="opacity: 0.8;">System analytics, user management, and revenue reports.</p>
+    </div>
+
+    <div class="dashboard-grid"
+        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;">
+        <div class="dashboard-card">
+            <h4
+                style="color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em;">
+                Total Users</h4>
+            <div style="font-size: 2rem; font-weight: 700; margin: 0.5rem 0;">{{ total_users|default:"0" }}</div>
+            <p style="color: #10b981; font-size: 0.875rem;">+12% from last month</p>
+        </div>
+        <div class="dashboard-card">
+            <h4
+                style="color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em;">
+                Appointments</h4>
+            <div style="font-size: 2rem; font-weight: 700; margin: 0.5rem 0;">{{ total_appointments|default:"0" }}</div>
+            <button class="btn-primary" style="font-size: 0.75rem; padding: 0.5rem;">Export CSV</button>
+        </div>
+        <div class="dashboard-card">
+            <h4
+                style="color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em;">
+                My Profile</h4>
+            <div style="font-size: 1.1rem; font-weight: 600; margin: 0.5rem 0;">{{ user.username }}</div>
+            <a href="{% url 'update_profile' %}" class="btn-primary"
+                style="font-size: 0.75rem; padding: 0.5rem; text-decoration: none; display: inline-block;">Update
+                Profile</a>
+        </div>
+    </div>
+
+    <div class="dashboard-card" style="margin-top: 2rem;">
+        <h3>User Management</h3>
+        <table style="width: 100%; border-collapse: collapse; margin-top: 1rem;">
+            <thead>
+                <tr style="text-align: left; border-bottom: 1px solid var(--border-color);">
+                    <th style="padding: 1rem 0.5rem;">User</th>
+                    <th style="padding: 1rem 0.5rem;">Role</th>
+                    <th style="padding: 1rem 0.5rem;">Status</th>
+                    <th style="padding: 1rem 0.5rem;">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr style="border-bottom: 1px solid var(--border-color);">
+                    <td style="padding: 1rem 0.5rem;">Example Admin</td>
+                    <td style="padding: 1rem 0.5rem;"><span
+                            style="background: #e0f2fe; color: #0369a1; padding: 0.25rem 0.5rem; border-radius: 9999px; font-size: 0.75rem;">ADMIN</span>
+                    </td>
+                    <td style="padding: 1rem 0.5rem;">Active</td>
+                    <td style="padding: 1rem 0.5rem;"><button
+                            style="border: none; background: none; color: var(--primary-color); cursor: pointer;">Edit</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
