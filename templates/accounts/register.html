@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block title %}Register - ClinicLife{% endblock %}
+{% block hide_nav %}True{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card" style="max-width: 500px;">
+        <h1 class="auth-title">Join ClinicLife</h1>
+        <p class="auth-subtitle">Create your secure medical account</p>
+
+        <form method="post">
+            {% csrf_token %}
+            {% for field in form %}
+            <div class="form-group">
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}
+                <div class="error-msg" style="color: #ef4444; font-size: 0.75rem; margin-top: 0.25rem;">
+                    {{ field.errors|striptags }}
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+
+            <button type="submit" class="btn-primary">Register Now</button>
+        </form>
+
+        <div class="auth-footer">
+            Already have an account? <a href="{% url 'login' %}">Sign in</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
