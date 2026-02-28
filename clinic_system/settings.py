@@ -10,20 +10,25 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+import os
 from pathlib import Path
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Load environment variables from .env file
+load_dotenv(BASE_DIR / '.env')
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-g@90o5k0*z^2b-hbi3q_0@*#6w5=-xjhkzv-@a54s0)=!r0u1)'
+SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-default-fallback-key')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = []
 
@@ -38,14 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'accounts',
-<<<<<<< HEAD
     
-=======
-    'scheduling',
-    'appointments',
-    'medical',
-    'dashboard',
->>>>>>> b957d1fb39c501aa834f01e28d1d90a2a22c7a2a
 ]
 
 
@@ -85,34 +83,14 @@ WSGI_APPLICATION = 'clinic_system.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-#DATABASES = {
-#    'default': {
-#        'ENGINE': 'django.db.backends.sqlite3',
-#        'NAME': BASE_DIR / 'db.sqlite3',
-#    }
-#}
-
-import os
-from dotenv import load_dotenv
-
-load_dotenv()
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-<<<<<<< HEAD
-        'NAME': 'clinic_db',          
-        'USER': 'rana',               
-        'PASSWORD': '1234',           
-        'HOST': 'localhost',          
-        'PORT': '5432',               
-=======
-        'NAME': os.getenv('DB_NAME'),
-        'USER': os.getenv('DB_USER'),
-        'PASSWORD': os.getenv('DB_PASS'),
-        'HOST': os.getenv('DB_HOST'),
-        'PORT': os.getenv('DB_PORT'),
->>>>>>> b957d1fb39c501aa834f01e28d1d90a2a22c7a2a
+        'NAME': os.getenv('DATABASE_NAME'),          
+        'USER': os.getenv('DATABASE_USER'),               
+        'PASSWORD': os.getenv('DATABASE_PASSWORD'),           
+        'HOST': os.getenv('DATABASE_HOST', 'localhost'),          
+        'PORT': os.getenv('DATABASE_PORT', '5432'),               
     }
 }
 
@@ -143,8 +121,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-#TIME_ZONE = 'UTC'
-TIME_ZONE = 'Africa/Cairo'
+TIME_ZONE = 'UTC'
 
 USE_I18N = True
 
@@ -163,4 +140,3 @@ STATICFILES_DIRS = [
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-

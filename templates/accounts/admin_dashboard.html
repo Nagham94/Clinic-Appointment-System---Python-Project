@@ -20,45 +20,44 @@
         <div class="dashboard-card">
             <h4
                 style="color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em;">
-                Appointments</h4>
-            <div style="font-size: 2rem; font-weight: 700; margin: 0.5rem 0;">{{ total_appointments|default:"0" }}</div>
-            <button class="btn-primary" style="font-size: 0.75rem; padding: 0.5rem;">Export CSV</button>
+                Doctors</h4>
+            <div style="font-size: 2rem; font-weight: 700; margin: 0.5rem 0;">{{ total_doctors|default:"0" }}</div>
+            <p style="color: var(--primary-color); font-size: 0.875rem;">Registered staff</p>
         </div>
         <div class="dashboard-card">
             <h4
                 style="color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em;">
-                My Profile</h4>
-            <div style="font-size: 1.1rem; font-weight: 600; margin: 0.5rem 0;">{{ user.username }}</div>
-            <a href="{% url 'update_profile' %}" class="btn-primary"
-                style="font-size: 0.75rem; padding: 0.5rem; text-decoration: none; display: inline-block;">Update
-                Profile</a>
+                Receptionists</h4>
+            <div style="font-size: 2rem; font-weight: 700; margin: 0.5rem 0;">{{ total_receptionists|default:"0" }}
+            </div>
+            <p style="color: var(--primary-color); font-size: 0.875rem;">Front desk staff</p>
+        </div>
+        <div class="dashboard-card">
+            <h4
+                style="color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em;">
+                Patients</h4>
+            <div style="font-size: 2rem; font-weight: 700; margin: 0.5rem 0;">{{ total_patients|default:"0" }}</div>
+            <p style="color: var(--primary-color); font-size: 0.875rem;">Registered patients</p>
         </div>
     </div>
 
-    <div class="dashboard-card" style="margin-top: 2rem;">
-        <h3>User Management</h3>
-        <table style="width: 100%; border-collapse: collapse; margin-top: 1rem;">
-            <thead>
-                <tr style="text-align: left; border-bottom: 1px solid var(--border-color);">
-                    <th style="padding: 1rem 0.5rem;">User</th>
-                    <th style="padding: 1rem 0.5rem;">Role</th>
-                    <th style="padding: 1rem 0.5rem;">Status</th>
-                    <th style="padding: 1rem 0.5rem;">Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr style="border-bottom: 1px solid var(--border-color);">
-                    <td style="padding: 1rem 0.5rem;">Example Admin</td>
-                    <td style="padding: 1rem 0.5rem;"><span
-                            style="background: #e0f2fe; color: #0369a1; padding: 0.25rem 0.5rem; border-radius: 9999px; font-size: 0.75rem;">ADMIN</span>
-                    </td>
-                    <td style="padding: 1rem 0.5rem;">Active</td>
-                    <td style="padding: 1rem 0.5rem;"><button
-                            style="border: none; background: none; color: var(--primary-color); cursor: pointer;">Edit</button>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+    <div class="dashboard-grid" style="grid-template-columns: 1fr 1fr; margin-top: 2rem;">
+        <div class="dashboard-card">
+            <h3>Quick Actions</h3>
+            <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                <a href="{% url 'admin_user_list' %}" class="btn-primary" style="text-decoration: none;">Manage
+                    Users</a>
+                <a href="{% url 'admin_create_user' %}" class="btn-primary"
+                    style="text-decoration: none; background: #6366f1;">Add New Staff</a>
+            </div>
+        </div>
+        <div class="dashboard-card">
+            <h3>System Settings</h3>
+            <p style="color: var(--text-muted); margin-top: 1rem;">Manage clinic open hours, departments, and services.
+            </p>
+            <button class="btn-primary" style="margin-top: 1rem; opacity: 0.6; cursor: not-allowed;">Coming
+                Soon</button>
+        </div>
     </div>
 </div>
 {% endblock %}

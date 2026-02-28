@@ -2,8 +2,8 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import login, logout, authenticate
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from .forms import RegisterForm, LoginForm, UserProfileUpdateForm, PatientProfileForm, DoctorProfileForm, ReceptionistProfileForm
-from .models import User
+from .forms import RegisterForm, LoginForm, UserProfileUpdateForm, PatientProfileForm, DoctorProfileForm, ReceptionistProfileForm, AdminUserCreationForm
+from .models import User, PatientProfile, DoctorProfile, ReceptionistProfile
 from .decorators import role_required
 
 
@@ -67,15 +67,15 @@ def dashboard_redirect(request):
 def update_profile_view(request):
     user = request.user
     
-    # Identify which profile form to use
+    # Ensure the corresponding profile exists
     if user.role == User.Roles.PATIENT:
-        profile_instance = user.patientprofile
+        profile_instance, _ = PatientProfile.objects.get_or_create(user=user)
         ProfileFormClass = PatientProfileForm
     elif user.role == User.Roles.DOCTOR:
-        profile_instance = user.doctorprofile
+        profile_instance, _ = DoctorProfile.objects.get_or_create(user=user)
         ProfileFormClass = DoctorProfileForm
     elif user.role == User.Roles.RECEPTIONIST:
-        profile_instance = user.receptionistprofile
+        profile_instance, _ = ReceptionistProfile.objects.get_or_create(user=user)
         ProfileFormClass = ReceptionistProfileForm
     else:
         profile_instance = None
@@ -122,5 +122,31 @@ def receptionist_dashboard_view(request):
 @login_required
 @role_required([User.Roles.ADMIN])
 def admin_dashboard_view(request):
-    total_users = User.objects.count()
-    return render(request, 'accounts/admin_dashboard.html', {'total_users': total_users})
+    context = {
+        'total_users': User.objects.count(),
+        'total_doctors': User.objects.filter(role=User.Roles.DOCTOR).count(),
+        'total_receptionists': User.objects.filter(role=User.Roles.RECEPTIONIST).count(),
+        'total_patients': User.objects.filter(role=User.Roles.PATIENT).count(),
+    }
+    return render(request, 'accounts/admin_dashboard.html', context)
+
+
+@login_required
+@role_required([User.Roles.ADMIN])
+def admin_user_list_view(request):
+    users = User.objects.all().order_by('-date_joined')
+    return render(request, 'accounts/admin_user_list.html', {'users': users})
+
+
+@login_required
+@role_required([User.Roles.ADMIN])
+def admin_create_user_view(request):
+    if request.method == 'POST':
+        form = AdminUserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            messages.success(request, f"User {user.username} created successfully as {user.role}.")
+            return redirect('admin_user_list')
+    else:
+        form = AdminUserCreationForm()
+    return render(request, 'accounts/admin_create_user.html', {'form': form})

@@ -6,11 +6,14 @@ urlpatterns = [
     path('login/', views.login_view, name='login'),
     path('logout/', views.logout_view, name='logout'),
     
+    path('dashboard/', views.dashboard_redirect, name='dashboard_redirect'),
     path('patient/dashboard/', views.patient_dashboard_view, name='patient_dashboard'),
     path('doctor/dashboard/', views.doctor_dashboard_view, name='doctor_dashboard'),
     path('receptionist/dashboard/', views.receptionist_dashboard_view, name='receptionist_dashboard'),
     path('admin/dashboard/', views.admin_dashboard_view, name='admin_dashboard'),
     
-    path('dashboard/', views.dashboard_redirect, name='dashboard_redirect'),
+    path('admin/users/', views.admin_user_list_view, name='admin_user_list'),
+    path('admin/users/create/', views.admin_create_user_view, name='admin_create_user'),
+    
     path('profile/update/', views.update_profile_view, name='update_profile'),
 ]

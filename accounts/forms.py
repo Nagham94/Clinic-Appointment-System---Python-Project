@@ -6,7 +6,15 @@ from django.contrib.auth import authenticate
 class RegisterForm(UserCreationForm):
     class Meta(UserCreationForm.Meta):
         model = User
-        fields = UserCreationForm.Meta.fields + ('first_name', 'last_name', 'email', 'role',)
+        fields = UserCreationForm.Meta.fields + ('first_name', 'last_name', 'email',)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Add Clear Labels
+        self.fields['username'].label = "Username"
+        self.fields['first_name'].label = "First Name"
+        self.fields['last_name'].label = "Last Name"
+        self.fields['email'].label = "Email Address"
 
     def clean_email(self):
         email = self.cleaned_data.get('email')
@@ -26,7 +34,7 @@ class RegisterForm(UserCreationForm):
         user.first_name = self.cleaned_data['first_name']
         user.last_name = self.cleaned_data['last_name']
         user.email = self.cleaned_data['email'] 
-        user.role = self.cleaned_data['role']    
+        user.role = User.Roles.PATIENT
         if commit:
             user.save()  
         return user
@@ -72,3 +80,20 @@ class ReceptionistProfileForm(forms.ModelForm):
     class Meta:
         model = ReceptionistProfile
         fields = []
+
+class AdminUserCreationForm(RegisterForm):
+    role = forms.ChoiceField(choices=User.Roles.choices)
+
+    class Meta(RegisterForm.Meta):
+        fields = RegisterForm.Meta.fields + ('role',)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['role'].label = "Account Role"
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        user.role = self.cleaned_data['role']
+        if commit:
+            user.save()
+        return user
