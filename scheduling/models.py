@@ -33,4 +33,23 @@ class DoctorSchedule(models.Model):
 
     def __str__(self):
         return f"{self.doctor.username} - Day {self.day_of_week}"
+    
+"""
+schedule exception:
+overrides the weekly schedule for specific date (vacation)
 
+doctor : schedule exception days
+  1    :    M
+
+date -> date of the exception day
+is day off -> true if the doctor is off all day
+reason -> optional
+"""
+
+class ScheduleException(models.Model):
+    doctor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    date = models.DateField()
+    is_day_off = models.BooleanField(default=False)
+    override_start_time = models.TimeField(null=True, blank=True)
+    override_end_time = models.TimeField(null=True, blank=True)
+    reason = models.CharField(max_length=255, blank=True)
