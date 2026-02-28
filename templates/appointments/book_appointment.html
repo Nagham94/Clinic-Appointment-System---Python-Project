@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<h2>Book an Appointment</h2>
+
+<form method="POST">
+    {% csrf_token %}
+    <label for="doctor">Select Doctor:</label>
+    <select name="doctor" required>
+        {% for doctor in doctors %}
+        <option value="{{ doctor.id }}">{{ doctor.get_full_name }}</option>
+        {% endfor %}
+    </select>
+    <br><br>
+
+    <label for="start_datetime">Start:</label>
+    <input type="datetime-local" name="start_datetime" required>
+    <br><br>
+
+    <label for="end_datetime">End:</label>
+    <input type="datetime-local" name="end_datetime" required>
+    <br><br>
+
+    <label for="reason">Reason (optional):</label>
+    <textarea name="reason"></textarea>
+    <br><br>
+
+    <button type="submit">Book Appointment</button>
+</form>
+
+{% for message in messages %}
+<p style="color: red;">{{ message }}</p>
+{% endfor %}
+{% endblock %}
