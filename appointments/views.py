@@ -23,6 +23,15 @@ def book_appointment(request):
         if Appointment.objects.filter(doctor=doctor, start_datetime__lt=end_datetime, end_datetime__gt=start_datetime).exists():
             messages.error(request, 'The selected time slot is not available. Please choose a different time.')
             return redirect('book_appointment')
+        # Check if start time equals end time
+        if start_datetime >= end_datetime or start_datetime == end_datetime:
+            messages.error(request, 'End time must be after start time. Please choose a valid time slot.')
+            return redirect('book_appointment')
+        # Check if date is in the past
+        if start_datetime < timezone.now().isoformat():
+            messages.error(request, 'You cannot book an appointment in the past. Please choose a future time slot.')
+            return redirect('book_appointment')
+
 
         appointment = Appointment.objects.create(
             patient=request.user,
