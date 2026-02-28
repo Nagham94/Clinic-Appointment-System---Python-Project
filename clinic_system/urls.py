@@ -25,5 +25,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path("accounts/", include("accounts.urls")),
     path("available-slots/", AvailableSlotsView.as_view(), name="available_slots"),
-
+    path("appointments/", include("appointments.urls"))
 ]

@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/appointments.css' %}">
+{% endblock %}
+
+{% block content %}
+<main class="flex-center">
+    <div class="auth-container glass-panel">
+
+        <header class="form-header">
+            <h1 class="auth-title">Book Appointment</h1>
+            <p class="auth-subtitle">Schedule your session with our specialists.</p>
+        </header>
+
+        <form method="POST">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label for="doctor">Select Specialist</label>
+                <select name="doctor" id="doctor" required>
+                    {% for doctor in doctors %}
+                    <option value="{{ doctor.id }}">Dr. {{ doctor.get_full_name }} </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="start_datetime">Start Time</label>
+                    <input type="datetime-local" name="start_datetime" id="start_datetime" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="end_datetime">End Time</label>
+                    <input type="datetime-local" name="end_datetime" id="end_datetime" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="reason">Reason for Visit (optional)</label>
+                <textarea name="reason" id="reason" rows="3" placeholder="What should the doctor know?"></textarea>
+            </div>
+
+            <button type="submit" class="confirm-btn-enhanced">
+                Confirm Booking
+            </button>
+        </form>
+    </div>
+
+    <script>
+        // document.getElementById('start_datetime').addEventListener('change', function () {
+        //     if (this.value) {
+        //         let startDate = new Date(this.value);
+        //         startDate.setHours(startDate.getHours() + 1); // Add 1 hour
+
+        //         // Format back to YYYY-MM-DDTHH:MM
+        //         let endInput = document.getElementById('end_datetime');
+        //         endInput.value = startDate.toISOString().slice(0, 16);
+        //     }
+        // });
+
+        // Function to get current time in YYYY-MM-DDTHH:MM format
+        function getNowString() {
+            const now = new Date();
+            // Offset for local timezone
+            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+            return now.toISOString().slice(0, 16);
+        }
+
+        // Set the minimum selectable date to right now
+        const startInput = document.getElementById('start_datetime');
+        const endInput = document.getElementById('end_datetime');
+
+        const now = getNowString();
+        startInput.min = now;
+        endInput.min = now;
+
+        // Optional: If user picks a start time, ensure end time can't be BEFORE that start time
+        startInput.addEventListener('change', () => {
+            endInput.min = startInput.value;
+        });
+    </script>
+</main>
+{% endblock %}
