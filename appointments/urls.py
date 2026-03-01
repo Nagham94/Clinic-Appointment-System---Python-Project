@@ -4,6 +4,11 @@ from . import views
 
 urlpatterns = [
     path('book/', views.book_appointment, name='book_appointment'),
+
+    # for doctor id
+    #  path('book/<int:doctor_id>/', views.book_appointment, name='book_appointment'),
+
+    path('appointment/<int:pk>/delete/', views.delete_appointment, name='delete_appointment'),
     path('my-appointments/', views.my_appointments, name='my_appointments'),
     path('cancel/<int:appointment_id>/', views.cancel_appointment, name='cancel_appointment')
 ]

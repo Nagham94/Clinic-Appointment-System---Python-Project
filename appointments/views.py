@@ -104,3 +104,18 @@ def cancel_appointment(request, appointment_id):
         return redirect('my_appointments')
 
     return render(request, 'appointments/cancel_confirm.html', {'appointment': appointment})
+
+# def home(request):
+#     doctors = User.objects.filter(role__iexact='doctor')  # حسب الrole عندك
+#     return render(request, 'home.html', {'doctors': doctors})
+
+
+def delete_appointment(request, pk):
+    appointment = get_object_or_404(Appointment, id=pk)
+
+    # ممكن نضيف حماية زيادة
+    if request.user == appointment.patient:
+        appointment.delete()
+        messages.success(request, "Appointment deleted successfully.")
+
+    return redirect('my_appointments')

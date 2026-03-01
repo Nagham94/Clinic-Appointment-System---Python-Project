@@ -31,6 +31,36 @@
         {% endif %}
     </div>
 </div>
+{#<hr style="margin: 4rem 0; opacity: 0.1;">#}
+{##}
+{#<div class="doctors-section" style="padding: 2rem 4rem;">#}
+{#    <h2 style="text-align:center; margin-bottom:3rem;">Our Doctors</h2>#}
+{##}
+{#    <div class="doctor-grid">#}
+{##}
+{#        {% for doctor in doctors %}#}
+{#        <div class="doctor-card">#}
+{##}
+{#            <div class="doctor-avatar">#}
+{#                👨‍⚕️#}
+{#            </div>#}
+{##}
+{#            <h3>Dr. {{ doctor.get_full_name|default:doctor.username }}</h3>#}
+{#            <p class="specialty">#}
+{#                {{ doctor.specialization|default:"General Practitioner" }}#}
+{#            </p>#}
+{##}
+{#            <a href="{% url 'home' doctor.id %}" class="book-btn">#}
+{#                Book Appointment#}
+{#            </a>#}
+{##}
+{#        </div>#}
+{#        {% empty %}#}
+{#            <p style="text-align:center;">No doctors available.</p>#}
+{#        {% endfor %}#}
+{##}
+{#    </div>#}
+{#</div>#}
 
 <footer
     style="margin-top: 5rem; padding: 4rem 2rem; border-top: 1px solid rgba(255, 255, 255, 0.05); text-align: center; color: var(--text-muted);">

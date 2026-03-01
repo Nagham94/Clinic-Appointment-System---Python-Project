@@ -153,3 +153,9 @@ def admin_dashboard_view(request):
 def user_list_view(request):
     users = User.objects.all().order_by('-date_joined')
     return render(request, 'accounts/user_list.html', {'users': users})
+
+# ## Home view of doctors
+# def home(request):
+#     doctors = User.objects.filter(role='doctor')  # حسب الrole عندك
+#     return render(request, 'home.html', {'doctors': doctors})
+

@@ -102,3 +102,47 @@ tr:hover {
 .cancel-btn:hover {
     background-color: #c0392b;
 }
+
+.doctor-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+}
+/*Doctor cards style*/
+.doctor-card {
+    background: white;
+    padding: 2rem;
+    border-radius: 20px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    transition: 0.3s ease;
+}
+
+.doctor-card:hover {
+    transform: translateY(-5px);
+}
+
+.doctor-avatar {
+    font-size: 50px;
+    margin-bottom: 1rem;
+}
+
+.specialty {
+    color: #64748b;
+    margin-bottom: 1.5rem;
+}
+
+.book-btn {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #3b82f6, #6366f1);
+    color: white;
+    text-decoration: none;
+    font-weight: 600;
+    transition: 0.3s ease;
+}
+
+.book-btn:hover {
+    opacity: 0.9;
+}

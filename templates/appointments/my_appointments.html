@@ -46,18 +46,56 @@
                             </span>
                         </td>
 
+{#                        <td>#}
+{#                            {% if appointment.status == 'REQUESTED' or appointment.status == 'CONFIRMED' %}#}
+{#                            <form method="POST"#}
+{#                                  action="{% url 'cancel_appointment' appointment.id %}"#}
+{#                                  style="display:inline;">#}
+{#                                {% csrf_token %}#}
+{#                                <button type="submit"#}
+{#                                    class="cancel-btn"#}
+{#                                    onclick="return confirm('Are you sure you want to cancel this appointment?');">#}
+{#                                    Cancel#}
+{#                                </button>#}
+{#                            </form>#}
+{#                            {% else %}#}
+{#                                -#}
+{#                            {% endif %}#}
+{#                        </td>#}
                         <td>
                             {% if appointment.status == 'REQUESTED' or appointment.status == 'CONFIRMED' %}
-                            <form method="POST"
-                                  action="{% url 'cancel_appointment' appointment.id %}"
-                                  style="display:inline;">
-                                {% csrf_token %}
-                                <button type="submit"
-                                    class="cancel-btn"
-                                    onclick="return confirm('Are you sure you want to cancel this appointment?');">
-                                    Cancel
-                                </button>
-                            </form>
+
+                                <form method="POST"
+                                      action="{% url 'cancel_appointment' appointment.id %}"
+                                      style="display:inline;">
+                                    {% csrf_token %}
+                                    <button type="submit"
+                                        class="cancel-btn"
+                                        onclick="return confirm('Are you sure you want to cancel this appointment?');">
+                                        Cancel
+                                    </button>
+                                </form>
+
+                            {% elif appointment.status == 'CANCELLED' %}
+
+                                <!-- Reschedule Button -->
+                                <a href="{% url 'book_appointment' %}"
+                                   class="reschedule-btn">
+                                    Reschedule
+                                </a>
+
+                                <!-- Delete Button -->
+                                <form method="POST"
+                                      action="{% url 'delete_appointment' appointment.id %}"
+                                      style="display:inline;">
+                                    {% csrf_token %}
+                                    <button type="submit"
+                                        class="delete-btn"
+                                        onclick="return confirm('Delete this appointment permanently?');">
+                                        Delete
+                                    </button>
+                                </form>
+
                             {% else %}
                                 -
                             {% endif %}
