@@ -24,6 +24,17 @@
             <a href="{% url 'update_profile' %}" class="btn-primary"
                 style="text-decoration: none; display: inline-block;">Update Profile</a>
         </div>
+        <div class="dashboard-card">
+            <h3>Doctor Schedules</h3>
+            <p style="color: var(--text-muted); margin-bottom: 1rem;">View and manage doctor availability.</p>
+            <a href="{% url 'schedule_list' %}" class="btn-primary" style="text-decoration: none; display: inline-block;">Manage Schedules</a>
+        </div>
+
+        <div class="dashboard-card">
+            <h3>Schedule Exceptions</h3>
+            <p style="color: var(--text-muted); margin-bottom: 1rem;">Handle doctor leaves and time-offs.</p>
+            <a href="{% url 'exception_list' %}" class="btn-primary" style="text-decoration: none; display: inline-block;">Manage Exceptions</a>
+        </div>
     </div>
 </div>
 {% endblock %}

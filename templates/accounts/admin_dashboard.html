@@ -91,6 +91,15 @@
         </div>
     </div>
 
+    <div class="dashboard-card" style="margin-bottom: 2.5rem;">
+        <h3 style="margin-bottom: 0.5rem;">Scheduling & Exceptions</h3>
+        <p style="color: #64748b; margin-bottom: 1.5rem;">Global override for doctor schedules and time-offs.</p>
+        <div style="display: flex; gap: 1rem;">
+            <a href="{% url 'schedule_list' %}" class="btn-primary" style="text-decoration: none;">View Schedules</a>
+            <a href="{% url 'exception_list' %}" class="btn-primary" style="background-color: #6366f1; text-decoration: none;">View Exceptions</a>
+        </div>
+    </div>
+
     <!-- Bottom Actions -->
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
         <div class="dashboard-card" style="padding: 2rem;">
