@@ -2,14 +2,9 @@
 venv/
 .env
 
-<<<<<<< HEAD
-=======
-.env
-
-# Python cache
->>>>>>> authentication-feature
 __pycache__/
 *.pyc
 
 db.sqlite3
 media/
+
