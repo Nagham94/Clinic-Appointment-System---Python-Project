@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% block title %}Update Profile - ClinicLife{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card" style="max-width: 600px;">
+        <h1 class="auth-title">Update Profile</h1>
+        <p class="auth-subtitle">Keep your information up to date</p>
+
+        <form method="post">
+            {% csrf_token %}
+
+            <h3 style="margin-bottom: 1rem; color: var(--primary);">User Information</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem;">
+                {% for field in user_form %}
+                <div class="form-group">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}
+                    <div class="error-msg" style="color: #ef4444; font-size: 0.75rem; margin-top: 0.25rem;">
+                        {{ field.errors|striptags }}
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+
+            {% if profile_form %}
+            <h3 style="margin-top: 2rem; margin-bottom: 1rem; color: var(--primary);">
+                {{ user.get_role_display }} Details
+            </h3>
+            <div style="display: grid; grid-template-columns: 1fr; gap: 1rem;">
+                {% for field in profile_form %}
+                <div class="form-group">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}
+                    <div class="error-msg" style="color: #ef4444; font-size: 0.75rem; margin-top: 0.25rem;">
+                        {{ field.errors|striptags }}
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <div style="margin-top: 2rem; display: flex; flex-direction: column; gap: 1rem;">
+                <button type="submit" class="btn-primary">Save Changes</button>
+                <div style="display: flex; gap: 1rem;">
+                    <a href="{% url 'password_change' %}" class="btn-secondary"
+                        style="flex: 1; text-align: center; text-decoration: none; border: 1px solid #cbd5e1; background: #f8fafc; color: #475569;">Change
+                        Password</a>
+                    <a href="{% url 'dashboard_redirect' %}" class="btn-secondary"
+                        style="flex: 1; text-align: center; text-decoration: none;">Back to Dashboard</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

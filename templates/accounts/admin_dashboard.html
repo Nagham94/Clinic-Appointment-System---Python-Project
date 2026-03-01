@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+{% block title %}Admin Dashboard - ClinicLife{% endblock %}
+
+{% block content %}
+<div class="dashboard-container" style="max-width: 1200px; margin: 2rem auto; padding: 0 1.5rem;">
+    <!-- Header Card -->
+    <div class="dashboard-card"
+        style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: white; border-radius: 1.5rem; padding: 2.5rem; margin-bottom: 2.5rem; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h1
+                    style="color: white; font-size: 2.25rem; font-weight: 800; margin-bottom: 0.5rem; letter-spacing: -0.025em;">
+                    Admin Console</h1>
+                <p style="opacity: 0.8; font-size: 1.1rem;">Manage your clinic's workforce and monitor system activity.
+                </p>
+            </div>
+            <div style="display: flex; gap: 1rem;">
+                <a href="{% url 'user_list' %}" class="btn-primary"
+                    style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 0.875rem 1.5rem; border-radius: 0.75rem; font-weight: 600; text-decoration: none; transition: all 0.2s;">
+                    <i class="fas fa-list" style="margin-right: 0.5rem;"></i> View All Users
+                </a>
+                <a href="{% url 'admin_register' %}" class="btn-primary"
+                    style="background: white; color: #0f172a; padding: 0.875rem 1.5rem; border-radius: 0.75rem; font-weight: 600; text-decoration: none; transition: all 0.2s; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+                    <i class="fas fa-user-plus" style="margin-right: 0.5rem;"></i> Register New User
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="dashboard-grid"
+        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; margin-bottom: 2.5rem;">
+        <!-- Total Users -->
+        <div class="dashboard-card"
+            style="background: white; padding: 1.5rem; border-radius: 1rem; border: 1px solid #e2e8f0; transition: transform 0.2s;">
+            <div style="display: flex; align-items: center; margin-bottom: 1rem;">
+                <div
+                    style="background: #e0f2fe; color: #0369a1; padding: 0.75rem; border-radius: 0.75rem; margin-right: 1rem;">
+                    <i class="fas fa-users" style="font-size: 1.25rem;"></i>
+                </div>
+                <h4
+                    style="color: #64748b; font-size: 0.875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin: 0;">
+                    Total Users</h4>
+            </div>
+            <div style="font-size: 2.5rem; font-weight: 800; color: #0f172a; line-height: 1;">{{ total_users }}</div>
+        </div>
+
+        <!-- Patients -->
+        <div class="dashboard-card"
+            style="background: white; padding: 1.5rem; border-radius: 1rem; border: 1px solid #e2e8f0;">
+            <div style="display: flex; align-items: center; margin-bottom: 1rem;">
+                <div
+                    style="background: #dcfce7; color: #15803d; padding: 0.75rem; border-radius: 0.75rem; margin-right: 1rem;">
+                    <i class="fas fa-user-injured" style="font-size: 1.25rem;"></i>
+                </div>
+                <h4
+                    style="color: #64748b; font-size: 0.875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin: 0;">
+                    Patients</h4>
+            </div>
+            <div style="font-size: 2.5rem; font-weight: 800; color: #0f172a; line-height: 1;">{{ patients }}</div>
+        </div>
+
+        <!-- Doctors -->
+        <div class="dashboard-card"
+            style="background: white; padding: 1.5rem; border-radius: 1rem; border: 1px solid #e2e8f0;">
+            <div style="display: flex; align-items: center; margin-bottom: 1rem;">
+                <div
+                    style="background: #fef9c3; color: #a16207; padding: 0.75rem; border-radius: 0.75rem; margin-right: 1rem;">
+                    <i class="fas fa-user-md" style="font-size: 1.25rem;"></i>
+                </div>
+                <h4
+                    style="color: #64748b; font-size: 0.875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin: 0;">
+                    Doctors</h4>
+            </div>
+            <div style="font-size: 2.5rem; font-weight: 800; color: #0f172a; line-height: 1;">{{ doctors }}</div>
+        </div>
+
+        <!-- Receptionists -->
+        <div class="dashboard-card"
+            style="background: white; padding: 1.5rem; border-radius: 1rem; border: 1px solid #e2e8f0;">
+            <div style="display: flex; align-items: center; margin-bottom: 1rem;">
+                <div
+                    style="background: #f3e8ff; color: #7e22ce; padding: 0.75rem; border-radius: 0.75rem; margin-right: 1rem;">
+                    <i class="fas fa-user-tie" style="font-size: 1.25rem;"></i>
+                </div>
+                <h4
+                    style="color: #64748b; font-size: 0.875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin: 0;">
+                    Reception</h4>
+            </div>
+            <div style="font-size: 2.5rem; font-weight: 800; color: #0f172a; line-height: 1;">{{ receptionists }}</div>
+        </div>
+    </div>
+
+    <!-- Bottom Actions -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+        <div class="dashboard-card" style="padding: 2rem;">
+            <h3 style="margin-bottom: 1.5rem; font-weight: 700;">Quick Settings</h3>
+            <div style="display: flex; flex-direction: column; gap: 1rem;">
+                <a href="{% url 'update_profile' %}" class="btn-outline"
+                    style="text-decoration: none; text-align: center; padding: 0.75rem; border-radius: 0.5rem;">Edit My
+                    Profile</a>
+                <p style="color: #64748b; font-size: 0.875rem; text-align: center;">Security settings are managed in
+                    your profile.</p>
+            </div>
+        </div>
+        <div class="dashboard-card"
+            style="padding: 2rem; display: flex; flex-direction: column; justify-content: center; align-items: center; background: #f8fafc;">
+            <i class="fas fa-shield-alt" style="font-size: 3rem; color: #cbd5e1; margin-bottom: 1rem;"></i>
+            <p style="color: #64748b; text-align: center;">Secure Admin Access Active<br><span
+                    style="font-size: 0.875rem;">Only authorized personnel can access these tools.</span></p>
+        </div>
+    </div>
+</div>
+
+<style>
+    .btn-outline {
+        border: 1px solid #e2e8f0;
+        color: #0f172a;
+        background: transparent;
+        font-weight: 600;
+        transition: all 0.2s;
+    }
+
+    .btn-outline:hover {
+        background: #f1f5f9;
+        border-color: #cbd5e1;
+    }
+
+    .dashboard-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+</style>
+{% endblock %}
