@@ -1,0 +1,13 @@
+<h2>My Appointments</h2>
+
+{% for appointment in appointments %}
+    <p>
+        Doctor: {{ appointment.doctor.username }} <br>
+        Start: {{ appointment.start_datetime }} <br>
+        End: {{ appointment.end_datetime }} <br>
+        Reason: {{ appointment.reason }} <br>
+        -------------------------
+    </p>
+{% empty %}
+    <p>No appointments found.</p>
+{% endfor %}

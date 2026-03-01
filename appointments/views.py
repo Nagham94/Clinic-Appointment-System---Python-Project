@@ -21,6 +21,7 @@ def book_appointment(request):
 
         # Check for overlapping appointments(doctor is free during the requested time slot)
         if Appointment.objects.filter(doctor=doctor, start_datetime__lt=end_datetime, end_datetime__gt=start_datetime).exists():
+            ##usage of message funct
             messages.error(request, 'The selected time slot is not available. Please choose a different time.')
             return redirect('book_appointment')
         # Check if start time equals end time
@@ -47,3 +48,9 @@ def book_appointment(request):
     return render(request, 'appointments/book_appointment.html', {'doctors': doctors})
 
 
+def my_appointments(request):
+    appointments = Appointment.objects.filter(patient=request.user)
+
+    return render(request, 'appointments/my_appointments.html', {
+        'appointments': appointments
+    })
