@@ -21,30 +21,33 @@
 
 <body>
 {###### Edited part, Needs more Edit...####}
+{#Done#}
+{#navbar#}
     {% if not hide_nav %}
     <nav class="navbar">
-        <div class="nav-logo">CLINIC<span>LIFE</span></div>
-        {% if user.is_authenticated %}
-{#        <div class="user-role">#}
-{#            <strong>{{ user.get_full_name|default:user.username }}</strong>#}
-{#            ({{ user.role|title }})#}
-            <span class="user-role {{ user.role }}">
-                 <strong>Logged-in as: {{ user.role }} </strong>
-            </span>
-{#        </div>#}
-        {% endif %}
-        <div class="nav-links">
-            <a href="{% url 'home' %}" class="nav-item">Home</a>
-            {% if user.is_authenticated %}
-            <a href="{% url 'dashboard_redirect' %}" class="nav-item">Dashboard</a>
-            <a href="{% url 'update_profile' %}" class="nav-item">Profile</a>
-            <a href="{% url 'logout' %}" class="nav-item logout-link" style="color: #f87171;">Logout</a>
-            {% else %}
-            <a href="{% url 'login' %}" class="nav-item">Login</a>
-            <a href="{% url 'register' %}" class="nav-item highlight">Register</a>
-            {% endif %}
+    <div class="nav-left">
+        <div class="nav-logo">
+            CLINIC<span>LIFE</span>
         </div>
-    </nav>
+
+        {% if user.is_authenticated %}
+        <span class="user-role {{ user.role }}">
+            {{ user.role|title }}
+        </span>
+        {% endif %}
+    </div>
+    <div class="nav-links">
+        <a href="{% url 'home' %}" class="nav-item">Home</a>
+        {% if user.is_authenticated %}
+        <a href="{% url 'dashboard_redirect' %}" class="nav-item">Dashboard</a>
+        <a href="{% url 'update_profile' %}" class="nav-item">Profile</a>
+        <a href="{% url 'logout' %}" class="nav-item logout-link" style="color: #f87171;">Logout</a>
+        {% else %}
+        <a href="{% url 'login' %}" class="nav-item">Login</a>
+        <a href="{% url 'register' %}" class="nav-item highlight">Register</a>
+        {% endif %}
+    </div>
+</nav>
     <style>
         .nav-logo span {
             color: var(--accent);
@@ -62,16 +65,26 @@
         }
 
         .user-role {
-                font-size: 14px;
-                color: #0f172a;
-                margin-left: 20px;
-                background: #94a3b8;
+            display: inline-block;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 6px 14px;
+            border-radius: 999px; /* rounded بالكامل */
+            background: linear-gradient(135deg, #3b82f6, #6366f1);
+            color: white;
+            margin-left: 15px;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            text-transform: uppercase;
+        }
 
-            }
-
+        .user-role:hover {
+            transform: translateY(-1px);
+            transition: 0.3s ease;
+        }
     </style>
     {% endif %}
-
+{#The message of confirmation#}
     <div class="messages-container">
         {% if messages %}
         {% for message in messages %}
@@ -85,22 +98,22 @@
     {% block content %}
     {% endblock %}
 
-    {% block extra_js %}
-            <script>
-                setTimeout(function () {
-                    const alerts = document.querySelectorAll('.alert');
-                    alerts.forEach(function (alert) {
-                        alert.style.transition = "opacity 0.5s ease";
-                        alert.style.opacity = "0";
+{#Auto Hide teh prev message#}
+    <script>
+        setTimeout(function () {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(function (alert) {
+                alert.style.transition = "opacity 0.5s ease";
+                alert.style.opacity = "0";
 
-                        setTimeout(() => {
-                            alert.remove();
-                        }, 500);
-                    });
-                }, 5000); // 5000 ms = 5 seconds
-            </script>
+                setTimeout(() => {
+                    alert.remove();
+                }, 500);
+            });
+        }, 5000); // 5000 ms = 5 seconds
+    </script>
 
-    {% endblock %}
+    {% block extra_js %}{% endblock %}
 </body>
 
 </html>
