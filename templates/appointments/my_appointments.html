@@ -1,24 +1,106 @@
-<h2>My Appointments</h2>
+{% extends "base.html" %}
+{% block title %}My Appointments{% endblock %}
 
-{% for appointment in appointments %}
-    <p>
-        Doctor: {{ appointment.doctor.username }} <br />
-        Start: {{ appointment.start_datetime }} <br />
-        End: {{ appointment.end_datetime }} <br />
-        Reason: {{ appointment.reason }} <br />
-        Status: {{ appointment.status }} <br />
-        -------------------------
-    </p>
+{% block content %}
+<div class="appointments-wrapper">
+    <div class="appointments-card">
 
-    {% if appointment.status in 'REQUESTED,CONFIRMED' %}
-    <form method="POST" action="{% url 'cancel_appointment' appointment.id %}">
-        {% csrf_token %}
-        <button type="submit" onclick="
-        return confirm('Are you sure you want to cancel this appointment?');
-        ">
-            Cancel
-        </button>
-</form>
-{% endif %} {% empty %}
-<p>No appointments found.</p>
-{% endfor %}
+        <div class="header">
+            <h1>My Appointments</h1>
+            <p>Manage all your appointments</p>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Doctor</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for appointment in appointments %}
+                    <tr>
+                        <td>APT{{ appointment.id }}</td>
+
+                        <td>
+                            <strong>Dr. {{ appointment.doctor.get_full_name }}</strong>
+                        </td>
+
+                        <td>
+                            {{ appointment.start_datetime|date:"Y-m-d" }}
+                        </td>
+
+                        <td>
+                            {{ appointment.start_datetime|time:"h:i A" }}
+                        </td>
+
+                        <td>
+                            <span class="status {{ appointment.status|lower }}">
+                                {{ appointment.status }}
+                            </span>
+                        </td>
+
+                        <td>
+                            {% if appointment.status == 'REQUESTED' or appointment.status == 'CONFIRMED' %}
+                            <form method="POST"
+                                  action="{% url 'cancel_appointment' appointment.id %}"
+                                  style="display:inline;">
+                                {% csrf_token %}
+                                <button type="submit"
+                                    class="cancel-btn"
+                                    onclick="return confirm('Are you sure you want to cancel this appointment?');">
+                                    Cancel
+                                </button>
+                            </form>
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                    </tr>
+
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="empty">
+                            No appointments found.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+
+            </table>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
+
+{#<h2>My Appointments</h2>#}
+{##}
+{#{% for appointment in appointments %}#}
+{#    <p>#}
+{#        Doctor: {{ appointment.doctor.username }} <br />#}
+{#        Start: {{ appointment.start_datetime }} <br />#}
+{#        End: {{ appointment.end_datetime }} <br />#}
+{#        Reason: {{ appointment.reason }} <br />#}
+{#        Status: {{ appointment.status }} <br />#}
+{#        -------------------------#}
+{#    </p>#}
+{##}
+{#    {% if appointment.status in 'REQUESTED,CONFIRMED' %}#}
+{#    <form method="POST" action="{% url 'cancel_appointment' appointment.id %}">#}
+{#        {% csrf_token %}#}
+{#        <button type="submit" onclick="#}
+{#        return confirm('Are you sure you want to cancel this appointment?');#}
+{#        ">#}
+{#            Cancel#}
+{#        </button>#}
+{#</form>#}
+{#{% endif %} {% empty %}#}
+{#<p>No appointments found.</p>#}
+{#{% endfor %}#}
