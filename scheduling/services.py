@@ -52,11 +52,19 @@ def generate_daily_slots(doctor, date):
         doctor=doctor,
         start_datetime__date=date
     ).values_list("start_datetime", "end_datetime")
+    # convert to naive(No timezone) for comparison with generated slots 
+    booked_naive = {
+    (b[0].replace(tzinfo=None), b[1].replace(tzinfo=None))
+    for b in booked
+    }
+
 
     available = [] # store available slots
 
     for slot in slots:
-        if slot not in booked:
+        if slot not in booked_naive:
             available.append(slot)
 
     return available
+
+

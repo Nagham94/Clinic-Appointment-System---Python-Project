@@ -5,6 +5,11 @@ from django.contrib import messages
 from django.utils import timezone
 from datetime import datetime
 from django.contrib.auth import get_user_model
+from scheduling.services import generate_daily_slots
+
+from sqlite3 import IntegrityError
+from django.db import transaction
+
 
 # User model import for referencing in views
 User = get_user_model()
@@ -15,45 +20,32 @@ def book_appointment(request):
     if request.method == 'POST':
         doctor_id = request.POST.get('doctor')
         reason = request.POST.get('reason')
+        start_str = request.POST.get('start_datetime')
+        end_str = request.POST.get('end_datetime')
 
         try:
-            start_datetime = timezone.make_aware(datetime.fromisoformat(request.POST.get('start_datetime')))
-            end_datetime = timezone.make_aware(datetime.fromisoformat(request.POST.get('end_datetime')))
-        except ValueError:
-            messages.error(request, 'Invalid date format. Please enter valid date and time.')
-            return redirect('book_appointment')
-        
-        duration = end_datetime - start_datetime
-        
-        # Validate Time
-        if start_datetime >= end_datetime:
-            messages.error(request, 'End time must be after start time.')
+            start_datetime = timezone.make_aware(datetime.fromisoformat(start_str))
+            end_datetime = timezone.make_aware(datetime.fromisoformat(end_str))
+        except (ValueError, TypeError):
+            messages.error(request, 'Invalid slot selected.')
             return redirect('book_appointment')
 
         if start_datetime < timezone.now():
             messages.error(request, 'Cannot book an appointment in the past.')
             return redirect('book_appointment')
 
-        if not (13 <= start_datetime.hour < 23):
-            messages.error(request, 'Appointments must be between 1:00 PM and 11:00 PM.')
-            return redirect('book_appointment')
-        
-        if duration.total_seconds() > 3600:
-            messages.error(request, 'Appointment duration cannot exceed 1 hour.')
+        doctor = get_object_or_404(User, id=doctor_id, role='DOCTOR')
+
+        # Validate submitted slot exists in generated slots
+        available_slots = generate_daily_slots(doctor, start_datetime.date())
+        naive_start = start_datetime.replace(tzinfo=None)
+        naive_end = end_datetime.replace(tzinfo=None)
+
+        if (naive_start, naive_end) not in available_slots:
+            messages.error(request, 'This slot is not available. Please choose another.')
             return redirect('book_appointment')
 
-        
-        doctor = get_object_or_404(User, id=doctor_id, role='DOCTOR')
-        # Check doctor overlap
-        if Appointment.objects.filter(
-            doctor=doctor,
-            start_datetime__lt=end_datetime,
-            end_datetime__gt=start_datetime
-        ).exists():
-            messages.error(request, 'This time slot is not available. Please choose a different time.')
-            return redirect('book_appointment')
-        
-        # Check patient overlap
+        # Check patient doesn't have overlapping appointment
         if Appointment.objects.filter(
             patient=request.user,
             status__in=['REQUESTED', 'CONFIRMED'],
@@ -63,20 +55,35 @@ def book_appointment(request):
             messages.error(request, 'You already have an appointment during this time.')
             return redirect('book_appointment')
 
-        appointment = Appointment.objects.create(
-            patient=request.user,
+        # Direct DB check to avoid naive/aware mismatch bug in generate_daily_slots
+        if Appointment.objects.filter(
             doctor=doctor,
             start_datetime=start_datetime,
-            end_datetime=end_datetime,
-            reason=reason
-        )
+            status__in=['REQUESTED', 'CONFIRMED']
+        ).exists():
+            messages.error(request, 'This slot is no longer available. Please choose another.')
+            return redirect('book_appointment')
+
+        # Handle race condition where two patients book the same slot simultaneously
+        try:
+            with transaction.atomic():
+                Appointment.objects.create(
+                    patient=request.user,
+                    doctor=doctor,
+                    start_datetime=start_datetime,
+                    end_datetime=end_datetime,
+                    reason=reason,
+                    status='REQUESTED'
+                )
+        except IntegrityError:
+            messages.error(request, 'This slot was just booked by someone else. Please choose another.')
+            return redirect('book_appointment')
+
         messages.success(request, 'Your appointment has been requested successfully.')
         return redirect('patient_dashboard')
 
     doctors = User.objects.filter(role='DOCTOR')
-    return render(request, 'appointments/book_appointment.html', {'doctors': doctors})
-
-
+    return render(request, 'appointments/book_appointment.html', {'doctors': doctors , 'today': timezone.now().date()})
 
 @login_required
 def my_appointments(request):
@@ -86,7 +93,6 @@ def my_appointments(request):
     return render(request, 'appointments/my_appointments.html', {
         'appointments': appointments
     })
-
 
 
 @login_required
