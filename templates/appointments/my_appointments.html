@@ -80,27 +80,3 @@
 </div>
 {% endblock %}
 
-{#<h2>My Appointments</h2>#}
-{##}
-{#{% for appointment in appointments %}#}
-{#    <p>#}
-{#        Doctor: {{ appointment.doctor.username }} <br />#}
-{#        Start: {{ appointment.start_datetime }} <br />#}
-{#        End: {{ appointment.end_datetime }} <br />#}
-{#        Reason: {{ appointment.reason }} <br />#}
-{#        Status: {{ appointment.status }} <br />#}
-{#        -------------------------#}
-{#    </p>#}
-{##}
-{#    {% if appointment.status in 'REQUESTED,CONFIRMED' %}#}
-{#    <form method="POST" action="{% url 'cancel_appointment' appointment.id %}">#}
-{#        {% csrf_token %}#}
-{#        <button type="submit" onclick="#}
-{#        return confirm('Are you sure you want to cancel this appointment?');#}
-{#        ">#}
-{#            Cancel#}
-{#        </button>#}
-{#</form>#}
-{#{% endif %} {% empty %}#}
-{#<p>No appointments found.</p>#}
-{#{% endfor %}#}
