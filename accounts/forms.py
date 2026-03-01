@@ -3,7 +3,37 @@ from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from .models import User, PatientProfile, DoctorProfile, ReceptionistProfile
 from django.contrib.auth import authenticate
 
-class RegisterForm(UserCreationForm):
+class PatientRegistrationForm(UserCreationForm):
+    first_name = forms.CharField(max_length=30, required=True)
+    last_name = forms.CharField(max_length=30, required=True)
+    email = forms.EmailField(required=True)
+
+    class Meta(UserCreationForm.Meta):
+        model = User
+        fields = UserCreationForm.Meta.fields + ('first_name', 'last_name', 'email',)
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if User.objects.filter(email=email).exists():
+            raise forms.ValidationError("This email is already registered.")
+        return email
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        user.first_name = self.cleaned_data['first_name']
+        user.last_name = self.cleaned_data['last_name']
+        user.email = self.cleaned_data['email']
+        user.role = User.Roles.PATIENT  # Default to PATIENT for self-registration
+        if commit:
+            user.save()
+        return user
+
+class AdminUserCreationForm(UserCreationForm):
+    first_name = forms.CharField(max_length=30, required=True)
+    last_name = forms.CharField(max_length=30, required=True)
+    email = forms.EmailField(required=True)
+    role = forms.ChoiceField(choices=User.Roles.choices, required=True)
+
     class Meta(UserCreationForm.Meta):
         model = User
         fields = UserCreationForm.Meta.fields + ('first_name', 'last_name', 'email',)
@@ -22,21 +52,19 @@ class RegisterForm(UserCreationForm):
             raise forms.ValidationError("This email is already registered.")
         return email
 
-    def clean_role(self):
-        role = self.cleaned_data.get('role')
-        allowed_roles = [choice[0] for choice in User.Roles.choices]
-        if role not in allowed_roles:
-            raise forms.ValidationError("Invalid role selected.")
-        return role
-
     def save(self, commit=True):
-        user = super().save(commit=False) 
+        user = super().save(commit=False)
         user.first_name = self.cleaned_data['first_name']
         user.last_name = self.cleaned_data['last_name']
+<<<<<<< HEAD
         user.email = self.cleaned_data['email'] 
         user.role = User.Roles.PATIENT
+=======
+        user.email = self.cleaned_data['email']
+        user.role = self.cleaned_data['role']
+>>>>>>> authentication-feature
         if commit:
-            user.save()  
+            user.save()
         return user
 
 class LoginForm(AuthenticationForm):

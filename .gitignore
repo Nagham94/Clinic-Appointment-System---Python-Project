@@ -2,6 +2,12 @@
 venv/
 .env
 
+<<<<<<< HEAD
+=======
+.env
+
+# Python cache
+>>>>>>> authentication-feature
 __pycache__/
 *.pyc
 
