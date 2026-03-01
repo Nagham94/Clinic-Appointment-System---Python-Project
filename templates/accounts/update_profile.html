@@ -46,7 +46,13 @@
 
             <div style="margin-top: 2rem; display: flex; flex-direction: column; gap: 1rem;">
                 <button type="submit" class="btn-primary">Save Changes</button>
-                <a href="{% url 'dashboard_redirect' %}" class="btn-secondary">Back to Dashboard</a>
+                <div style="display: flex; gap: 1rem;">
+                    <a href="{% url 'password_change' %}" class="btn-secondary"
+                        style="flex: 1; text-align: center; text-decoration: none; border: 1px solid #cbd5e1; background: #f8fafc; color: #475569;">Change
+                        Password</a>
+                    <a href="{% url 'dashboard_redirect' %}" class="btn-secondary"
+                        style="flex: 1; text-align: center; text-decoration: none;">Back to Dashboard</a>
+                </div>
             </div>
         </form>
     </div>
