@@ -13,7 +13,7 @@ class RoleRestrictionMiddleware:
             path = request.path
             role = request.user.role
             
-            # Dashboard URL patterns
+            
             role_paths = {
                 'PATIENT': reverse('patient_dashboard'),
                 'DOCTOR': reverse('doctor_dashboard'),
@@ -21,7 +21,7 @@ class RoleRestrictionMiddleware:
                 'ADMIN': reverse('admin_dashboard'),
             }
             
-            # Check if user is trying to access another role's dashboard
+            
             for r, p in role_paths.items():
                 if path.startswith(p) and role != r:
                     return redirect('dashboard_redirect')
