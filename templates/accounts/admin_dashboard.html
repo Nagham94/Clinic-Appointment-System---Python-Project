@@ -44,48 +44,6 @@
             </div>
             <div style="font-size: 2.5rem; font-weight: 800; color: #0f172a; line-height: 1;">{{ total_users }}</div>
         </div>
-<<<<<<< HEAD
-        <div class="dashboard-card">
-            <h4
-                style="color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em;">
-                Doctors</h4>
-            <div style="font-size: 2rem; font-weight: 700; margin: 0.5rem 0;">{{ total_doctors|default:"0" }}</div>
-            <p style="color: var(--primary-color); font-size: 0.875rem;">Registered staff</p>
-        </div>
-        <div class="dashboard-card">
-            <h4
-                style="color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em;">
-                Receptionists</h4>
-            <div style="font-size: 2rem; font-weight: 700; margin: 0.5rem 0;">{{ total_receptionists|default:"0" }}
-            </div>
-            <p style="color: var(--primary-color); font-size: 0.875rem;">Front desk staff</p>
-        </div>
-        <div class="dashboard-card">
-            <h4
-                style="color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em;">
-                Patients</h4>
-            <div style="font-size: 2rem; font-weight: 700; margin: 0.5rem 0;">{{ total_patients|default:"0" }}</div>
-            <p style="color: var(--primary-color); font-size: 0.875rem;">Registered patients</p>
-        </div>
-    </div>
-
-    <div class="dashboard-grid" style="grid-template-columns: 1fr 1fr; margin-top: 2rem;">
-        <div class="dashboard-card">
-            <h3>Quick Actions</h3>
-            <div style="display: flex; gap: 1rem; margin-top: 1rem;">
-                <a href="{% url 'admin_user_list' %}" class="btn-primary" style="text-decoration: none;">Manage
-                    Users</a>
-                <a href="{% url 'admin_create_user' %}" class="btn-primary"
-                    style="text-decoration: none; background: #6366f1;">Add New Staff</a>
-            </div>
-        </div>
-        <div class="dashboard-card">
-            <h3>System Settings</h3>
-            <p style="color: var(--text-muted); margin-top: 1rem;">Manage clinic open hours, departments, and services.
-            </p>
-            <button class="btn-primary" style="margin-top: 1rem; opacity: 0.6; cursor: not-allowed;">Coming
-                Soon</button>
-=======
 
         <!-- Patients -->
         <div class="dashboard-card"
@@ -150,7 +108,6 @@
             <i class="fas fa-shield-alt" style="font-size: 3rem; color: #cbd5e1; margin-bottom: 1rem;"></i>
             <p style="color: #64748b; text-align: center;">Secure Admin Access Active<br><span
                     style="font-size: 0.875rem;">Only authorized personnel can access these tools.</span></p>
->>>>>>> authentication-feature
         </div>
     </div>
 </div>

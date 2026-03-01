@@ -23,7 +23,7 @@ class PatientRegistrationForm(UserCreationForm):
         user.first_name = self.cleaned_data['first_name']
         user.last_name = self.cleaned_data['last_name']
         user.email = self.cleaned_data['email']
-        user.role = User.Roles.PATIENT  # Default to PATIENT for self-registration
+        user.role = User.Roles.PATIENT
         if commit:
             user.save()
         return user
@@ -40,11 +40,11 @@ class AdminUserCreationForm(UserCreationForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Add Clear Labels
         self.fields['username'].label = "Username"
         self.fields['first_name'].label = "First Name"
         self.fields['last_name'].label = "Last Name"
         self.fields['email'].label = "Email Address"
+        self.fields['role'].label = "Account Role"
 
     def clean_email(self):
         email = self.cleaned_data.get('email')
@@ -56,13 +56,8 @@ class AdminUserCreationForm(UserCreationForm):
         user = super().save(commit=False)
         user.first_name = self.cleaned_data['first_name']
         user.last_name = self.cleaned_data['last_name']
-<<<<<<< HEAD
-        user.email = self.cleaned_data['email'] 
-        user.role = User.Roles.PATIENT
-=======
         user.email = self.cleaned_data['email']
         user.role = self.cleaned_data['role']
->>>>>>> authentication-feature
         if commit:
             user.save()
         return user
@@ -108,20 +103,3 @@ class ReceptionistProfileForm(forms.ModelForm):
     class Meta:
         model = ReceptionistProfile
         fields = []
-
-class AdminUserCreationForm(RegisterForm):
-    role = forms.ChoiceField(choices=User.Roles.choices)
-
-    class Meta(RegisterForm.Meta):
-        fields = RegisterForm.Meta.fields + ('role',)
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields['role'].label = "Account Role"
-
-    def save(self, commit=True):
-        user = super().save(commit=False)
-        user.role = self.cleaned_data['role']
-        if commit:
-            user.save()
-        return user

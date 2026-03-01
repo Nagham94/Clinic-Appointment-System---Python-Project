@@ -12,11 +12,9 @@ urlpatterns = [
     path('doctor/dashboard/', views.doctor_dashboard_view, name='doctor_dashboard'),
     path('receptionist/dashboard/', views.receptionist_dashboard_view, name='receptionist_dashboard'),
     path('admin/dashboard/', views.admin_dashboard_view, name='admin_dashboard'),
+    
     path('admin/register/', views.admin_register_view, name='admin_register'),
     path('admin/users/', views.user_list_view, name='user_list'),
-    
-    path('admin/users/', views.admin_user_list_view, name='admin_user_list'),
-    path('admin/users/create/', views.admin_create_user_view, name='admin_create_user'),
     
     path('profile/update/', views.update_profile_view, name='update_profile'),
 
