@@ -16,9 +16,19 @@
 </head>
 
 <body>
+{###### Edited part, Needs more Edit...####}
     {% if not hide_nav %}
     <nav class="navbar">
         <div class="nav-logo">CLINIC<span>LIFE</span></div>
+        {% if user.is_authenticated %}
+{#        <div class="user-role">#}
+{#            <strong>{{ user.get_full_name|default:user.username }}</strong>#}
+{#            ({{ user.role|title }})#}
+            <span class="user-role {{ user.role }}">
+                 <strong>Logged-in as: {{ user.role }} </strong>
+            </span>
+{#        </div>#}
+        {% endif %}
         <div class="nav-links">
             <a href="{% url 'home' %}" class="nav-item">Home</a>
             {% if user.is_authenticated %}
@@ -46,6 +56,15 @@
         .highlight:hover {
             filter: brightness(1.2);
         }
+
+        .user-role {
+                font-size: 14px;
+                color: #0f172a;
+                margin-left: 20px;
+                background: #94a3b8;
+
+            }
+
     </style>
     {% endif %}
 
