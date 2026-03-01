@@ -5,5 +5,5 @@ from . import views
 urlpatterns = [
     path('book/', views.book_appointment, name='book_appointment'),
     ##sh
-    path('my-appointments/', views.my_appointments, name='my_appointments'),
+    path('my-appointments/', views.my_appointments, name='my_appointments')
 ]

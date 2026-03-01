@@ -47,7 +47,7 @@ def book_appointment(request):
     doctors = User.objects.filter(role='DOCTOR')
     return render(request, 'appointments/book_appointment.html', {'doctors': doctors})
 
-
+##Shahd
 def my_appointments(request):
     appointments = Appointment.objects.filter(patient=request.user)
 
