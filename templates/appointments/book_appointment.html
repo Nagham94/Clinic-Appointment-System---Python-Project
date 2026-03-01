@@ -1,130 +1,436 @@
-{% extends "base.html" %}
-{% load static %}
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap');
 
-{% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/appointments.css' %}">
-{% endblock %}
+    :root {
+        --bg-deep:      #0f1021;
+        --bg-card:      #181a2e;
+        --bg-elevated:  #1f2140;
+        --border:       #2e3058;
+        --text-primary: #e8eaf6;
+        --text-muted:   #7b7fa8;
+        --accent:       #7c4dff;
+        --accent-glow:  rgba(124, 77, 255, 0.25);
+        --accent-soft:  rgba(124, 77, 255, 0.12);
+        --danger:       #ff4d4d;
+        --success:      #4dffb4;
+    }
 
-{% block content %}
-<main class="flex-center">
-    <div class="auth-container glass-panel">
+    body {
+        background-color: var(--bg-deep);
+        font-family: 'DM Sans', sans-serif;
+        color: var(--text-primary);
+    }
 
-        <header class="form-header">
-            <h1 class="auth-title">Book Appointment</h1>
-            <p class="auth-subtitle">Schedule your session with our specialists.</p>
-        </header>
+    .booking-wrapper {
+        max-width: 680px;
+        margin: 48px auto;
+        padding: 0 24px;
+    }
 
-        <form method="POST">
+    .booking-header {
+        margin-bottom: 36px;
+    }
+
+    .booking-header .eyebrow {
+        font-size: 0.72rem;
+        font-weight: 600;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--accent);
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .booking-header .eyebrow::before {
+        content: '';
+        display: inline-block;
+        width: 24px;
+        height: 2px;
+        background: var(--accent);
+        border-radius: 2px;
+    }
+
+    .booking-header h1 {
+        font-family: 'Instrument Serif', serif;
+        font-size: 2.4rem;
+        font-weight: 400;
+        line-height: 1.15;
+        color: var(--text-primary);
+        margin: 0;
+    }
+
+    .booking-header h1 em {
+        font-style: italic;
+        color: var(--accent);
+    }
+
+    .booking-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 36px;
+        box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(124,77,255,0.08);
+    }
+
+    .field-group {
+        margin-bottom: 24px;
+    }
+
+    .field-label {
+        display: block;
+        font-size: 0.72rem;
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--text-muted);
+        margin-bottom: 10px;
+    }
+
+    .field-control {
+        width: 100%;
+        padding: 12px 16px;
+        border: 1.5px solid var(--border);
+        border-radius: 10px;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.95rem;
+        color: var(--text-primary);
+        background: var(--bg-elevated);
+        transition: border-color 0.2s, box-shadow 0.2s;
+        appearance: none;
+        -webkit-appearance: none;
+        outline: none;
+        box-sizing: border-box;
+    }
+
+    .field-control:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+
+    .field-control option {
+        background: var(--bg-elevated);
+        color: var(--text-primary);
+    }
+
+    select.field-control {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237b7fa8' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 14px center;
+        padding-right: 40px;
+        cursor: pointer;
+    }
+
+    /* Date input calendar icon color fix */
+    input[type="date"]::-webkit-calendar-picker-indicator {
+        filter: invert(0.6);
+        cursor: pointer;
+    }
+
+    /* Divider */
+    .section-divider {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 28px 0 22px;
+    }
+
+    .section-divider span {
+        font-size: 0.72rem;
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--text-muted);
+        white-space: nowrap;
+    }
+
+    .section-divider::before,
+    .section-divider::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: var(--border);
+    }
+
+    /* Slots */
+    #slotsSection {
+        animation: fadeUp 0.3s ease;
+    }
+
+    @keyframes fadeUp {
+        from { opacity: 0; transform: translateY(8px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+
+    #slotsContainer {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .slot-btn {
+        padding: 10px 18px;
+        border-radius: 8px;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.88rem;
+        font-weight: 500;
+        border: 1.5px solid var(--border);
+        background: var(--bg-elevated);
+        color: var(--text-primary);
+        cursor: pointer;
+        transition: all 0.18s ease;
+        letter-spacing: 0.01em;
+    }
+
+    .slot-btn:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+        background: var(--accent-soft);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 16px var(--accent-glow);
+    }
+
+    .slot-btn.selected {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: #fff;
+        box-shadow: 0 4px 20px var(--accent-glow);
+        transform: translateY(-1px);
+    }
+
+    /* Loading */
+    .slots-loading {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: var(--text-muted);
+        font-size: 0.88rem;
+        padding: 8px 0;
+    }
+
+    .spinner {
+        width: 18px;
+        height: 18px;
+        border: 2px solid var(--border);
+        border-top-color: var(--accent);
+        border-radius: 50%;
+        animation: spin 0.7s linear infinite;
+        flex-shrink: 0;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    /* No slots */
+    .no-slots-msg {
+        padding: 14px 18px;
+        background: rgba(255, 77, 77, 0.08);
+        border: 1px solid rgba(255, 77, 77, 0.25);
+        border-radius: 10px;
+        color: var(--danger);
+        font-size: 0.88rem;
+        font-weight: 500;
+    }
+
+    /* Textarea */
+    textarea.field-control {
+        resize: vertical;
+        min-height: 100px;
+    }
+
+    /* Submit */
+    .submit-btn {
+        width: 100%;
+        padding: 14px;
+        background: var(--accent);
+        color: #fff;
+        border: none;
+        border-radius: 10px;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.95rem;
+        font-weight: 600;
+        letter-spacing: 0.03em;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        margin-top: 8px;
+        box-shadow: 0 4px 20px var(--accent-glow);
+    }
+
+    .submit-btn:hover:not(:disabled) {
+        background: #9c6fff;
+        transform: translateY(-1px);
+        box-shadow: 0 8px 28px var(--accent-glow);
+    }
+
+    .submit-btn:disabled {
+        opacity: 0.3;
+        cursor: not-allowed;
+        box-shadow: none;
+    }
+
+    .submit-btn:active:not(:disabled) {
+        transform: translateY(0);
+    }
+
+    /* Selected indicator */
+    .selected-indicator {
+        display: none;
+        align-items: center;
+        gap: 8px;
+        margin-top: 14px;
+        padding: 10px 14px;
+        background: rgba(77, 255, 180, 0.08);
+        border: 1px solid rgba(77, 255, 180, 0.2);
+        border-radius: 8px;
+        font-size: 0.85rem;
+        color: var(--success);
+        font-weight: 500;
+    }
+
+    .selected-indicator.visible {
+        display: flex;
+    }
+</style>
+
+<div class="booking-wrapper">
+    <div class="booking-header">
+        <p class="eyebrow">Book a Visit</p>
+        <h1>Schedule your <em>appointment</em></h1>
+    </div>
+
+    <div class="booking-card">
+        <form method="POST" id="bookingForm">
             {% csrf_token %}
 
-            <div class="form-group">
-                <label for="doctor">Select Specialist</label>
-                <select name="doctor" id="doctor" required>
+            <div class="field-group">
+                <label class="field-label" for="doctorSelect">Select Doctor</label>
+                <select name="doctor" id="doctorSelect" class="field-control" required>
+                    <option value="">— Choose a doctor —</option>
                     {% for doctor in doctors %}
-                    <option value="{{ doctor.id }}">Dr. {{ doctor.get_full_name }} </option>
+                    <option value="{{ doctor.id }}">Dr. {{ doctor.get_full_name|default:doctor.username }}</option>
                     {% endfor %}
                 </select>
             </div>
 
-            <div class="form-grid">
-                <div class="form-group">
-                    <label for="start_datetime">Start Time</label>
-                    <input type="datetime-local" name="start_datetime" id="start_datetime" required>
+            <div class="field-group">
+                <label class="field-label" for="dateInput">Preferred Date</label>
+                <input type="date" id="dateInput" class="field-control"
+                       min="{{ today|date:'Y-m-d' }}" required>
+            </div>
+
+            <div id="slotsSection" style="display:none;">
+                <div class="section-divider"><span>Available Times</span></div>
+
+                <div id="slotsLoading" class="slots-loading" style="display:none;">
+                    <div class="spinner"></div>
+                    <span>Finding available slots...</span>
                 </div>
 
-                <div class="form-group">
-                    <label for="end_datetime">End Time</label>
-                    <input type="datetime-local" name="end_datetime" id="end_datetime" required>
+                <div id="noSlots" class="no-slots-msg" style="display:none;">
+                    No available slots for this date.
+                </div>
+
+                <div id="slotsContainer"></div>
+
+                <div class="selected-indicator" id="selectedIndicator">
+                    <svg width="16" height="16" fill="none" viewBox="0 0 24 24"
+                         stroke="currentColor" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                    </svg>
+                    <span id="selectedLabel">Slot selected</span>
                 </div>
             </div>
 
-            <div class="form-group">
-                <label for="reason">Reason for Visit (optional)</label>
-                <textarea name="reason" id="reason" rows="3" placeholder="What should the doctor know?"></textarea>
+            <input type="hidden" name="start_datetime" id="selectedStart">
+            <input type="hidden" name="end_datetime" id="selectedEnd">
+
+            <div class="section-divider"><span>Details</span></div>
+
+            <div class="field-group">
+                <label class="field-label" for="reasonInput">Reason for Visit</label>
+                <textarea name="reason" id="reasonInput" class="field-control"
+                          placeholder="Briefly describe your symptoms or reason..." required></textarea>
             </div>
 
-            <button type="submit" class="confirm-btn-enhanced">
-                Confirm Booking
+            <button type="submit" class="submit-btn" id="submitBtn" disabled>
+                Request Appointment
             </button>
         </form>
     </div>
+</div>
 
-    <script>
-        function getNowString() {
-            const now = new Date();
-            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-            return now.toISOString().slice(0, 16);
-        }
+<script>
+    const doctorSelect      = document.getElementById('doctorSelect');
+    const dateInput         = document.getElementById('dateInput');
+    const slotsSection      = document.getElementById('slotsSection');
+    const slotsContainer    = document.getElementById('slotsContainer');
+    const slotsLoading      = document.getElementById('slotsLoading');
+    const noSlots           = document.getElementById('noSlots');
+    const selectedStart     = document.getElementById('selectedStart');
+    const selectedEnd       = document.getElementById('selectedEnd');
+    const submitBtn         = document.getElementById('submitBtn');
+    const selectedIndicator = document.getElementById('selectedIndicator');
+    const selectedLabel     = document.getElementById('selectedLabel');
 
-        function isValidTime(datetimeStr) {
-            const hour = new Date(datetimeStr).getHours();
-            return hour >= 13 && hour < 23;
-        }
+    function resetSlots() {
+        slotsContainer.innerHTML = '';
+        selectedStart.value = '';
+        selectedEnd.value = '';
+        submitBtn.disabled = true;
+        noSlots.style.display = 'none';
+        selectedIndicator.classList.remove('visible');
+    }
 
-        //DOM
-        const startInput = document.getElementById('start_datetime');
-        const endInput = document.getElementById('end_datetime');
+    function fetchSlots() {
+        const doctorId = doctorSelect.value;
+        const date = dateInput.value;
+        if (!doctorId || !date) return;
 
-        // --- Set Minimums ---
-        // --- Set Minimums ---
-        const now = getNowString();
-        startInput.min = now;
-        endInput.min = now;
-        startInput.value = ''; // clear any stale value
+        resetSlots();
+        slotsSection.style.display = 'block';
+        slotsLoading.style.display = 'flex';
 
-        // --- Sync end min with start ---
-        startInput.addEventListener('change', () => {
-            endInput.min = startInput.value;
-        });
+        fetch(`/available-slots/?doctor_id=${doctorId}&date=${date}`)
+            .then(res => { if (!res.ok) throw new Error(); return res.json(); })
+            .then(data => {
+                slotsLoading.style.display = 'none';
 
-        // --- Prevent past date selection ---
-        startInput.addEventListener('change', () => {
-            if (startInput.value < now) {
-                startInput.value = now;
-                alert('You cannot select a past date.');
-            }
-            endInput.min = startInput.value;
-        });
+                if (!data.slots || data.slots.length === 0) {
+                    noSlots.style.display = 'block';
+                    return;
+                }
 
-        endInput.addEventListener('change', () => {
-            if (endInput.value < now) {
-                endInput.value = now;
-                alert('You cannot select a past date.');
-            }
-        });
+                data.slots.forEach(slot => {
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = 'slot-btn';
 
-        // --- Form Validation ---
-        document.querySelector('form').addEventListener('submit', function (e) {
-            const start = startInput.value;
-            const end = endInput.value;
+                    const startTime = slot.start.split(' ')[1];
+                    const endTime   = slot.end.split(' ')[1];
+                    btn.textContent = `${startTime} – ${endTime}`;
 
-            if (!start || !end) {
-                e.preventDefault();
-                alert('Please select both start and end times.');
-                return;
-            }
+                    btn.addEventListener('click', () => {
+                        slotsContainer.querySelectorAll('.slot-btn').forEach(b => b.classList.remove('selected'));
+                        btn.classList.add('selected');
+                        selectedStart.value = slot.start;
+                        selectedEnd.value   = slot.end;
+                        submitBtn.disabled  = false;
+                        selectedLabel.textContent = `${startTime} – ${endTime} selected`;
+                        selectedIndicator.classList.add('visible');
+                    });
 
-            if (!isValidTime(start) || !isValidTime(end)) {
-                e.preventDefault();
-                alert('Appointments must be between 1:00 PM and 11:00 PM.');
-                return;
-            }
+                    slotsContainer.appendChild(btn);
+                });
+            })
+            .catch(() => {
+                slotsLoading.style.display = 'none';
+                noSlots.textContent = 'Failed to load slots. Please try again.';
+                noSlots.style.display = 'block';
+            });
+    }
 
-            const diffMinutes = (new Date(end) - new Date(start)) / (1000 * 60);
-
-            if (diffMinutes <= 0) {
-                e.preventDefault();
-                alert('End time must be after start time.');
-                return;
-            }
-
-            if (diffMinutes > 60) {
-                e.preventDefault();
-                alert('Appointment duration cannot exceed 1 hour.');
-                return;
-            }
-
-        });
-    </script>
-</main>
-{% endblock %}
+    doctorSelect.addEventListener('change', fetchSlots);
+    dateInput.addEventListener('change', fetchSlots);
+</script>
