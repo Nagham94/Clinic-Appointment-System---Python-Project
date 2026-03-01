@@ -17,9 +17,13 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from django.views.generic import TemplateView
+# slot view lives in scheduling app
+from scheduling.views import AvailableSlotsView
 
 urlpatterns = [
     path('', TemplateView.as_view(template_name='home.html'), name='home'),
     path('admin/', admin.site.urls),
     path("accounts/", include("accounts.urls")),
+    path("available-slots/", AvailableSlotsView.as_view(), name="available_slots"),
+    path("appointments/", include("appointments.urls"))
 ]

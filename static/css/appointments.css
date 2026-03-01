@@ -1,0 +1,77 @@
+/* Layout Fix: Force Vertical Stacking */
+.auth-container {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch; /* Ensures inputs fill width */
+    text-align: center;
+    margin: 2rem auto;
+}
+
+.form-header {
+    margin-bottom: 2rem;
+}
+
+.auth-title {
+    font-size: 2.25rem;
+    margin-bottom: 0.5rem;
+    background: linear-gradient(to right, #fff, var(--text-muted));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* Enhanced Confirm Button */
+.confirm-btn-enhanced {
+    width: 100%;
+    margin-top: 1.5rem;
+    padding: 1rem;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    cursor: pointer;
+    
+    /* Contrast & Color */
+    color: #ffffff !important; 
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    
+    /* Depth & Glow */
+    box-shadow: 0 4px 15px rgba(79, 70, 229, 0.4);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.confirm-btn-enhanced:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(236, 72, 153, 0.5);
+    filter: brightness(1.1);
+}
+
+.confirm-btn-enhanced:active {
+    transform: translateY(0);
+}
+
+/* Ensure form labels are left-aligned even if header is centered */
+.form-group label {
+    text-align: left;
+}
+
+/* Forces the calendar icon to be more accessible and the input clickable */
+input[type="datetime-local"] {
+    position: relative;
+    cursor: pointer;
+}
+
+/* This targets the internal browser 'picker' button and expands it 
+   to cover the whole input area in some browsers */
+input::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    opacity: 0; /* Keeps the icon invisible but clickable over the whole field */
+}

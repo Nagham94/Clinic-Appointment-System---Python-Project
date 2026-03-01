@@ -43,7 +43,14 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'accounts',
+<<<<<<< HEAD
     
+=======
+    'scheduling',
+    'appointments',
+    'medical',
+    'dashboard',
+>>>>>>> c64c7d9823e73787793d40be83882271559ae898
 ]
 
 
@@ -86,11 +93,19 @@ WSGI_APPLICATION = 'clinic_system.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
+<<<<<<< HEAD
         'NAME': os.getenv('DATABASE_NAME'),          
         'USER': os.getenv('DATABASE_USER'),               
         'PASSWORD': os.getenv('DATABASE_PASSWORD'),           
         'HOST': os.getenv('DATABASE_HOST', 'localhost'),          
         'PORT': os.getenv('DATABASE_PORT', '5432'),               
+=======
+        'NAME': os.getenv('DB_NAME'),
+        'USER': os.getenv('DB_USER'),
+        'PASSWORD': os.getenv('DB_PASS'),
+        'HOST': os.getenv('DB_HOST'),
+        'PORT': os.getenv('DB_PORT'),
+>>>>>>> c64c7d9823e73787793d40be83882271559ae898
     }
 }
 
@@ -139,4 +154,10 @@ STATICFILES_DIRS = [
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
+<<<<<<< HEAD
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+=======
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+AUTH_USER_MODEL = 'accounts.User'
+
+>>>>>>> c64c7d9823e73787793d40be83882271559ae898
