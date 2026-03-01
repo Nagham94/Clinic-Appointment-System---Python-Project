@@ -78,12 +78,29 @@ def book_appointment(request):
 
 
 
-
-
 @login_required
 def my_appointments(request):
+    
     appointments = Appointment.objects.filter(patient=request.user)
 
     return render(request, 'appointments/my_appointments.html', {
         'appointments': appointments
     })
+
+
+
+@login_required
+def cancel_appointment(request, appointment_id):
+    appointment = get_object_or_404(Appointment, id=appointment_id, patient=request.user)
+
+    if appointment.status not in ['REQUESTED', 'CONFIRMED']:
+        messages.error(request, 'This appointment cannot be cancelled.')
+        return redirect('my_appointments')
+
+    if request.method == 'POST':
+        appointment.status = 'CANCELLED'
+        appointment.save()
+        messages.success(request, 'Your appointment has been cancelled successfully.')
+        return redirect('my_appointments')
+
+    return render(request, 'appointments/cancel_confirm.html', {'appointment': appointment})
