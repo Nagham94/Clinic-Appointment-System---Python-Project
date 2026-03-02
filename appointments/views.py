@@ -128,7 +128,7 @@ def reschedule_appointment(request, appointment_id):
     appointment = get_object_or_404(Appointment, id=appointment_id)
 
     # only patient who owns the appointment or receptionist can reschedule
-    if request.user != appointment.patient or request.user.role != 'RECEPTIONIST':
+    if request.user != appointment.patient and request.user.role != 'RECEPTIONIST':
         messages.error(request, 'You do not have permission to reschedule this appointment.')
         return redirect('my_appointments')
     
@@ -161,8 +161,8 @@ def reschedule_appointment(request, appointment_id):
         if Appointment.objects.filter(
             patient=appointment.patient,
             status__in=['REQUESTED', 'CONFIRMED'],
-            start_datetime__lt=start_datetime,
-            end_datetime__gt=end_datetime
+            start_datetime__lt=end_datetime,   # existing starts before new ends
+            end_datetime__gt=start_datetime    # existing ends after new starts
         ).exclude(id=appointment.id).exists():
             messages.error(request, 'Patient already has an appointment during this time.')
             return redirect('reschedule_appointment', appointment_id=appointment_id)
@@ -200,6 +200,14 @@ def reschedule_appointment(request, appointment_id):
         
         messages.success(request, 'Your appointment has been rescheduled successfully.')
         return redirect('my_appointments')
+    
+    # GET — load the form with the doctor pre-selected
+    doctors = User.objects.filter(role='DOCTOR')
+    return render(request, 'appointments/reschedule_appointment.html', {
+        'appointment': appointment,
+        'doctors': doctors,
+        'today': timezone.now().date(),
+    })
     
 
     

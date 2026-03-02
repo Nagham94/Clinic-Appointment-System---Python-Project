@@ -10,5 +10,6 @@ urlpatterns = [
 
     path('appointment/<int:pk>/delete/', views.delete_appointment, name='delete_appointment'),
     path('my-appointments/', views.my_appointments, name='my_appointments'),
-    path('cancel/<int:appointment_id>/', views.cancel_appointment, name='cancel_appointment')
+    path('cancel/<int:appointment_id>/', views.cancel_appointment, name='cancel_appointment'),
+    path('<int:appointment_id>/reschedule/', views.reschedule_appointment, name='reschedule_appointment'),
 ]

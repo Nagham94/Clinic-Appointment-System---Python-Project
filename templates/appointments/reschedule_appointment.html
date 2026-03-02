@@ -1,0 +1,493 @@
+{% extends "base.html" %}
+{% block title %}Reschedule Appointment{% endblock %}
+
+{% block content %}
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+    :root {
+        --bg-deep:      #0f1021;
+        --bg-card:      #181a2e;
+        --bg-elevated:  #1f2140;
+        --border:       #2e3058;
+        --text-primary: #e8eaf6;
+        --text-muted:   #7b7fa8;
+        --accent:       #7c4dff;
+        --accent-glow:  rgba(124, 77, 255, 0.25);
+        --accent-soft:  rgba(124, 77, 255, 0.12);
+        --danger:       #ff4d4d;
+        --success:      #4dffb4;
+        --warning:      #ffd166;
+    }
+
+    body {
+        background-color: var(--bg-deep);
+        font-family: 'DM Sans', sans-serif;
+        color: var(--text-primary);
+    }
+
+    .booking-wrapper {
+        max-width: 680px;
+        margin: 48px auto;
+        padding: 0 24px;
+    }
+
+    .booking-header {
+        margin-bottom: 36px;
+    }
+
+    .booking-header .eyebrow {
+        font-size: 0.72rem;
+        font-weight: 600;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--warning);
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .booking-header .eyebrow::before {
+        content: '';
+        display: inline-block;
+        width: 24px;
+        height: 2px;
+        background: var(--warning);
+        border-radius: 2px;
+    }
+
+    .booking-header h1 {
+        font-family: 'Instrument Serif', serif;
+        font-size: 2.4rem;
+        font-weight: 400;
+        line-height: 1.15;
+        color: var(--text-primary);
+        margin: 0;
+    }
+
+    .booking-header h1 em {
+        font-style: italic;
+        color: var(--accent);
+    }
+
+    /* Current appointment info box */
+    .current-apt {
+        background: rgba(255, 209, 102, 0.06);
+        border: 1px solid rgba(255, 209, 102, 0.2);
+        border-radius: 12px;
+        padding: 16px 20px;
+        margin-bottom: 28px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .current-apt-icon {
+        width: 36px;
+        height: 36px;
+        background: rgba(255, 209, 102, 0.12);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        color: var(--warning);
+    }
+
+    .current-apt-info {
+        font-size: 0.88rem;
+        color: var(--text-muted);
+        line-height: 1.5;
+    }
+
+    .current-apt-info strong {
+        color: var(--warning);
+        display: block;
+        font-size: 0.78rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        margin-bottom: 2px;
+    }
+
+    .booking-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 36px;
+        box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(124,77,255,0.08);
+    }
+
+    .field-group {
+        margin-bottom: 24px;
+    }
+
+    .field-label {
+        display: block;
+        font-size: 0.72rem;
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--text-muted);
+        margin-bottom: 10px;
+    }
+
+    .field-control {
+        width: 100%;
+        padding: 12px 16px;
+        border: 1.5px solid var(--border);
+        border-radius: 10px;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.95rem;
+        color: var(--text-primary);
+        background: var(--bg-elevated);
+        transition: border-color 0.2s, box-shadow 0.2s;
+        appearance: none;
+        -webkit-appearance: none;
+        outline: none;
+        box-sizing: border-box;
+    }
+
+    .field-control:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+
+    .field-control.readonly {
+        opacity: 0.5;
+        cursor: not-allowed;
+        pointer-events: none;
+    }
+
+    input[type="date"]::-webkit-calendar-picker-indicator {
+        filter: invert(0.6);
+        cursor: pointer;
+    }
+
+    .section-divider {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 28px 0 22px;
+    }
+
+    .section-divider span {
+        font-size: 0.72rem;
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--text-muted);
+        white-space: nowrap;
+    }
+
+    .section-divider::before,
+    .section-divider::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: var(--border);
+    }
+
+    #slotsSection {
+        animation: fadeUp 0.3s ease;
+    }
+
+    @keyframes fadeUp {
+        from { opacity: 0; transform: translateY(8px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+
+    #slotsContainer {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .slot-btn {
+        padding: 10px 18px;
+        border-radius: 8px;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.88rem;
+        font-weight: 500;
+        border: 1.5px solid var(--border);
+        background: var(--bg-elevated);
+        color: var(--text-primary);
+        cursor: pointer;
+        transition: all 0.18s ease;
+        letter-spacing: 0.01em;
+    }
+
+    .slot-btn:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+        background: var(--accent-soft);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 16px var(--accent-glow);
+    }
+
+    .slot-btn.selected {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: #fff;
+        box-shadow: 0 4px 20px var(--accent-glow);
+        transform: translateY(-1px);
+    }
+
+    .slots-loading {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: var(--text-muted);
+        font-size: 0.88rem;
+        padding: 8px 0;
+    }
+
+    .spinner {
+        width: 18px;
+        height: 18px;
+        border: 2px solid var(--border);
+        border-top-color: var(--accent);
+        border-radius: 50%;
+        animation: spin 0.7s linear infinite;
+        flex-shrink: 0;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .no-slots-msg {
+        padding: 14px 18px;
+        background: rgba(255, 77, 77, 0.08);
+        border: 1px solid rgba(255, 77, 77, 0.25);
+        border-radius: 10px;
+        color: var(--danger);
+        font-size: 0.88rem;
+        font-weight: 500;
+    }
+
+    textarea.field-control {
+        resize: vertical;
+        min-height: 100px;
+    }
+
+    .submit-btn {
+        width: 100%;
+        padding: 14px;
+        background: var(--accent);
+        color: #fff;
+        border: none;
+        border-radius: 10px;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.95rem;
+        font-weight: 600;
+        letter-spacing: 0.03em;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        margin-top: 8px;
+        box-shadow: 0 4px 20px var(--accent-glow);
+    }
+
+    .submit-btn:hover:not(:disabled) {
+        background: #9c6fff;
+        transform: translateY(-1px);
+        box-shadow: 0 8px 28px var(--accent-glow);
+    }
+
+    .submit-btn:disabled {
+        opacity: 0.3;
+        cursor: not-allowed;
+        box-shadow: none;
+    }
+
+    .selected-indicator {
+        display: none;
+        align-items: center;
+        gap: 8px;
+        margin-top: 14px;
+        padding: 10px 14px;
+        background: rgba(77, 255, 180, 0.08);
+        border: 1px solid rgba(77, 255, 180, 0.2);
+        border-radius: 8px;
+        font-size: 0.85rem;
+        color: var(--success);
+        font-weight: 500;
+    }
+
+    .selected-indicator.visible { display: flex; }
+
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        color: var(--text-muted);
+        font-size: 0.88rem;
+        text-decoration: none;
+        margin-bottom: 24px;
+        transition: color 0.2s;
+    }
+
+    .back-link:hover { color: var(--text-primary); }
+</style>
+
+<div class="booking-wrapper">
+
+    <a href="{% url 'my_appointments' %}" class="back-link">
+        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+        </svg>
+        Back to My Appointments
+    </a>
+
+    <div class="booking-header">
+        <p class="eyebrow">Reschedule</p>
+        <h1>Pick a new <em>time slot</em></h1>
+    </div>
+
+    <!-- Current appointment info -->
+    <div class="current-apt">
+        <div class="current-apt-icon">
+            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+            </svg>
+        </div>
+        <div class="current-apt-info">
+            <strong>Current Appointment</strong>
+            Dr. {{ appointment.doctor.get_full_name|default:appointment.doctor.username }}
+            &nbsp;·&nbsp;
+            {{ appointment.start_datetime|date:"M d, Y" }}
+            &nbsp;·&nbsp;
+            {{ appointment.start_datetime|time:"h:i A" }} – {{ appointment.end_datetime|time:"h:i A" }}
+        </div>
+    </div>
+
+    <div class="booking-card">
+        <form method="POST" id="rescheduleForm">
+            {% csrf_token %}
+
+            <!-- Doctor is fixed -->
+            <input type="hidden" name="doctor" value="{{ appointment.doctor.id }}">
+            <div class="field-group">
+                <label class="field-label">Doctor</label>
+                <div class="field-control readonly">
+                    Dr. {{ appointment.doctor.get_full_name|default:appointment.doctor.username }}
+                </div>
+            </div>
+
+            <div class="field-group">
+                <label class="field-label" for="dateInput">New Date</label>
+                <input type="date" id="dateInput" class="field-control"
+                       min="{{ today|date:'Y-m-d' }}" required>
+            </div>
+
+            <div id="slotsSection" style="display:none;">
+                <div class="section-divider"><span>Available Times</span></div>
+
+                <div id="slotsLoading" class="slots-loading" style="display:none;">
+                    <div class="spinner"></div>
+                    <span>Finding available slots...</span>
+                </div>
+
+                <div id="noSlots" class="no-slots-msg" style="display:none;">
+                    No available slots for this date.
+                </div>
+
+                <div id="slotsContainer"></div>
+
+                <div class="selected-indicator" id="selectedIndicator">
+                    <svg width="16" height="16" fill="none" viewBox="0 0 24 24"
+                         stroke="currentColor" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                    </svg>
+                    <span id="selectedLabel">Slot selected</span>
+                </div>
+            </div>
+
+            <input type="hidden" name="start_datetime" id="selectedStart">
+            <input type="hidden" name="end_datetime" id="selectedEnd">
+
+            <div class="section-divider"><span>Details</span></div>
+
+            <div class="field-group">
+                <label class="field-label" for="reasonInput">Reason for Rescheduling</label>
+                <textarea name="reason" id="reasonInput" class="field-control"
+                          placeholder="Why are you rescheduling?" required></textarea>
+            </div>
+
+            <button type="submit" class="submit-btn" id="submitBtn" disabled>
+                Confirm Reschedule
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+    const DOCTOR_ID         = "{{ appointment.doctor.id }}";
+    const dateInput         = document.getElementById('dateInput');
+    const slotsSection      = document.getElementById('slotsSection');
+    const slotsContainer    = document.getElementById('slotsContainer');
+    const slotsLoading      = document.getElementById('slotsLoading');
+    const noSlots           = document.getElementById('noSlots');
+    const selectedStart     = document.getElementById('selectedStart');
+    const selectedEnd       = document.getElementById('selectedEnd');
+    const submitBtn         = document.getElementById('submitBtn');
+    const selectedIndicator = document.getElementById('selectedIndicator');
+    const selectedLabel     = document.getElementById('selectedLabel');
+
+    function resetSlots() {
+        slotsContainer.innerHTML = '';
+        selectedStart.value = '';
+        selectedEnd.value = '';
+        submitBtn.disabled = true;
+        noSlots.style.display = 'none';
+        selectedIndicator.classList.remove('visible');
+    }
+
+    function fetchSlots() {
+        const date = dateInput.value;
+        if (!date) return;
+
+        resetSlots();
+        slotsSection.style.display = 'block';
+        slotsLoading.style.display = 'flex';
+
+        fetch(`/available-slots/?doctor_id=${DOCTOR_ID}&date=${date}`)
+            .then(res => { if (!res.ok) throw new Error(); return res.json(); })
+            .then(data => {
+                slotsLoading.style.display = 'none';
+
+                if (!data.slots || data.slots.length === 0) {
+                    noSlots.style.display = 'block';
+                    return;
+                }
+
+                data.slots.forEach(slot => {
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = 'slot-btn';
+
+                    const startTime = slot.start.split(' ')[1];
+                    const endTime   = slot.end.split(' ')[1];
+                    btn.textContent = `${startTime} – ${endTime}`;
+
+                    btn.addEventListener('click', () => {
+                        slotsContainer.querySelectorAll('.slot-btn').forEach(b => b.classList.remove('selected'));
+                        btn.classList.add('selected');
+                        selectedStart.value = slot.start;
+                        selectedEnd.value   = slot.end;
+                        submitBtn.disabled  = false;
+                        selectedLabel.textContent = `${startTime} – ${endTime} selected`;
+                        selectedIndicator.classList.add('visible');
+                    });
+
+                    slotsContainer.appendChild(btn);
+                });
+            })
+            .catch(() => {
+                slotsLoading.style.display = 'none';
+                noSlots.textContent = 'Failed to load slots. Please try again.';
+                noSlots.style.display = 'block';
+            });
+    }
+
+    dateInput.addEventListener('change', fetchSlots);
+</script>
+{% endblock %}

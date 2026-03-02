@@ -45,23 +45,6 @@
                                 {{ appointment.status }}
                             </span>
                         </td>
-
-{#                        <td>#}
-{#                            {% if appointment.status == 'REQUESTED' or appointment.status == 'CONFIRMED' %}#}
-{#                            <form method="POST"#}
-{#                                  action="{% url 'cancel_appointment' appointment.id %}"#}
-{#                                  style="display:inline;">#}
-{#                                {% csrf_token %}#}
-{#                                <button type="submit"#}
-{#                                    class="cancel-btn"#}
-{#                                    onclick="return confirm('Are you sure you want to cancel this appointment?');">#}
-{#                                    Cancel#}
-{#                                </button>#}
-{#                            </form>#}
-{#                            {% else %}#}
-{#                                -#}
-{#                            {% endif %}#}
-{#                        </td>#}
                         <td>
                             {% if appointment.status == 'REQUESTED' or appointment.status == 'CONFIRMED' %}
 
@@ -76,13 +59,21 @@
                                     </button>
                                 </form>
 
+                                <!-- Reschedule -->
+                                 <form method="POST"
+                                      action="{% url 'reschedule_appointment' appointment.id %}"
+                                      style="display:inline;">
+                                    {% csrf_token %}
+                                    <button type="submit"
+                                        class="reschedule-btn"
+                                        onclick="return confirm('Are you sure you want to reschedule this appointment?');">
+                                        Reschedule
+                                    </button>
+                                </form>
+
                             {% elif appointment.status == 'CANCELLED' %}
 
-                                <!-- Reschedule Button -->
-                                <a href="{% url 'book_appointment' %}"
-                                   class="reschedule-btn">
-                                    Reschedule
-                                </a>
+                        
 
                                 <!-- Delete Button -->
                                 <form method="POST"
@@ -90,7 +81,7 @@
                                       style="display:inline;">
                                     {% csrf_token %}
                                     <button type="submit"
-                                        class="delete-btn"
+                                        class="cancel-btn"
                                         onclick="return confirm('Delete this appointment permanently?');">
                                         Delete
                                     </button>
