@@ -6,7 +6,9 @@ from django.urls import reverse_lazy
 from django.contrib import messages
 from django.shortcuts import redirect
 from datetime import datetime
-
+from collections import OrderedDict
+from collections import OrderedDict
+from django.utils import timezone
 from django.contrib.auth import get_user_model
 from .models import DoctorSchedule, ScheduleException
 from .forms import DoctorScheduleForm, ScheduleExceptionForm
@@ -40,13 +42,21 @@ class DoctorScheduleListView(ScheduleStaffRequiredMixin, ListView):
     context_object_name = 'schedules'
     ordering = ['doctor', 'day_of_week']
 
-    DAY_NAMES = {
-        0: 'Monday', 1: 'Tuesday', 2: 'Wednesday',
-        3: 'Thursday', 4: 'Friday', 5: 'Saturday', 6: 'Sunday'
-    }
+    DAY_NAMES = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        schedules = self.get_queryset().select_related('doctor')
+
+        # group schedule by doctor
+        grouped = OrderedDict()
+        for schedule in schedules:
+            if schedule.doctor not in grouped:
+                grouped[schedule.doctor] = {}
+            day_name = self.DAY_NAMES[schedule.day_of_week]
+            grouped[schedule.doctor][day_name] = schedule
+
+        context['grouped_schedules'] = grouped
         context['day_names'] = self.DAY_NAMES
         return context
 
@@ -112,6 +122,29 @@ class ScheduleExceptionListView(ScheduleStaffRequiredMixin, ListView):
     template_name = 'scheduling/exception_list.html'
     context_object_name = 'exceptions'
     ordering = ['-date']
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        exceptions = self.get_queryset().select_related('doctor')
+        today = timezone.now().date()
+
+        upcoming = []
+        past = []
+
+        for exc in exceptions:
+            if exc.date >= today:
+                upcoming.append(exc)
+            else:
+                past.append(exc)
+
+        # sort by nearest
+        upcoming.sort(key=lambda e: e.date)
+        past.sort(key=lambda e: e.date, reverse=True)
+
+        context['upcoming_exceptions'] = upcoming
+        context['past_exceptions'] = past
+        context['today'] = today
+        return context
 
 
 class ScheduleExceptionCreateView(ScheduleStaffRequiredMixin, CreateView):

@@ -90,7 +90,7 @@ class ScheduleExceptionForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields['doctor'].queryset = User.objects.filter(role='DOCTOR')
         self.fields['doctor'].label_from_instance = lambda obj: f"Dr. {obj.get_full_name() or obj.username}"
-        self.fields['reason'].required = True
+        self.fields['reason'].required = False
 
     def clean(self):
         cleaned_data = super().clean()
@@ -99,6 +99,7 @@ class ScheduleExceptionForm(forms.ModelForm):
         is_day_off = cleaned_data.get('is_day_off')
         override_start = cleaned_data.get('override_start_time')
         override_end = cleaned_data.get('override_end_time')
+        reason = cleaned_data.get('reason')
 
         if date and date < timezone.now().date():
             raise forms.ValidationError("Cannot create an exception for a past date.")
@@ -127,6 +128,8 @@ class ScheduleExceptionForm(forms.ModelForm):
                 )
 
         if is_day_off:
+            if not reason:
+                self.add_error('reason', 'Reason is required when marking a full day off.')
             cleaned_data['override_start_time'] = None
             cleaned_data['override_end_time'] = None
 
