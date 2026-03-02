@@ -53,3 +53,9 @@ class ScheduleException(models.Model):
     override_start_time = models.TimeField(null=True, blank=True)
     override_end_time = models.TimeField(null=True, blank=True)
     reason = models.CharField(max_length=255, blank=True)
+
+    class Meta:
+        unique_together = ('doctor', 'date')
+
+    def __str__(self):
+        return f"{self.doctor.username} - {self.date}"
