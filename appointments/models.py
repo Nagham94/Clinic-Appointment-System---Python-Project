@@ -63,3 +63,15 @@ class Appointment(models.Model):
 
     def __str__(self):
         return f"{self.patient} with {self.doctor}"
+
+
+# Audit Trail for Appointment Rescheduling
+class RescheduleRequest(models.Model):
+    appointment = models.ForeignKey(Appointment, on_delete=models.CASCADE, related_name='reschedule_requests')
+    changed_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
+    old_start_datetime = models.DateTimeField()
+    old_end_datetime = models.DateTimeField()
+    new_start_datetime = models.DateTimeField()
+    new_end_datetime = models.DateTimeField()
+    reason = models.TextField(blank=True)
+    timestamp = models.DateTimeField(auto_now_add=True)

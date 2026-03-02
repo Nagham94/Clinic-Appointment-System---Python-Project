@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from .models import Appointment
+from .models import Appointment, RescheduleRequest
+from scheduling.services import generate_daily_slots
 from django.contrib import messages
 from django.utils import timezone
 from datetime import datetime
@@ -111,11 +112,7 @@ def cancel_appointment(request, appointment_id):
 
     return render(request, 'appointments/cancel_confirm.html', {'appointment': appointment})
 
-# def home(request):
-#     doctors = User.objects.filter(role__iexact='doctor')  # حسب الrole عندك
-#     return render(request, 'home.html', {'doctors': doctors})
-
-
+@login_required
 def delete_appointment(request, pk):
     appointment = get_object_or_404(Appointment, id=pk)
 
@@ -125,3 +122,86 @@ def delete_appointment(request, pk):
         messages.success(request, "Appointment deleted successfully.")
 
     return redirect('my_appointments')
+
+@login_required
+def reschedule_appointment(request, appointment_id):
+    appointment = get_object_or_404(Appointment, id=appointment_id)
+
+    # only patient who owns the appointment or receptionist can reschedule
+    if request.user != appointment.patient or request.user.role != 'RECEPTIONIST':
+        messages.error(request, 'You do not have permission to reschedule this appointment.')
+        return redirect('my_appointments')
+    
+    # only appointments in REQUESTED or CONFIRMED state can be rescheduled
+    if appointment.status not in ['REQUESTED', 'CONFIRMED']:
+        messages.error(request, 'This appointment cannot be rescheduled.')
+        return redirect('my_appointments')
+    
+    if request.method == 'POST':
+        start_date_str = request.POST.get('start_datetime')
+        end_date_str = request.POST.get('end_datetime')
+        reason = request.POST.get('reason','')
+        try:
+            start_datetime = timezone.make_aware(datetime.fromisoformat(start_date_str))
+            end_datetime = timezone.make_aware(datetime.fromisoformat(end_date_str))
+        except (ValueError, TypeError):
+            messages.error(request, 'Invalid slot selected.')
+            return redirect('reschedule_appointment', appointment_id=appointment_id)
+        
+        if start_datetime < timezone.now():
+            messages.error(request, 'Cannot reschedule to a past time.')
+            return redirect('reschedule_appointment', appointment_id=appointment_id)
+        
+        # validate new slot is available
+        available_slots = generate_daily_slots(appointment.doctor, start_datetime.date())
+        naive_start = start_datetime.replace(tzinfo=None)
+        naive_end = end_datetime.replace(tzinfo=None)
+
+        # Check Patient overlapping appointments
+        if Appointment.objects.filter(
+            patient=appointment.patient,
+            status__in=['REQUESTED', 'CONFIRMED'],
+            start_datetime__lt=start_datetime,
+            end_datetime__gt=end_datetime
+        ).exclude(id=appointment.id).exists():
+            messages.error(request, 'Patient already has an appointment during this time.')
+            return redirect('reschedule_appointment', appointment_id=appointment_id)
+        
+        # Check doctor slot not already taken (excluding this appointment)
+        if Appointment.objects.filter(
+            doctor=appointment.doctor,
+            start_datetime=start_datetime,
+            status__in=['REQUESTED', 'CONFIRMED']
+        ).exclude(id=appointment.id).exists():
+            messages.error(request, 'This slot is no longer available.')
+            return redirect('reschedule_appointment', appointment_id=appointment_id)
+        
+        try:
+            with transaction.atomic():
+                # Save Audit Trail
+                RescheduleRequest.objects.create(
+                    appointment=appointment,
+                    changed_by=request.user,
+                    old_start_datetime=appointment.start_datetime,
+                    old_end_datetime=appointment.end_datetime,
+                    new_start_datetime=start_datetime,
+                    new_end_datetime=end_datetime,
+                    reason=reason
+                )
+
+                # Update appointment
+                appointment.start_datetime = start_datetime
+                appointment.end_datetime = end_datetime
+                appointment.status = 'REQUESTED'  # reset to REQUESTED for re-approval
+                appointment.save()
+        except IntegrityError:
+            messages.error(request, 'This slot was just booked by someone else. Please choose another.')
+            return redirect('reschedule_appointment', appointment_id=appointment_id)
+        
+        messages.success(request, 'Your appointment has been rescheduled successfully.')
+        return redirect('my_appointments')
+    
+
+    
+
+
