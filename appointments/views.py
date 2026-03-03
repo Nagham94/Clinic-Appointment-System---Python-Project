@@ -208,8 +208,27 @@ def reschedule_appointment(request, appointment_id):
         'doctors': doctors,
         'today': timezone.now().date(),
     })
-    
 
-    
+
+def mark_no_show(request, pk):
+    appointment = get_object_or_404(Appointment, id=pk)
+
+    if appointment.status == 'CONFIRMED' and appointment.start_datetime < timezone.now():
+        appointment.status = 'NO_SHOW'
+        appointment.save()
+        messages.warning(request, "Appointment marked as No Show.")
+
+    # return redirect('doctor_dashboard')
+    return redirect(request.META.get('HTTP_REFERER'))
+
+def confirm_appointment(request, pk):
+    appointment = get_object_or_404(Appointment, id=pk)
+
+    if appointment.status == 'REQUESTED':
+        appointment.status = 'CONFIRMED'
+        appointment.save()
+        messages.success(request, "Appointment Confirmed Successfully.")
+
+    return redirect('queue_manager')
 
 

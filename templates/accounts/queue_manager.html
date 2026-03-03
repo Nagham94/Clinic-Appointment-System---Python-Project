@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block title %}Queue Manager{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <div class="dashboard-card">
+        <h2>Pending Appointment Requests</h2>
+
+        {% for appointment in appointments %}
+        <div style="border:1px solid #ddd; padding:1rem; margin-bottom:1rem; border-radius:8px;">
+            <p><strong>Patient:</strong> {{ appointment.patient.get_full_name }}</p>
+            <p><strong>Doctor:</strong> Dr. {{ appointment.doctor.get_full_name }}</p>
+            <p><strong>Date:</strong> {{ appointment.start_datetime }}</p>
+
+            <form method="POST" action="{% url 'confirm_appointment' appointment.id %}">
+                {% csrf_token %}
+                <button type="submit" class="btn-primary">
+                    Confirm Appointment
+                </button>
+            </form>
+        </div>
+        {% empty %}
+            <p style="color: var(--text-muted);">No pending requests.</p>
+        {% endfor %}
+
+        <br>
+        <a href="{% url 'receptionist_dashboard' %}" class="btn-primary" style="text-decoration:none;">
+            Back to Dashboard
+        </a>
+    </div>
+</div>
+{% endblock %}

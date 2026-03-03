@@ -14,9 +14,38 @@
             <h3>Pending Bookings</h3>
             <p style="color: var(--text-muted);">0 New Requests</p>
         </div>
+{#    edited by shahd#}
+        <div class="dashboard-card">
+            <h3>Today's Confirmed Appointments</h3>
+
+            {% for appointment in appointments %}
+                {% if appointment.status == 'CONFIRMED' %}
+                <div style="margin-bottom:1rem;">
+                    <p>
+                        {{ appointment.patient.get_full_name }}
+                        - {{ appointment.start_datetime }}
+                    </p>
+
+                    {% if appointment.start_datetime < now %}
+                    <form method="POST" action="{% url 'mark_no_show' appointment.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-primary" style="background:#e74c3c;">
+                            Mark No Show
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+                {% endif %}
+            {% empty %}
+                <p style="color: var(--text-muted);">No confirmed appointments.</p>
+            {% endfor %}
+        </div>
         <div class="dashboard-card">
             <h3>Manage Queue</h3>
-            <button class="btn-primary">Open Queue Manager</button>
+{#            <button class="btn-primary">Open Queue Manager</button>#}
+            <a href="{% url 'queue_manager' %}" class="btn-primary" style="text-decoration:none;">
+                Open Queue Manager
+            </a>
         </div>
         <div class="dashboard-card">
             <h3>My Profile</h3>

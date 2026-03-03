@@ -33,8 +33,26 @@
     <div class="dashboard-grid"
         style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
         <div class="dashboard-card">
-            <h3>Today's Queue</h3>
-            <p style="color: var(--text-muted);">No patients checked in yet.</p>
+           <h3>Today's Appointments</h3>
+{#edited by shahd#}
+            {% for appointment in appointments %}
+            <div style="border:1px solid #eee; padding:1rem; margin-bottom:1rem; border-radius:8px;">
+                <p><strong>Patient:</strong> {{ appointment.patient.get_full_name }}</p>
+                <p><strong>Date:</strong> {{ appointment.start_datetime }}</p>
+                <p><strong>Status:</strong> {{ appointment.status }}</p>
+
+                {% if appointment.status == 'CONFIRMED' and appointment.start_datetime < now %}
+                <form method="POST" action="{% url 'mark_no_show' appointment.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn-primary" style="background:#e74c3c;">
+                        Mark No Show
+                    </button>
+                </form>
+                {% endif %}
+            </div>
+            {% empty %}
+            <p style="color: var(--text-muted);">No appointments today.</p>
+            {% endfor %}
         </div>
         <div class="dashboard-card">
             <h3>My Schedule</h3>
