@@ -1,3 +1,5 @@
+# from datetime import timezone
+
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, logout, authenticate
 from django.contrib import messages
@@ -8,8 +10,9 @@ from .forms import (
     UserProfileUpdateForm, PatientProfileForm, DoctorProfileForm, ReceptionistProfileForm
 )
 from .models import User, PatientProfile, DoctorProfile, ReceptionistProfile
+from appointments.models import Appointment
 from .decorators import role_required
-
+from django.utils import timezone
 
 def register_view(request):
     if request.method == 'POST':
@@ -123,18 +126,45 @@ def update_profile_view(request):
 def patient_dashboard_view(request):
     return render(request, 'accounts/patient_dashboard.html')
 
-
+##edited by shahd
 @login_required
 @role_required([User.Roles.DOCTOR])
 def doctor_dashboard_view(request):
+    appointments = Appointment.objects.filter(
+        doctor=request.user
+    ).order_by('start_datetime')
+
+    context = {
+        'appointments': appointments,
+        'now': timezone.now()
+    }
     return render(request, 'accounts/doctor_dashboard.html')
 
-
+# //edited by shahd
 @login_required
 @role_required([User.Roles.RECEPTIONIST])
 def receptionist_dashboard_view(request):
+    appointments = Appointment.objects.all().order_by('start_datetime')
+
+    context = {
+        'appointments': appointments,
+        'now': timezone.now()
+    }
     return render(request, 'accounts/receptionist_dashboard.html')
 
+
+# edited by shahd
+def queue_manager_view(request):
+
+    requested_appointments = Appointment.objects.filter(
+        status='REQUESTED'
+    ).order_by('start_datetime')
+
+    context = {
+        'appointments': requested_appointments
+    }
+
+    return render(request, 'accounts/queue_manager.html', context)
 
 @login_required
 @role_required([User.Roles.ADMIN])
