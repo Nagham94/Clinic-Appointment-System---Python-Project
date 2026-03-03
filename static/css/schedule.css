@@ -638,3 +638,83 @@
     .form-card-footer { flex-direction: column; }
     .delete-confirm-footer { flex-direction: column; }
 }
+
+/* ── Queue waiting badges ── */
+.queue-wait-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.3rem 0.75rem;
+    border-radius: var(--radius-full);
+    font-size: 0.82rem;
+    font-weight: 600;
+}
+
+.queue-wait-ok   { background: rgba(34, 197, 94, 0.12);  color: #86efac; }
+.queue-wait-warn { background: rgba(245, 158, 11, 0.12); color: #fcd34d; }
+.queue-wait-long { background: rgba(239, 68, 68, 0.12);  color: #fca5a5; }
+
+.queue-pulse-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+    animation: queuePulse 1.5s infinite;
+}
+
+.queue-dot-ok   { background: #22c55e; }
+.queue-dot-warn { background: #f59e0b; }
+.queue-dot-long { background: #ef4444; }
+
+@keyframes queuePulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%      { opacity: 0.4; transform: scale(1.3); }
+}
+
+/* ── Queue stats responsive ── */
+.queue-stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+@media (max-width: 768px) {
+    .queue-stats-row {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 480px) {
+    .queue-stats-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ── Queue item border colors ── */
+.queue-item.queue-item-ok,
+.queue-item.queue-item-warn,
+.queue-item.queue-item-long {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.queue-item.queue-item-ok   { border-left: 3px solid var(--success); }
+.queue-item.queue-item-warn { border-left: 3px solid var(--warning); }
+.queue-item.queue-item-long { border-left: 3px solid var(--danger); }
+
+/* ── Queue stat card spacing ── */
+.queue-stats-row .stat-value {
+    margin-bottom: 0.4rem;
+}
+
+.queue-stats-row .stat-label {
+    margin-top: 0.25rem;
+}
+
+.queue-stats-row .stat-icon {
+    margin-bottom: 0.6rem;
+}

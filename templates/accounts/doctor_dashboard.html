@@ -74,13 +74,27 @@
             </a>
         </div>
 
-        <!-- Queue Management -->
+        <!-- Daily Queue — YOUR page -->    
         <div class="dashboard-card" style="padding:1.4rem;">
-            <div class="section-title"><i class="fa-solid fa-list-ol"></i> Queue</div>
-            <h3 style="margin:0 0 0.5rem;">Queue Management</h3>
-            <p style="color:var(--text-muted); font-size:0.88rem; margin-bottom:1.25rem;">Review and manage pending patient requests from the queue.</p>
+            <div class="section-title"><i class="fa-solid fa-clipboard-list"></i> Daily Queue</div>
+            <h3 style="margin:0 0 0.5rem;">Today's Queue</h3>
+            <p style="color:var(--text-muted); font-size:0.88rem; margin-bottom:1.25rem;">
+                View checked-in patients and monitor waiting times.
+            </p>
+            <a href="{% url 'doctor_queue' %}" class="btn btn-icon" style="text-decoration:none; font-size:0.85rem;">
+                <i class="fa-solid fa-clipboard-list"></i> Open Queue
+            </a>
+        </div>
+
+        <!-- Queue Manager — TEAMMATES' page -->
+        <div class="dashboard-card" style="padding:1.4rem;">
+            <div class="section-title"><i class="fa-solid fa-list-ol"></i> Requests</div>
+            <h3 style="margin:0 0 0.5rem;">Queue Manager</h3>
+            <p style="color:var(--text-muted); font-size:0.88rem; margin-bottom:1.25rem;">
+                Accept or reject pending appointment requests.
+            </p>
             <a href="{% url 'queue_manager' %}" class="btn btn-icon" style="text-decoration:none; font-size:0.85rem;">
-                <i class="fa-solid fa-list"></i> Open Queue Manager
+                <i class="fa-solid fa-list"></i> Manage Requests
             </a>
         </div>
 
