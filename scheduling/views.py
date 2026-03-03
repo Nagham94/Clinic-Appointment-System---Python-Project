@@ -9,6 +9,7 @@ from datetime import datetime
 from collections import OrderedDict
 from collections import OrderedDict
 from django.utils import timezone
+from appointments.models import Appointment
 from django.contrib.auth import get_user_model
 from .models import DoctorSchedule, ScheduleException
 from .forms import DoctorScheduleForm, ScheduleExceptionForm
@@ -240,3 +241,89 @@ def doctor_weekly_schedule(request):
     return render(request, 'scheduling/doctor_weekly_schedule.html', {
         'weekly_schedule': weekly_schedule
     })
+
+
+# ══════════════════════════════════════════════
+#  DOCTOR QUEUE DASHBOARD
+# ══════════════════════════════════════════════
+"""
+Doctor queue checked in patients
+"""
+class DoctorQueueView(LoginRequiredMixin, UserPassesTestMixin, ListView):
+    template_name = 'scheduling/doctor_queue.html'
+    context_object_name = 'queue'
+    login_url = 'login'
+
+    def test_func(self):
+        return (
+            self.request.user.is_superuser
+            or self.request.user.role == 'DOCTOR'
+        )
+
+    def handle_no_permission(self):
+        messages.error(self.request, "Only doctors can access the queue dashboard.")
+        return redirect('dashboard_redirect')
+
+    def get_queryset(self):
+        today = timezone.now().date()
+        return Appointment.objects.filter(
+            doctor=self.request.user,
+            start_datetime__date=today,
+            status='CHECKED_IN',
+        ).select_related('patient').order_by('checked_in_at')
+
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        now = timezone.localtime()
+        today = now.date()
+        context['now'] = now
+        context['today'] = today
+
+        # calculate waiting time
+        queue_with_wait = []
+        for position, appointment in enumerate(context['queue'], start=1):
+            check_in_time = appointment.checked_in_at
+
+            if check_in_time:
+                wait_delta = now - check_in_time
+                total_minutes = int(wait_delta.total_seconds() // 60)
+                hours = total_minutes // 60
+                minutes = total_minutes % 60
+            else:
+                total_minutes = 0
+                hours = 0
+                minutes = 0
+
+            queue_with_wait.append({
+                'position': position,
+                'appointment': appointment,
+                'check_in_time': check_in_time,
+                'wait_minutes': total_minutes,
+                'wait_hours': hours,
+                'wait_mins': minutes,
+            })
+
+        context['queue_with_wait'] = queue_with_wait
+        context['total_waiting'] = len(queue_with_wait)
+
+        # today's other appointments
+        context['upcoming_confirmed'] = Appointment.objects.filter(
+            doctor=self.request.user,
+            start_datetime__date=today,
+            status='CONFIRMED',
+        ).select_related('patient').order_by('start_datetime')
+
+        context['completed_today'] = Appointment.objects.filter(
+            doctor=self.request.user,
+            start_datetime__date=today,
+            status='COMPLETED',
+        ).count()
+
+        context['no_show_today'] = Appointment.objects.filter(
+            doctor=self.request.user,
+            start_datetime__date=today,
+            status='NO_SHOW',
+        ).count()
+
+        return context

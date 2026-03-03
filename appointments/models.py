@@ -51,6 +51,7 @@ class Appointment(models.Model):
     reason = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    checked_in_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         ordering = ['start_datetime']
