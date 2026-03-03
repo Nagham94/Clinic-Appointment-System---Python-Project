@@ -18,6 +18,15 @@
                     Confirm Appointment
                 </button>
             </form>
+
+            
+            <form method="POST" action="{% url 'cancel_appointment' appointment.id %}">
+                {% csrf_token %}
+                <button type="submit" class="btn-danger">
+                    Cancel Appointment
+                </button>
+            </form>
+            
         </div>
         {% empty %}
             <p style="color: var(--text-muted);">No pending requests.</p>

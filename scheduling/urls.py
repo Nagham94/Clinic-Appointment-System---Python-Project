@@ -11,4 +11,7 @@ urlpatterns = [
     path('exceptions/<int:pk>/edit/', views.ScheduleExceptionUpdateView.as_view(), name='exception_update'),
     path('exceptions/<int:pk>/delete/', views.ScheduleExceptionDeleteView.as_view(), name='exception_delete'),
     path('api/available-slots/', views.AvailableSlotsView.as_view(), name='available_slots'),
+    
+    # doctor personal schedule view
+    path('my-schedule/', views.doctor_weekly_schedule, name='doctor_weekly_schedule'),
 ]

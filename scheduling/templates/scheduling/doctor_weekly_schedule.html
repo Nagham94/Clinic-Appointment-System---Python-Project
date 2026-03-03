@@ -1,0 +1,43 @@
+{% extends "schedule_base.html" %}
+{% load schedule_tags %}
+
+{% block title %}My Weekly Schedule{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2><i class="bi bi-calendar-week"></i> My Weekly Schedule</h2>
+
+    <div class="row g-0 mt-3">
+        {% for day_name, schedule in weekly_schedule.items %}
+            <div class="col border-end" style="min-width: 130px;">
+                <div class="text-center fw-bold py-2 
+                    {% if schedule %}bg-primary bg-opacity-10{% else %}bg-light text-muted{% endif %}">
+                    {{ day_name }}
+                </div>
+                <div class="text-center p-2" style="min-height: 120px;">
+                    {% if schedule %}
+                        <div class="mb-1">
+                            <i class="bi bi-clock text-success"></i><br>
+                            <strong>{{ schedule.start_time|time:"H:i" }}</strong>
+                            <span class="text-muted">-</span>
+                            <strong>{{ schedule.end_time|time:"H:i" }}</strong>
+                        </div>
+                        <div class="small text-muted mb-2">
+                            <i class="bi bi-hourglass-split"></i> {{ schedule.slot_duration }}min slots
+                            {% if schedule.buffer_time %}
+                                <br><i class="bi bi-pause-circle"></i> {{ schedule.buffer_time }}min buffer
+                            {% endif %}
+                        </div>
+                    {% else %}
+                        <div class="text-muted mt-3">
+                            <i class="bi bi-moon" style="font-size: 1.5rem;"></i>
+                            <br>
+                            <small>Day Off</small>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

@@ -206,3 +206,37 @@ class AvailableSlotsView(View):
         ]
 
         return JsonResponse({"slots": formatted_slots})
+
+
+
+"""
+My schedule view for doctors
+"""
+
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect
+
+@login_required
+def doctor_weekly_schedule(request):
+    if request.user.role != 'DOCTOR':
+        return redirect('dashboard_redirect')
+
+    DAY_NAMES = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+
+    schedules = DoctorSchedule.objects.filter(
+        doctor=request.user
+    ).order_by('day_of_week')
+
+    # Create weekly structure
+    weekly_schedule = OrderedDict()
+
+    for index, day in enumerate(DAY_NAMES):
+        weekly_schedule[day] = None
+
+    for schedule in schedules:
+        day_name = DAY_NAMES[schedule.day_of_week]
+        weekly_schedule[day_name] = schedule
+
+    return render(request, 'scheduling/doctor_weekly_schedule.html', {
+        'weekly_schedule': weekly_schedule
+    })

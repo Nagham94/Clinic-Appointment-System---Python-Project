@@ -98,19 +98,28 @@ def my_appointments(request):
 
 @login_required
 def cancel_appointment(request, appointment_id):
-    appointment = get_object_or_404(Appointment, id=appointment_id, patient=request.user)
+    appointment = get_object_or_404(Appointment, id=appointment_id)
+    
+    # Allow cancellation by patient, receptionist, or admin
+    is_patient = appointment.patient == request.user
+    is_staff = request.user.role in ['RECEPTIONIST', 'DOCTOR']  # doctors can also cancel on behalf of patients
+    
+    if not (is_patient or is_staff):
+        messages.error(request, 'You do not have permission to cancel this appointment.')
+        return redirect('my_appointments')
 
     if appointment.status not in ['REQUESTED', 'CONFIRMED']:
         messages.error(request, 'This appointment cannot be cancelled.')
-        return redirect('my_appointments')
+        return redirect('my_appointments' if is_patient else 'dashboard_redirect')
 
     if request.method == 'POST':
         appointment.status = 'CANCELLED'
         appointment.save()
-        messages.success(request, 'Your appointment has been cancelled successfully.')
-        return redirect('my_appointments')
+        messages.success(request, 'Appointment has been cancelled successfully.')
+        return redirect('my_appointments' if is_patient else 'dashboard_redirect')
 
     return render(request, 'appointments/cancel_confirm.html', {'appointment': appointment})
+
 
 @login_required
 def delete_appointment(request, pk):
@@ -223,6 +232,11 @@ def mark_no_show(request, pk):
 
 def confirm_appointment(request, pk):
     appointment = get_object_or_404(Appointment, id=pk)
+
+    is_staff = request.user.role in ['RECEPTIONIST', 'DOCTOR']  # doctors can also cancel on behalf of patients
+    if not is_staff:
+        messages.error(request, 'You do not have permission to confirm this appointment.')
+        return redirect('dashboard_redirect')
 
     if appointment.status == 'REQUESTED':
         appointment.status = 'CONFIRMED'

@@ -1,31 +1,5 @@
-{% extends "base.html" %}
-{% block title %}Reschedule Appointment{% endblock %}
-
-{% block content %}
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap');
-
-    :root {
-        --bg-deep:      #0f1021;
-        --bg-card:      #181a2e;
-        --bg-elevated:  #1f2140;
-        --border:       #2e3058;
-        --text-primary: #e8eaf6;
-        --text-muted:   #7b7fa8;
-        --accent:       #7c4dff;
-        --accent-glow:  rgba(124, 77, 255, 0.25);
-        --accent-soft:  rgba(124, 77, 255, 0.12);
-        --danger:       #ff4d4d;
-        --success:      #4dffb4;
-        --warning:      #ffd166;
-    }
-
-    body {
-        background-color: var(--bg-deep);
-        font-family: 'DM Sans', sans-serif;
-        color: var(--text-primary);
-    }
-
+    /* Using unified theme colors */
     .booking-wrapper {
         max-width: 680px;
         margin: 48px auto;
@@ -37,11 +11,11 @@
     }
 
     .booking-header .eyebrow {
-        font-size: 0.72rem;
+        font-size: 0.75rem;
         font-weight: 600;
-        letter-spacing: 0.14em;
+        letter-spacing: 0.1em;
         text-transform: uppercase;
-        color: var(--warning);
+        color: var(--primary);
         margin-bottom: 10px;
         display: flex;
         align-items: center;
@@ -53,69 +27,31 @@
         display: inline-block;
         width: 24px;
         height: 2px;
-        background: var(--warning);
+        background: var(--primary);
         border-radius: 2px;
     }
 
     .booking-header h1 {
-        font-family: 'Instrument Serif', serif;
-        font-size: 2.4rem;
-        font-weight: 400;
-        line-height: 1.15;
-        color: var(--text-primary);
+        font-size: 2.25rem;
+        font-weight: 600;
+        line-height: 1.2;
+        color: var(--text-main);
         margin: 0;
+        letter-spacing: -0.025em;
     }
 
     .booking-header h1 em {
         font-style: italic;
-        color: var(--accent);
-    }
-
-    /* Current appointment info box */
-    .current-apt {
-        background: rgba(255, 209, 102, 0.06);
-        border: 1px solid rgba(255, 209, 102, 0.2);
-        border-radius: 12px;
-        padding: 16px 20px;
-        margin-bottom: 28px;
-        display: flex;
-        align-items: center;
-        gap: 14px;
-    }
-
-    .current-apt-icon {
-        width: 36px;
-        height: 36px;
-        background: rgba(255, 209, 102, 0.12);
-        border-radius: 8px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-shrink: 0;
-        color: var(--warning);
-    }
-
-    .current-apt-info {
-        font-size: 0.88rem;
-        color: var(--text-muted);
-        line-height: 1.5;
-    }
-
-    .current-apt-info strong {
-        color: var(--warning);
-        display: block;
-        font-size: 0.78rem;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-        margin-bottom: 2px;
+        color: var(--primary);
     }
 
     .booking-card {
-        background: var(--bg-card);
+        background: var(--bg-surface);
         border: 1px solid var(--border);
-        border-radius: 16px;
+        border-radius: var(--radius-lg);
         padding: 36px;
-        box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(124,77,255,0.08);
+        box-shadow: var(--shadow);
+        backdrop-filter: blur(12px);
     }
 
     .field-group {
@@ -124,7 +60,7 @@
 
     .field-label {
         display: block;
-        font-size: 0.72rem;
+        font-size: 0.75rem;
         font-weight: 600;
         letter-spacing: 0.1em;
         text-transform: uppercase;
@@ -135,13 +71,13 @@
     .field-control {
         width: 100%;
         padding: 12px 16px;
-        border: 1.5px solid var(--border);
-        border-radius: 10px;
-        font-family: 'DM Sans', sans-serif;
+        border: 1px solid var(--border);
+        border-radius: var(--border-radius);
+        font-family: var(--font-family);
         font-size: 0.95rem;
-        color: var(--text-primary);
-        background: var(--bg-elevated);
-        transition: border-color 0.2s, box-shadow 0.2s;
+        color: var(--text-main);
+        background: var(--bg-card);
+        transition: var(--transition);
         appearance: none;
         -webkit-appearance: none;
         outline: none;
@@ -149,18 +85,25 @@
     }
 
     .field-control:focus {
-        border-color: var(--accent);
-        box-shadow: 0 0 0 3px var(--accent-glow);
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
     }
 
-    .field-control.readonly {
-        opacity: 0.5;
-        cursor: not-allowed;
-        pointer-events: none;
+    .field-control option {
+        background: var(--bg-card);
+        color: var(--text-main);
+    }
+
+    select.field-control {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2394a3b8' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 14px center;
+        padding-right: 40px;
+        cursor: pointer;
     }
 
     input[type="date"]::-webkit-calendar-picker-indicator {
-        filter: invert(0.6);
+        filter: invert(0.8);
         cursor: pointer;
     }
 
@@ -172,7 +115,7 @@
     }
 
     .section-divider span {
-        font-size: 0.72rem;
+        font-size: 0.75rem;
         font-weight: 600;
         letter-spacing: 0.1em;
         text-transform: uppercase;
@@ -205,32 +148,32 @@
 
     .slot-btn {
         padding: 10px 18px;
-        border-radius: 8px;
-        font-family: 'DM Sans', sans-serif;
-        font-size: 0.88rem;
+        border-radius: var(--border-radius);
+        font-family: var(--font-family);
+        font-size: 0.875rem;
         font-weight: 500;
-        border: 1.5px solid var(--border);
-        background: var(--bg-elevated);
-        color: var(--text-primary);
+        border: 1px solid var(--border);
+        background: var(--bg-card);
+        color: var(--text-main);
         cursor: pointer;
-        transition: all 0.18s ease;
+        transition: var(--transition);
         letter-spacing: 0.01em;
     }
 
     .slot-btn:hover {
-        border-color: var(--accent);
-        color: var(--accent);
-        background: var(--accent-soft);
-        transform: translateY(-1px);
-        box-shadow: 0 4px 16px var(--accent-glow);
+        border-color: var(--primary);
+        color: var(--primary);
+        background: rgba(99, 102, 241, 0.1);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 16px rgba(99, 102, 241, 0.2);
     }
 
     .slot-btn.selected {
-        background: var(--accent);
-        border-color: var(--accent);
-        color: #fff;
-        box-shadow: 0 4px 20px var(--accent-glow);
-        transform: translateY(-1px);
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        border-color: var(--primary);
+        color: white;
+        box-shadow: 0 4px 20px rgba(99, 102, 241, 0.3);
+        transform: translateY(-2px);
     }
 
     .slots-loading {
@@ -238,7 +181,7 @@
         align-items: center;
         gap: 10px;
         color: var(--text-muted);
-        font-size: 0.88rem;
+        font-size: 0.875rem;
         padding: 8px 0;
     }
 
@@ -246,50 +189,53 @@
         width: 18px;
         height: 18px;
         border: 2px solid var(--border);
-        border-top-color: var(--accent);
+        border-top-color: var(--primary);
         border-radius: 50%;
         animation: spin 0.7s linear infinite;
         flex-shrink: 0;
     }
 
-    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
 
     .no-slots-msg {
         padding: 14px 18px;
-        background: rgba(255, 77, 77, 0.08);
-        border: 1px solid rgba(255, 77, 77, 0.25);
-        border-radius: 10px;
-        color: var(--danger);
-        font-size: 0.88rem;
+        background: rgba(239, 68, 68, 0.1);
+        border: 1px solid rgba(239, 68, 68, 0.3);
+        border-radius: var(--border-radius);
+        color: #fca5a5;
+        font-size: 0.875rem;
         font-weight: 500;
     }
 
     textarea.field-control {
         resize: vertical;
         min-height: 100px;
+        font-family: var(--font-family);
     }
 
     .submit-btn {
         width: 100%;
-        padding: 14px;
-        background: var(--accent);
-        color: #fff;
+        padding: 12px;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        color: white;
         border: none;
-        border-radius: 10px;
-        font-family: 'DM Sans', sans-serif;
+        border-radius: var(--border-radius);
+        font-family: var(--font-family);
         font-size: 0.95rem;
         font-weight: 600;
         letter-spacing: 0.03em;
         cursor: pointer;
-        transition: all 0.2s ease;
+        transition: var(--transition);
         margin-top: 8px;
-        box-shadow: 0 4px 20px var(--accent-glow);
+        box-shadow: var(--shadow-sm);
     }
 
     .submit-btn:hover:not(:disabled) {
-        background: #9c6fff;
-        transform: translateY(-1px);
-        box-shadow: 0 8px 28px var(--accent-glow);
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3);
+        filter: brightness(1.1);
     }
 
     .submit-btn:disabled {
@@ -298,82 +244,51 @@
         box-shadow: none;
     }
 
+    .submit-btn:active:not(:disabled) {
+        transform: translateY(0);
+    }
+
     .selected-indicator {
         display: none;
         align-items: center;
         gap: 8px;
         margin-top: 14px;
         padding: 10px 14px;
-        background: rgba(77, 255, 180, 0.08);
-        border: 1px solid rgba(77, 255, 180, 0.2);
-        border-radius: 8px;
+        background: rgba(16, 185, 129, 0.1);
+        border: 1px solid rgba(16, 185, 129, 0.3);
+        border-radius: var(--border-radius);
         font-size: 0.85rem;
-        color: var(--success);
+        color: #86efac;
         font-weight: 500;
     }
 
-    .selected-indicator.visible { display: flex; }
-
-    .back-link {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        color: var(--text-muted);
-        font-size: 0.88rem;
-        text-decoration: none;
-        margin-bottom: 24px;
-        transition: color 0.2s;
+    .selected-indicator.visible {
+        display: flex;
     }
-
-    .back-link:hover { color: var(--text-primary); }
 </style>
 
 <div class="booking-wrapper">
-
-    <a href="{% url 'my_appointments' %}" class="back-link">
-        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
-        </svg>
-        Back to My Appointments
-    </a>
-
     <div class="booking-header">
-        <p class="eyebrow">Reschedule</p>
-        <h1>Pick a new <em>time slot</em></h1>
-    </div>
-
-    <!-- Current appointment info -->
-    <div class="current-apt">
-        <div class="current-apt-icon">
-            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-            </svg>
-        </div>
-        <div class="current-apt-info">
-            <strong>Current Appointment</strong>
-            Dr. {{ appointment.doctor.get_full_name|default:appointment.doctor.username }}
-            &nbsp;·&nbsp;
-            {{ appointment.start_datetime|date:"M d, Y" }}
-            &nbsp;·&nbsp;
-            {{ appointment.start_datetime|time:"h:i A" }} – {{ appointment.end_datetime|time:"h:i A" }}
-        </div>
+        <p class="eyebrow">Book a Visit</p>
+        <h1>Schedule your <em>appointment</em></h1>
     </div>
 
     <div class="booking-card">
-        <form method="POST" id="rescheduleForm">
+        <form method="POST" id="bookingForm">
             {% csrf_token %}
 
-            <!-- Doctor is fixed -->
-            <input type="hidden" name="doctor" value="{{ appointment.doctor.id }}">
             <div class="field-group">
-                <label class="field-label">Doctor</label>
-                <div class="field-control readonly">
-                    Dr. {{ appointment.doctor.get_full_name|default:appointment.doctor.username }}
-                </div>
+                <label class="field-label" for="doctorSelect">Select Doctor</label>
+                <select name="doctor" id="doctorSelect" class="field-control" required>
+                    <option value="">— Choose a doctor —</option>
+                    {% for doctor in doctors %}
+                    <option value="{{ doctor.id }}">Dr. {{ doctor.get_full_name|default:doctor.username }}</option>
+                    {% endfor %}
+                </select>
             </div>
 
             <div class="field-group">
-                <label class="field-label" for="dateInput">New Date</label>
+                <label class="field-label" for="dateInput">Preferred Date</label>
                 <input type="date" id="dateInput" class="field-control"
                        min="{{ today|date:'Y-m-d' }}" required>
             </div>
@@ -407,20 +322,20 @@
             <div class="section-divider"><span>Details</span></div>
 
             <div class="field-group">
-                <label class="field-label" for="reasonInput">Reason for Rescheduling</label>
+                <label class="field-label" for="reasonInput">Reason for Visit</label>
                 <textarea name="reason" id="reasonInput" class="field-control"
-                          placeholder="Why are you rescheduling?" required></textarea>
+                          placeholder="Briefly describe your symptoms or reason..." required></textarea>
             </div>
 
             <button type="submit" class="submit-btn" id="submitBtn" disabled>
-                Confirm Reschedule
+                Request Appointment
             </button>
         </form>
     </div>
 </div>
 
 <script>
-    const DOCTOR_ID         = "{{ appointment.doctor.id }}";
+    const doctorSelect      = document.getElementById('doctorSelect');
     const dateInput         = document.getElementById('dateInput');
     const slotsSection      = document.getElementById('slotsSection');
     const slotsContainer    = document.getElementById('slotsContainer');
@@ -442,14 +357,15 @@
     }
 
     function fetchSlots() {
+        const doctorId = doctorSelect.value;
         const date = dateInput.value;
-        if (!date) return;
+        if (!doctorId || !date) return;
 
         resetSlots();
         slotsSection.style.display = 'block';
         slotsLoading.style.display = 'flex';
 
-        fetch(`/available-slots/?doctor_id=${DOCTOR_ID}&date=${date}`)
+        fetch(`/available-slots/?doctor_id=${doctorId}&date=${date}`)
             .then(res => { if (!res.ok) throw new Error(); return res.json(); })
             .then(data => {
                 slotsLoading.style.display = 'none';
@@ -488,6 +404,6 @@
             });
     }
 
+    doctorSelect.addEventListener('change', fetchSlots);
     dateInput.addEventListener('change', fetchSlots);
 </script>
-{% endblock %}
