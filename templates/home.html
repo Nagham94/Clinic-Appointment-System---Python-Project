@@ -2,69 +2,46 @@
 {% block title %}ClinicLife - Modern Healthcare Management{% endblock %}
 
 {% block content %}
-<div class="hero-section"
-    style="padding: 8rem 2rem; display: flex; flex-direction: column; align-items: center; text-align: center; position: relative;">
-    <div class="hero-glow"
-        style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80%; height: 80%; background: radial-gradient(circle, var(--primary-glow) 0%, transparent 70%); z-index: -1; filter: blur(120px); opacity: 0.6;">
+<div class="hero-section">
+
+    <div class="hero-badge">
+        <span class="hero-badge-dot"></span>
+        Now Available — Online Booking
     </div>
 
-    <p class="auth-subtitle" style="font-size: 1.25rem; max-width: 700px; margin-bottom: 3rem;">
-        Experience a state-of-the-art medical system. Built for doctors, loved by patients. Secure, fast, and remarkably
-        beautiful.
+    <h1>Modern Healthcare,<br>Beautifully Simple</h1>
+
+    <p class="auth-subtitle">
+        Experience a state-of-the-art medical system. Built for doctors,
+        loved by patients. Secure, fast, and remarkably beautiful.
     </p>
 
-    <div style="display: flex; gap: 2rem; justify-content: center; flex-wrap: wrap; margin-top: 2rem;">
+    <div class="button-group">
         {% if user.is_authenticated %}
-        <a href="{% url 'dashboard_redirect' %}" class="btn-primary"
-            style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: auto; min-width: 200px; padding: 1.25rem 3rem;">
-            <i class="fa-solid fa-gauge" style="margin-right: 10px;"></i> Open Dashboard
+        <a href="{% url 'dashboard_redirect' %}" class="btn-primary btn-icon" style="min-width:200px; padding:0.85rem 1.5rem; font-size:1rem;">
+            <i class="fa-solid fa-gauge"></i> Open Dashboard
         </a>
         {% else %}
-        <a href="{% url 'login' %}" class="btn-primary"
-            style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: auto; min-width: 180px; padding: 1.25rem 3rem; font-size: 1.1rem;">
-            <i class="fa-solid fa-right-to-bracket" style="margin-right: 10px;"></i> Login
+        <a href="{% url 'login' %}" class="btn-primary btn-icon" style="min-width:180px; padding:0.85rem 1.5rem; font-size:1rem;">
+            <i class="fa-solid fa-right-to-bracket"></i> Sign In
         </a>
-        <a href="{% url 'register' %}" class="btn-secondary"
-            style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: auto; min-width: 180px; padding: 1.25rem 3rem; font-size: 1.1rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);">
-            <i class="fa-solid fa-user-plus" style="margin-right: 10px;"></i> Register
+        <a href="{% url 'register' %}" class="btn btn-icon" style="min-width:180px; padding:0.85rem 1.5rem; font-size:1rem;">
+            <i class="fa-solid fa-user-plus"></i> Create Account
         </a>
         {% endif %}
     </div>
-</div>
-{#<hr style="margin: 4rem 0; opacity: 0.1;">#}
-{##}
-{#<div class="doctors-section" style="padding: 2rem 4rem;">#}
-{#    <h2 style="text-align:center; margin-bottom:3rem;">Our Doctors</h2>#}
-{##}
-{#    <div class="doctor-grid">#}
-{##}
-{#        {% for doctor in doctors %}#}
-{#        <div class="doctor-card">#}
-{##}
-{#            <div class="doctor-avatar">#}
-{#                👨‍⚕️#}
-{#            </div>#}
-{##}
-{#            <h3>Dr. {{ doctor.get_full_name|default:doctor.username }}</h3>#}
-{#            <p class="specialty">#}
-{#                {{ doctor.specialization|default:"General Practitioner" }}#}
-{#            </p>#}
-{##}
-{#            <a href="{% url 'home' doctor.id %}" class="book-btn">#}
-{#                Book Appointment#}
-{#            </a>#}
-{##}
-{#        </div>#}
-{#        {% empty %}#}
-{#            <p style="text-align:center;">No doctors available.</p>#}
-{#        {% endfor %}#}
-{##}
-{#    </div>#}
-{#</div>#}
 
-<footer
-    style="margin-top: 5rem; padding: 4rem 2rem; border-top: 1px solid rgba(255, 255, 255, 0.05); text-align: center; color: var(--text-muted);">
-    <div class="nav-logo" style="margin-bottom: 1rem;">CLINIC<span>LIFE</span></div>
-    <p>&copy; 2026 ClinicLife Medical Systems. All rights reserved.</p>
+    <div class="hero-features">
+        <span class="hero-feature"><i class="fa-solid fa-check-circle"></i> Easy Scheduling</span>
+        <span class="hero-feature"><i class="fa-solid fa-check-circle"></i> Role-Based Access</span>
+        <span class="hero-feature"><i class="fa-solid fa-check-circle"></i> Consultation Records</span>
+        <span class="hero-feature"><i class="fa-solid fa-check-circle"></i> Queue Management</span>
+    </div>
+
+</div>
+
+<footer class="footer">
+    <div class="nav-logo" style="display:inline-block; margin-bottom:0.6rem;">CLINIC<span>LIFE</span></div>
+    <p style="margin:0;">&copy; 2026 ClinicLife Medical Systems. All rights reserved.</p>
 </footer>
 {% endblock %}

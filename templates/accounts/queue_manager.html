@@ -1,41 +1,59 @@
 {% extends 'base.html' %}
-{% block title %}Queue Manager{% endblock %}
+{% block title %}Queue Manager - ClinicLife{% endblock %}
 
 {% block content %}
-<div class="dashboard-container">
-    <div class="dashboard-card">
-        <h2>Pending Appointment Requests</h2>
+<div class="dashboard-container fade-in-up">
+
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem; flex-wrap:wrap; gap:1rem;">
+        <div>
+            <div class="section-title"><i class="fa-solid fa-list-ol"></i> Appointments</div>
+            <h1 style="margin:0; font-size:1.75rem;">Pending Requests</h1>
+            <p style="color:var(--text-muted); margin:0.3rem 0 0; font-size:0.9rem;">Review and action incoming appointment requests.</p>
+        </div>
+        <a href="{% url 'receptionist_dashboard' %}" class="btn btn-icon" style="text-decoration:none; font-size:0.85rem;">
+            <i class="fa-solid fa-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+
+    <div class="dashboard-card" style="padding:1.5rem;">
 
         {% for appointment in appointments %}
-        <div style="border:1px solid #ddd; padding:1rem; margin-bottom:1rem; border-radius:8px;">
-            <p><strong>Patient:</strong> {{ appointment.patient.get_full_name }}</p>
-            <p><strong>Doctor:</strong> Dr. {{ appointment.doctor.get_full_name }}</p>
-            <p><strong>Date:</strong> {{ appointment.start_datetime }}</p>
-
-            <form method="POST" action="{% url 'confirm_appointment' appointment.id %}">
-                {% csrf_token %}
-                <button type="submit" class="btn-primary">
-                    Confirm Appointment
-                </button>
-            </form>
-
-            
-            <form method="POST" action="{% url 'cancel_appointment' appointment.id %}">
-                {% csrf_token %}
-                <button type="submit" class="btn-danger">
-                    Cancel Appointment
-                </button>
-            </form>
-            
+        <div class="queue-item" id="apt-{{ appointment.id }}">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:0.75rem;">
+                <div>
+                    <p style="margin:0 0 0.25rem; font-weight:700; color:var(--text-main); font-size:1rem;">
+                        {{ appointment.patient.get_full_name }}
+                    </p>
+                    <p style="margin:0 0 0.2rem; font-size:0.85rem; color:var(--text-muted);">
+                        <i class="fa-solid fa-user-doctor" style="margin-right:0.35rem; color:var(--accent);"></i>Dr. {{ appointment.doctor.get_full_name }}
+                    </p>
+                    <p style="margin:0; font-size:0.83rem; color:var(--text-muted);">
+                        <i class="fa-regular fa-clock" style="margin-right:0.35rem;"></i>{{ appointment.start_datetime }}
+                    </p>
+                </div>
+                <div style="display:flex; gap:0.55rem; flex-wrap:wrap; align-items:center;">
+                    <form method="POST" action="{% url 'confirm_appointment' appointment.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-primary btn-small btn-icon">
+                            <i class="fa-solid fa-check"></i> Confirm
+                        </button>
+                    </form>
+                    <form method="POST" action="{% url 'cancel_appointment' appointment.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger btn-small btn-icon" onclick="return confirm('Cancel this appointment?');">
+                            <i class="fa-solid fa-xmark"></i> Cancel
+                        </button>
+                    </form>
+                </div>
+            </div>
         </div>
         {% empty %}
-            <p style="color: var(--text-muted);">No pending requests.</p>
+        <div style="text-align:center; padding:3rem; color:var(--text-muted);">
+            <i class="fa-solid fa-inbox" style="font-size:2rem; display:block; margin-bottom:0.75rem; opacity:0.35;"></i>
+            <p style="margin:0; font-size:0.95rem;">No pending requests. All caught up!</p>
+        </div>
         {% endfor %}
 
-        <br>
-        <a href="{% url 'receptionist_dashboard' %}" class="btn-primary" style="text-decoration:none;">
-            Back to Dashboard
-        </a>
     </div>
 </div>
 {% endblock %}

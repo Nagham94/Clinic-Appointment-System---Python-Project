@@ -3,33 +3,30 @@
 
 {% block content %}
 <div class="auth-container">
-    <div class="auth-card" style="max-width: 500px;">
+    <a href="{% url 'admin_user_list' %}" class="back-link">
+        <i class="fa-solid fa-arrow-left"></i> Back to User List
+    </a>
+
+    <div class="auth-card" style="max-width:520px;">
         <h1 class="auth-title">Add New User</h1>
         <p class="auth-subtitle">Create a new staff or admin account</p>
 
-        <form method="post">
+        <form method="post" style="display:flex; flex-direction:column; gap:0.1rem;">
             {% csrf_token %}
             {% for field in form %}
             <div class="form-group">
                 <label for="{{ field.id_for_label }}">{{ field.label }}</label>
                 {{ field }}
                 {% if field.errors %}
-                <div class="error-msg" style="color: #ef4444; font-size: 0.75rem; margin-top: 0.25rem;">
-                    {{ field.errors|striptags }}
-                </div>
+                <div class="error-msg">{{ field.errors|striptags }}</div>
                 {% endif %}
             </div>
             {% endfor %}
 
-            <button type="submit" class="btn-primary">Create Account</button>
+            <button type="submit" class="btn-primary" style="width:100%; justify-content:center; margin-top:0.75rem; padding:0.82rem;">
+                <i class="fa-solid fa-plus"></i> Create Account
+            </button>
         </form>
-
-        <div class="auth-footer" style="margin-top: 1.5rem; text-align: center;">
-            <a href="{% url 'admin_user_list' %}"
-                style="color: var(--primary-color); text-decoration: none; font-size: 0.875rem;">
-                &larr; Back to User List
-            </a>
-        </div>
     </div>
 </div>
 {% endblock %}

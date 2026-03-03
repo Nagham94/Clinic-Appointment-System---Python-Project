@@ -3,30 +3,39 @@
 {% block hide_nav %}True{% endblock %}
 
 {% block content %}
-<div class="auth-container">
-    <div class="auth-card">
-        <h1 class="auth-title">Welcome Back</h1>
-        <p class="auth-subtitle">Log in to your ClinicLife account</p>
-        
-        <form method="post">
-            {% csrf_token %}
-            {% for field in form %}
+<div style="min-height:100vh; display:flex; align-items:center; justify-content:center; padding:2rem 1rem;">
+    <div style="width:100%; max-width:440px;">
+
+        <!-- Logo -->
+        <div style="text-align:center; margin-bottom:2.5rem;">
+            <div class="nav-logo" style="font-size:1.6rem; display:inline-block; margin-bottom:0.75rem;">CLINIC<span>LIFE</span></div>
+            <p style="color:var(--text-muted); font-size:0.88rem;">Medical Management System</p>
+        </div>
+
+        <div class="auth-card">
+            <h1 class="auth-title">Welcome back</h1>
+            <p class="auth-subtitle">Sign in to your account to continue</p>
+
+            <form method="post" style="display:flex; flex-direction:column; gap:0.1rem;">
+                {% csrf_token %}
+                {% for field in form %}
                 <div class="form-group">
                     <label for="{{ field.id_for_label }}">{{ field.label }}</label>
                     {{ field }}
                     {% if field.errors %}
-                        <div class="error-msg" style="color: #ef4444; font-size: 0.75rem; margin-top: 0.25rem;">
-                            {{ field.errors|striptags }}
-                        </div>
+                    <div class="error-msg">{{ field.errors|striptags }}</div>
                     {% endif %}
                 </div>
-            {% endfor %}
-            
-            <button type="submit" class="btn-primary">Sign In</button>
-        </form>
-        
-        <div class="auth-footer">
-            Don't have an account? <a href="{% url 'register' %}">Create account</a>
+                {% endfor %}
+
+                <button type="submit" class="btn-primary" style="width:100%; justify-content:center; margin-top:0.75rem; padding:0.82rem; font-size:0.95rem;">
+                    <i class="fa-solid fa-right-to-bracket"></i> Sign In
+                </button>
+            </form>
+
+            <div class="auth-footer">
+                Don't have an account? <a href="{% url 'register' %}">Create account</a>
+            </div>
         </div>
     </div>
 </div>

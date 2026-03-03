@@ -1,275 +1,11 @@
-<style>
-    /* Using unified theme colors */
-    .booking-wrapper {
-        max-width: 680px;
-        margin: 48px auto;
-        padding: 0 24px;
-    }
+{% extends "base.html" %}
+{% block title %}Book Appointment - ClinicLife{% endblock %}
 
-    .booking-header {
-        margin-bottom: 36px;
-    }
+{% block content %}
+<div class="booking-wrapper fade-in-up">
 
-    .booking-header .eyebrow {
-        font-size: 0.75rem;
-        font-weight: 600;
-        letter-spacing: 0.1em;
-        text-transform: uppercase;
-        color: var(--primary);
-        margin-bottom: 10px;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
-
-    .booking-header .eyebrow::before {
-        content: '';
-        display: inline-block;
-        width: 24px;
-        height: 2px;
-        background: var(--primary);
-        border-radius: 2px;
-    }
-
-    .booking-header h1 {
-        font-size: 2.25rem;
-        font-weight: 600;
-        line-height: 1.2;
-        color: var(--text-main);
-        margin: 0;
-        letter-spacing: -0.025em;
-    }
-
-    .booking-header h1 em {
-        font-style: italic;
-        color: var(--primary);
-    }
-
-    .booking-card {
-        background: var(--bg-surface);
-        border: 1px solid var(--border);
-        border-radius: var(--radius-lg);
-        padding: 36px;
-        box-shadow: var(--shadow);
-        backdrop-filter: blur(12px);
-    }
-
-    .field-group {
-        margin-bottom: 24px;
-    }
-
-    .field-label {
-        display: block;
-        font-size: 0.75rem;
-        font-weight: 600;
-        letter-spacing: 0.1em;
-        text-transform: uppercase;
-        color: var(--text-muted);
-        margin-bottom: 10px;
-    }
-
-    .field-control {
-        width: 100%;
-        padding: 12px 16px;
-        border: 1px solid var(--border);
-        border-radius: var(--border-radius);
-        font-family: var(--font-family);
-        font-size: 0.95rem;
-        color: var(--text-main);
-        background: var(--bg-card);
-        transition: var(--transition);
-        appearance: none;
-        -webkit-appearance: none;
-        outline: none;
-        box-sizing: border-box;
-    }
-
-    .field-control:focus {
-        border-color: var(--primary);
-        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
-    }
-
-    .field-control option {
-        background: var(--bg-card);
-        color: var(--text-main);
-    }
-
-    select.field-control {
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2394a3b8' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-        background-repeat: no-repeat;
-        background-position: right 14px center;
-        padding-right: 40px;
-        cursor: pointer;
-    }
-
-    input[type="date"]::-webkit-calendar-picker-indicator {
-        filter: invert(0.8);
-        cursor: pointer;
-    }
-
-    .section-divider {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        margin: 28px 0 22px;
-    }
-
-    .section-divider span {
-        font-size: 0.75rem;
-        font-weight: 600;
-        letter-spacing: 0.1em;
-        text-transform: uppercase;
-        color: var(--text-muted);
-        white-space: nowrap;
-    }
-
-    .section-divider::before,
-    .section-divider::after {
-        content: '';
-        flex: 1;
-        height: 1px;
-        background: var(--border);
-    }
-
-    #slotsSection {
-        animation: fadeUp 0.3s ease;
-    }
-
-    @keyframes fadeUp {
-        from { opacity: 0; transform: translateY(8px); }
-        to   { opacity: 1; transform: translateY(0); }
-    }
-
-    #slotsContainer {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
-    }
-
-    .slot-btn {
-        padding: 10px 18px;
-        border-radius: var(--border-radius);
-        font-family: var(--font-family);
-        font-size: 0.875rem;
-        font-weight: 500;
-        border: 1px solid var(--border);
-        background: var(--bg-card);
-        color: var(--text-main);
-        cursor: pointer;
-        transition: var(--transition);
-        letter-spacing: 0.01em;
-    }
-
-    .slot-btn:hover {
-        border-color: var(--primary);
-        color: var(--primary);
-        background: rgba(99, 102, 241, 0.1);
-        transform: translateY(-2px);
-        box-shadow: 0 4px 16px rgba(99, 102, 241, 0.2);
-    }
-
-    .slot-btn.selected {
-        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-        border-color: var(--primary);
-        color: white;
-        box-shadow: 0 4px 20px rgba(99, 102, 241, 0.3);
-        transform: translateY(-2px);
-    }
-
-    .slots-loading {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        color: var(--text-muted);
-        font-size: 0.875rem;
-        padding: 8px 0;
-    }
-
-    .spinner {
-        width: 18px;
-        height: 18px;
-        border: 2px solid var(--border);
-        border-top-color: var(--primary);
-        border-radius: 50%;
-        animation: spin 0.7s linear infinite;
-        flex-shrink: 0;
-    }
-
-    @keyframes spin {
-        to { transform: rotate(360deg); }
-    }
-
-    .no-slots-msg {
-        padding: 14px 18px;
-        background: rgba(239, 68, 68, 0.1);
-        border: 1px solid rgba(239, 68, 68, 0.3);
-        border-radius: var(--border-radius);
-        color: #fca5a5;
-        font-size: 0.875rem;
-        font-weight: 500;
-    }
-
-    textarea.field-control {
-        resize: vertical;
-        min-height: 100px;
-        font-family: var(--font-family);
-    }
-
-    .submit-btn {
-        width: 100%;
-        padding: 12px;
-        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-        color: white;
-        border: none;
-        border-radius: var(--border-radius);
-        font-family: var(--font-family);
-        font-size: 0.95rem;
-        font-weight: 600;
-        letter-spacing: 0.03em;
-        cursor: pointer;
-        transition: var(--transition);
-        margin-top: 8px;
-        box-shadow: var(--shadow-sm);
-    }
-
-    .submit-btn:hover:not(:disabled) {
-        transform: translateY(-2px);
-        box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3);
-        filter: brightness(1.1);
-    }
-
-    .submit-btn:disabled {
-        opacity: 0.3;
-        cursor: not-allowed;
-        box-shadow: none;
-    }
-
-    .submit-btn:active:not(:disabled) {
-        transform: translateY(0);
-    }
-
-    .selected-indicator {
-        display: none;
-        align-items: center;
-        gap: 8px;
-        margin-top: 14px;
-        padding: 10px 14px;
-        background: rgba(16, 185, 129, 0.1);
-        border: 1px solid rgba(16, 185, 129, 0.3);
-        border-radius: var(--border-radius);
-        font-size: 0.85rem;
-        color: #86efac;
-        font-weight: 500;
-    }
-
-    .selected-indicator.visible {
-        display: flex;
-    }
-</style>
-
-<div class="booking-wrapper">
     <div class="booking-header">
-        <p class="eyebrow">Book a Visit</p>
+        <p class="eyebrow">New Visit</p>
         <h1>Schedule your <em>appointment</em></h1>
     </div>
 
@@ -277,28 +13,31 @@
         <form method="POST" id="bookingForm">
             {% csrf_token %}
 
+            <!-- Doctor -->
             <div class="field-group">
                 <label class="field-label" for="doctorSelect">Select Doctor</label>
                 <select name="doctor" id="doctorSelect" class="field-control" required>
-                    <option value="">— Choose a doctor —</option>
+                    <option value="">Choose a doctor…</option>
                     {% for doctor in doctors %}
                     <option value="{{ doctor.id }}">Dr. {{ doctor.get_full_name|default:doctor.username }}</option>
                     {% endfor %}
                 </select>
             </div>
 
+            <!-- Date -->
             <div class="field-group">
                 <label class="field-label" for="dateInput">Preferred Date</label>
-                <input type="date" id="dateInput" class="field-control"
+                <input type="date" id="dateInput" name="date" class="field-control"
                        min="{{ today|date:'Y-m-d' }}" required>
             </div>
 
+            <!-- Slots -->
             <div id="slotsSection" style="display:none;">
                 <div class="section-divider"><span>Available Times</span></div>
 
                 <div id="slotsLoading" class="slots-loading" style="display:none;">
                     <div class="spinner"></div>
-                    <span>Finding available slots...</span>
+                    <span>Finding available slots…</span>
                 </div>
 
                 <div id="noSlots" class="no-slots-msg" style="display:none;">
@@ -308,10 +47,7 @@
                 <div id="slotsContainer"></div>
 
                 <div class="selected-indicator" id="selectedIndicator">
-                    <svg width="16" height="16" fill="none" viewBox="0 0 24 24"
-                         stroke="currentColor" stroke-width="2.5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
-                    </svg>
+                    <i class="fa-solid fa-circle-check"></i>
                     <span id="selectedLabel">Slot selected</span>
                 </div>
             </div>
@@ -319,33 +55,36 @@
             <input type="hidden" name="start_datetime" id="selectedStart">
             <input type="hidden" name="end_datetime" id="selectedEnd">
 
+            <!-- Reason -->
             <div class="section-divider"><span>Details</span></div>
 
             <div class="field-group">
                 <label class="field-label" for="reasonInput">Reason for Visit</label>
                 <textarea name="reason" id="reasonInput" class="field-control"
-                          placeholder="Briefly describe your symptoms or reason..." required></textarea>
+                          placeholder="Briefly describe your symptoms or reason for the visit…" required></textarea>
             </div>
 
             <button type="submit" class="submit-btn" id="submitBtn" disabled>
-                Request Appointment
+                <i class="fa-solid fa-calendar-check"></i> Request Appointment
             </button>
         </form>
     </div>
 </div>
+{% endblock %}
 
+{% block extra_js %}
 <script>
-    const doctorSelect      = document.getElementById('doctorSelect');
-    const dateInput         = document.getElementById('dateInput');
-    const slotsSection      = document.getElementById('slotsSection');
-    const slotsContainer    = document.getElementById('slotsContainer');
-    const slotsLoading      = document.getElementById('slotsLoading');
-    const noSlots           = document.getElementById('noSlots');
-    const selectedStart     = document.getElementById('selectedStart');
-    const selectedEnd       = document.getElementById('selectedEnd');
-    const submitBtn         = document.getElementById('submitBtn');
+    const doctorSelect     = document.getElementById('doctorSelect');
+    const dateInput        = document.getElementById('dateInput');
+    const slotsSection     = document.getElementById('slotsSection');
+    const slotsContainer   = document.getElementById('slotsContainer');
+    const slotsLoading     = document.getElementById('slotsLoading');
+    const noSlots          = document.getElementById('noSlots');
+    const selectedStart    = document.getElementById('selectedStart');
+    const selectedEnd      = document.getElementById('selectedEnd');
+    const submitBtn        = document.getElementById('submitBtn');
     const selectedIndicator = document.getElementById('selectedIndicator');
-    const selectedLabel     = document.getElementById('selectedLabel');
+    const selectedLabel    = document.getElementById('selectedLabel');
 
     function resetSlots() {
         slotsContainer.innerHTML = '';
@@ -369,21 +108,17 @@
             .then(res => { if (!res.ok) throw new Error(); return res.json(); })
             .then(data => {
                 slotsLoading.style.display = 'none';
-
                 if (!data.slots || data.slots.length === 0) {
                     noSlots.style.display = 'block';
                     return;
                 }
-
                 data.slots.forEach(slot => {
                     const btn = document.createElement('button');
                     btn.type = 'button';
                     btn.className = 'slot-btn';
-
                     const startTime = slot.start.split(' ')[1];
                     const endTime   = slot.end.split(' ')[1];
                     btn.textContent = `${startTime} – ${endTime}`;
-
                     btn.addEventListener('click', () => {
                         slotsContainer.querySelectorAll('.slot-btn').forEach(b => b.classList.remove('selected'));
                         btn.classList.add('selected');
@@ -393,7 +128,6 @@
                         selectedLabel.textContent = `${startTime} – ${endTime} selected`;
                         selectedIndicator.classList.add('visible');
                     });
-
                     slotsContainer.appendChild(btn);
                 });
             })
@@ -407,3 +141,4 @@
     doctorSelect.addEventListener('change', fetchSlots);
     dateInput.addEventListener('change', fetchSlots);
 </script>
+{% endblock %}

@@ -1,13 +1,22 @@
 {% extends "base.html" %}
-{% block title %}My Appointments{% endblock %}
+{% block title %}My Appointments - ClinicLife{% endblock %}
 
 {% block content %}
-<div class="appointments-wrapper">
-    <div class="appointments-card">
+<div class="appointments-wrapper fade-in-up">
 
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; flex-wrap:wrap; gap:1rem;">
+        <div>
+            <div class="section-title"><i class="fa-solid fa-calendar-days"></i> Patient Portal</div>
+            <h1 style="margin:0; font-size:1.75rem;">My Appointments</h1>
+        </div>
+        <a href="{% url 'book_appointment' %}" class="btn-primary btn-icon" style="text-decoration:none; font-size:0.88rem;">
+            <i class="fa-solid fa-calendar-plus"></i> Book New
+        </a>
+    </div>
+
+    <div class="appointments-card">
         <div class="header">
-            <h1>My Appointments</h1>
-            <p>Manage all your appointments</p>
+            <p>Manage your upcoming and past visits</p>
         </div>
 
         <div class="table-container">
@@ -19,27 +28,24 @@
                         <th>Date</th>
                         <th>Time</th>
                         <th>Status</th>
-                        <th>Action</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
-
                 <tbody>
                     {% for appointment in appointments %}
                     <tr>
-                        <td>APT{{ appointment.id }}</td>
-
-                        <td>
-                            <strong>Dr. {{ appointment.doctor.get_full_name }}</strong>
+                        <td style="font-size:0.8rem; color:var(--text-muted); font-family:'Syne',sans-serif; font-weight:700;">
+                            APT-{{ appointment.id }}
                         </td>
-
-                        <td>
-                            {{ appointment.start_datetime|date:"Y-m-d" }}
+                        <td style="font-weight:600; color:var(--text-main);">
+                            Dr. {{ appointment.doctor.get_full_name }}
                         </td>
-
-                        <td>
+                        <td style="color:var(--text-secondary);">
+                            {{ appointment.start_datetime|date:"M d, Y" }}
+                        </td>
+                        <td style="color:var(--text-secondary);">
                             {{ appointment.start_datetime|time:"h:i A" }}
                         </td>
-
                         <td>
                             <span class="status {{ appointment.status|lower }}">
                                 {{ appointment.status }}
@@ -47,65 +53,45 @@
                         </td>
                         <td>
                             {% if appointment.status == 'REQUESTED' or appointment.status == 'CONFIRMED' %}
-
-                                <form method="POST"
-                                      action="{% url 'cancel_appointment' appointment.id %}"
-                                      style="display:inline;">
-                                    {% csrf_token %}
-                                    <button type="submit"
-                                        class="cancel-btn"
-                                        onclick="return confirm('Are you sure you want to cancel this appointment?');">
-                                        Cancel
-                                    </button>
-                                </form>
-
-                                <!-- Reschedule -->
-                                 <form method="POST"
-                                      action="{% url 'reschedule_appointment' appointment.id %}"
-                                      style="display:inline;">
-                                    {% csrf_token %}
-                                    <button type="submit"
-                                        class="reschedule-btn"
-                                        onclick="return confirm('Are you sure you want to reschedule this appointment?');">
-                                        Reschedule
-                                    </button>
-                                </form>
+                                <div style="display:flex; gap:0.4rem; flex-wrap:wrap;">
+                                    <form method="POST" action="{% url 'cancel_appointment' appointment.id %}" style="display:inline;">
+                                        {% csrf_token %}
+                                        <button type="submit" class="cancel-btn"
+                                            onclick="return confirm('Cancel this appointment?');">
+                                            <i class="fa-solid fa-xmark"></i> Cancel
+                                        </button>
+                                    </form>
+                                    <a href="{% url 'reschedule_appointment' appointment.id %}" class="reschedule-btn btn-icon" style="text-decoration:none; display:inline-flex;">
+                                        <i class="fa-solid fa-rotate"></i> Reschedule
+                                    </a>
+                                </div>
 
                             {% elif appointment.status == 'CANCELLED' %}
-
-                        
-
-                                <!-- Delete Button -->
-                                <form method="POST"
-                                      action="{% url 'delete_appointment' appointment.id %}"
-                                      style="display:inline;">
+                                <form method="POST" action="{% url 'delete_appointment' appointment.id %}" style="display:inline;">
                                     {% csrf_token %}
-                                    <button type="submit"
-                                        class="cancel-btn"
-                                        onclick="return confirm('Delete this appointment permanently?');">
-                                        Delete
+                                    <button type="submit" class="cancel-btn"
+                                        onclick="return confirm('Delete this record permanently?');">
+                                        <i class="fa-solid fa-trash"></i> Delete
                                     </button>
                                 </form>
 
                             {% else %}
-                                -
+                                <span style="color:var(--text-muted); font-size:0.85rem;">—</span>
                             {% endif %}
                         </td>
                     </tr>
-
                     {% empty %}
                     <tr>
                         <td colspan="6" class="empty">
-                            No appointments found.
+                            <i class="fa-regular fa-calendar-xmark" style="font-size:1.6rem; display:block; margin-bottom:0.6rem; opacity:0.35;"></i>
+                            No appointments found. <a href="{% url 'book_appointment' %}" style="color:var(--primary); font-weight:600;">Book one now →</a>
                         </td>
                     </tr>
                     {% endfor %}
                 </tbody>
-
             </table>
         </div>
-
     </div>
+
 </div>
 {% endblock %}
-

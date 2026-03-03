@@ -2,84 +2,112 @@
 {% block title %}Receptionist Dashboard - ClinicLife{% endblock %}
 
 {% block content %}
-<div class="dashboard-container">
-    <div class="dashboard-card" style="margin-bottom: 2rem; border-left: 5px solid var(--primary); padding: 2rem;">
-        <h2 style="color: var(--text-main);">Receptionist Portal</h2>
-        <p style="color: var(--text-secondary); margin: 0; margin-top: 0.5rem;">Manage patient check-ins, doctors' schedules, and system bookings.</p>
+<div class="dashboard-container fade-in-up">
+
+    <!-- Header -->
+    <div class="dashboard-card" style="margin-bottom:1.5rem; padding:1.6rem 2rem; border-left:3px solid var(--warning);">
+        <div class="section-title" style="color:var(--warning);"><i class="fa-solid fa-headset"></i> Receptionist Portal</div>
+        <h2 style="margin:0 0 0.25rem;">{{ user.get_full_name|default:user.username }}</h2>
+        <p style="color:var(--text-muted); margin:0; font-size:0.9rem;">Manage patient check-ins, doctor schedules, and clinic bookings.</p>
     </div>
 
     <div class="dashboard-grid">
-        <div class="dashboard-card">
-            <h3 style="margin-bottom: 1.5rem; color: var(--text-main);">Pending Booking Requests</h3>
+
+        <!-- Pending Requests -->
+        <div class="dashboard-card" style="padding:1.4rem;">
+            <div class="section-title"><i class="fa-regular fa-clock"></i> Pending</div>
+            <h3 style="margin:0 0 1rem;">Booking Requests</h3>
+
             {% for appointment in appointments %}
                 {% if appointment.status == 'REQUESTED' %}
-                <div style="border: 1px solid var(--border); padding: 1rem; margin-bottom: 1rem; border-radius: var(--border-radius); background: rgba(255, 255, 255, 0.02);">
-                    <p style="margin-bottom: 0.5rem; font-weight: 600; color: var(--text-secondary);">{{ appointment.patient.get_full_name }}</p>
-                    <p style="margin-bottom: 0.25rem; color: var(--text-muted); font-size: 0.9rem;"><strong>Doctor:</strong> Dr. {{ appointment.doctor.get_full_name }}</p>
-                    <p style="margin-bottom: 1rem; color: var(--text-muted); font-size: 0.9rem;">{{ appointment.start_datetime }}</p>
-                    <div style="display: flex; gap: 0.5rem;">
-                        <form method="POST" action="{% url 'cancel_appointment' appointment.id %}" style="display: inline;">
+                <div class="queue-item">
+                    <p style="margin:0 0 0.25rem; font-weight:600; color:var(--text-main);">{{ appointment.patient.get_full_name }}</p>
+                    <p style="margin:0 0 0.25rem; font-size:0.83rem; color:var(--text-muted);">Dr. {{ appointment.doctor.get_full_name }}</p>
+                    <p style="margin:0 0 0.6rem; font-size:0.82rem; color:var(--text-muted);"><i class="fa-regular fa-clock" style="margin-right:0.3rem;"></i>{{ appointment.start_datetime }}</p>
+                    <div style="display:flex; gap:0.5rem;">
+                        <a href="{% url 'queue_manager' %}#apt-{{ appointment.id }}" class="btn btn-small btn-icon" style="text-decoration:none; color:var(--accent);">
+                            <i class="fa-solid fa-check"></i> Confirm
+                        </a>
+                        <form method="POST" action="{% url 'cancel_appointment' appointment.id %}" style="display:inline;">
                             {% csrf_token %}
-                            <button type="submit" class="btn btn-danger btn-small" onclick="return confirm('Are you sure you want to cancel this request?');">Cancel Request</button>
+                            <button type="submit" class="btn btn-danger btn-small" onclick="return confirm('Cancel this request?');">
+                                <i class="fa-solid fa-xmark"></i> Cancel
+                            </button>
                         </form>
-                        <a href="{% url 'queue_manager' %}#apt-{{ appointment.id }}" class="btn btn-small" style="text-decoration: none; display: inline-block;">Confirm</a>
                     </div>
                 </div>
                 {% endif %}
             {% empty %}
-                <p style="color: var(--text-muted); text-align: center; padding: 2rem 0; margin: 0;">No pending requests.</p>
+                <div style="text-align:center; padding:1.5rem 0; color:var(--text-muted); font-size:0.88rem;">
+                    <i class="fa-solid fa-inbox" style="font-size:1.4rem; display:block; margin-bottom:0.5rem; opacity:0.4;"></i>
+                    No pending requests.
+                </div>
             {% endfor %}
         </div>
-{#    edited by shahd#}
-        <div class="dashboard-card">
-            <h3 style="margin-bottom: 1.5rem; color: var(--text-main);">Today's Confirmed Appointments</h3>
+
+        <!-- Today's Confirmed -->
+        <div class="dashboard-card" style="padding:1.4rem;">
+            <div class="section-title"><i class="fa-solid fa-circle-check" style="color:var(--success);"></i> Confirmed</div>
+            <h3 style="margin:0 0 1rem;">Today's Appointments</h3>
 
             {% for appointment in appointments %}
                 {% if appointment.status == 'CONFIRMED' %}
-                <div style="border: 1px solid var(--border); padding: 1rem; margin-bottom: 1rem; border-radius: var(--border-radius); background: rgba(255, 255, 255, 0.02);">
-                    <p style="margin-bottom: 0.5rem; font-weight: 600; color: var(--text-secondary);">{{ appointment.patient.get_full_name }}</p>
-                    <p style="margin-bottom: 1rem; color: var(--text-muted); font-size: 0.9rem;">{{ appointment.start_datetime }}</p>
-
+                <div class="queue-item">
+                    <p style="margin:0 0 0.25rem; font-weight:600; color:var(--text-main);">{{ appointment.patient.get_full_name }}</p>
+                    <p style="margin:0 0 0.6rem; font-size:0.83rem; color:var(--text-muted);"><i class="fa-regular fa-clock" style="margin-right:0.3rem;"></i>{{ appointment.start_datetime }}</p>
                     {% if appointment.start_datetime < now %}
                     <form method="POST" action="{% url 'mark_no_show' appointment.id %}">
                         {% csrf_token %}
-                        <button type="submit" class="btn btn-danger btn-small">Mark No Show</button>
+                        <button type="submit" class="btn btn-danger btn-small">
+                            <i class="fa-solid fa-user-slash"></i> No Show
+                        </button>
                     </form>
                     {% endif %}
                 </div>
                 {% endif %}
             {% empty %}
-                <p style="color: var(--text-muted); text-align: center; padding: 2rem 0; margin: 0;">No confirmed appointments.</p>
+                <div style="text-align:center; padding:1.5rem 0; color:var(--text-muted); font-size:0.88rem;">
+                    <i class="fa-regular fa-calendar-check" style="font-size:1.4rem; display:block; margin-bottom:0.5rem; opacity:0.4;"></i>
+                    No confirmed appointments.
+                </div>
             {% endfor %}
         </div>
-        <div class="dashboard-card">
-            <h3 style="margin-bottom: 1.5rem; color: var(--text-main);">Queue Management</h3>
-            <p style="color: var(--text-secondary); margin-bottom: 1rem; font-size: 0.95rem;">View and manage patient requests from the queue.</p>
-            <a href="{% url 'queue_manager' %}" class="btn" style="display: inline-block;">
-                <i class="fa-solid fa-list" style="margin-right: 0.5rem;"></i> Open Queue Manager
+
+        <!-- Queue Management -->
+        <div class="dashboard-card" style="padding:1.4rem;">
+            <div class="section-title"><i class="fa-solid fa-list-ol"></i> Queue</div>
+            <h3 style="margin:0 0 0.5rem;">Queue Manager</h3>
+            <p style="color:var(--text-muted); font-size:0.88rem; margin-bottom:1.25rem;">View and manage all patient appointment requests.</p>
+            <a href="{% url 'queue_manager' %}" class="btn btn-icon" style="text-decoration:none; font-size:0.85rem;">
+                <i class="fa-solid fa-list"></i> Open Queue Manager
             </a>
         </div>
-        <div class="dashboard-card">
-            <h3 style="margin-bottom: 1.5rem; color: var(--text-main);">My Profile</h3>
-            <p style="font-weight: 600; margin-bottom: 1rem; color: var(--text-secondary);">{{ user.username }}</p>
-            <a href="{% url 'update_profile' %}" class="btn" style="display: inline-block;">
-                <i class="fa-solid fa-user-pen" style="margin-right: 0.5rem;"></i> Update Profile
+
+        <!-- Doctor Schedules -->
+        <div class="dashboard-card" style="padding:1.4rem;">
+            <div class="section-title"><i class="fa-solid fa-calendar-days"></i> Schedules</div>
+            <h3 style="margin:0 0 0.5rem;">Doctor Schedules</h3>
+            <p style="color:var(--text-muted); font-size:0.88rem; margin-bottom:1rem;">View and manage doctor availability slots.</p>
+            <div style="display:flex; gap:0.6rem; flex-wrap:wrap;">
+                <a href="{% url 'schedule_list' %}" class="btn btn-icon" style="text-decoration:none; font-size:0.85rem;">
+                    <i class="fa-solid fa-calendar"></i> Schedules
+                </a>
+                <a href="{% url 'exception_list' %}" class="btn btn-icon" style="text-decoration:none; font-size:0.85rem;">
+                    <i class="fa-solid fa-calendar-xmark"></i> Exceptions
+                </a>
+            </div>
+        </div>
+
+        <!-- My Profile -->
+        <div class="dashboard-card" style="padding:1.4rem;">
+            <div class="section-title"><i class="fa-solid fa-user"></i> Profile</div>
+            <h3 style="margin:0 0 0.4rem;">My Account</h3>
+            <p style="color:var(--text-secondary); font-size:0.9rem; margin-bottom:1rem; font-weight:600;">{{ user.username }}</p>
+            <a href="{% url 'update_profile' %}" class="btn btn-icon" style="text-decoration:none; font-size:0.85rem;">
+                <i class="fa-solid fa-user-pen"></i> Update Profile
             </a>
         </div>
-        <div class="dashboard-card">
-            <h3 style="margin-bottom: 1.5rem; color: var(--text-main);">Doctor Schedules</h3>
-            <p style="color: var(--text-secondary); margin-bottom: 1rem; font-size: 0.95rem;">View and manage doctor availability.</p>
-            <a href="{% url 'schedule_list' %}" class="btn" style="display: inline-block;">
-                <i class="fa-solid fa-calendar" style="margin-right: 0.5rem;"></i> Manage Schedules
-            </a>
-        </div>
-        <div class="dashboard-card">
-            <h3 style="margin-bottom: 1.5rem; color: var(--text-main);">Schedule Exceptions</h3>
-            <p style="color: var(--text-secondary); margin-bottom: 1rem; font-size: 0.95rem;">Handle doctor leaves and time-offs.</p>
-            <a href="{% url 'exception_list' %}" class="btn" style="display: inline-block;">
-                <i class="fa-solid fa-calendar-xmark" style="margin-right: 0.5rem;"></i> Manage Exceptions
-            </a>
-        </div>
+
     </div>
 </div>
 {% endblock %}

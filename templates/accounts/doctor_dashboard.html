@@ -2,63 +2,88 @@
 {% block title %}Doctor Dashboard - ClinicLife{% endblock %}
 
 {% block content %}
-<div class="dashboard-container">
-    <div class="dashboard-card"
-        style="margin-bottom: 2rem; border-left: 5px solid var(--primary); display: flex; justify-content: space-between; align-items: start; padding: 2rem;">
-        <div style="flex: 1;">
-            <h2 style="margin-bottom: 0.5rem; color: var(--text-main);">Dr. {{ user.get_full_name|default:user.username }}</h2>
-            <div style="display: flex; gap: 3rem; flex-wrap: wrap;">
-                <div>
-                    <span style="color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; display: block; margin-bottom: 0.5rem;">Specialization</span>
-                    <p style="font-weight: 600; font-size: 1.125rem; color: var(--primary); margin: 0;">
-                        {% if user.doctorprofile %}{{ user.doctorprofile.specialization }}{% else %}General Medicine{% endif %}</p>
+<div class="dashboard-container fade-in-up">
+
+    <!-- Doctor Profile Header -->
+    <div class="dashboard-card" style="margin-bottom:1.5rem; padding:1.75rem 2rem; border-left:3px solid var(--accent);">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:1rem;">
+            <div style="flex:1;">
+                <div class="section-title" style="color:var(--accent);"><i class="fa-solid fa-stethoscope"></i> Doctor Portal</div>
+                <h2 style="margin:0 0 1rem;">Dr. {{ user.get_full_name|default:user.username }}</h2>
+                <div class="profile-meta">
+                    <div class="profile-field">
+                        <span class="profile-label">Specialization</span>
+                        <span class="profile-value" style="color:var(--accent);">
+                            {% if user.doctorprofile %}{{ user.doctorprofile.specialization }}{% else %}General Medicine{% endif %}
+                        </span>
+                    </div>
+                    {% if user.doctorprofile.bio %}
+                    <div class="profile-field" style="flex:1; min-width:250px;">
+                        <span class="profile-label">Professional Bio</span>
+                        <span class="profile-value" style="font-weight:400; color:var(--text-secondary); font-size:0.9rem;">{{ user.doctorprofile.bio }}</span>
+                    </div>
+                    {% endif %}
                 </div>
-                {% if user.doctorprofile.bio %}
-                <div style="flex: 1; min-width: 250px;">
-                    <span style="color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; display: block; margin-bottom: 0.5rem;">Professional Bio</span>
-                    <p style="font-size: 0.95rem; line-height: 1.6; margin: 0; color: var(--text-secondary);">{{ user.doctorprofile.bio }}</p>
-                </div>
-                {% endif %}
             </div>
+            <a href="{% url 'update_profile' %}" class="btn btn-icon" style="white-space:nowrap; text-decoration:none; font-size:0.85rem;">
+                <i class="fa-solid fa-user-pen"></i> Edit Profile
+            </a>
         </div>
-        <a href="{% url 'update_profile' %}" class="btn" style="white-space: nowrap; margin-left: 1rem;">
-            <i class="fa-solid fa-user-pen" style="margin-right: 0.5rem;"></i> Edit Profile
-        </a>
     </div>
 
     <div class="dashboard-grid">
-        <div class="dashboard-card">
-           <h3 style="margin-bottom: 1.5rem; color: var(--text-main);">Today's Appointments</h3>
-            {% for appointment in appointments %}
-            <div style="border: 1px solid var(--border); padding: 1rem; margin-bottom: 1rem; border-radius: var(--border-radius); background: rgba(255, 255, 255, 0.02);">
-                <p style="margin-bottom: 0.5rem;"><strong>Patient:</strong> <span style="color: var(--text-secondary);">{{ appointment.patient.get_full_name }}</span></p>
-                <p style="margin-bottom: 0.5rem;"><strong>Date:</strong> <span style="color: var(--text-secondary);">{{ appointment.start_datetime }}</span></p>
-                <p style="margin-bottom: 1rem;"><strong>Status:</strong> <span class="status {% if appointment.status == 'CONFIRMED' %}confirmed{% else %}{{ appointment.status|lower }}{% endif %}">{{ appointment.status }}</span></p>
 
-                {% if appointment.status == 'CONFIRMED' and appointment.start_datetime < now %}
-                <form method="POST" action="{% url 'mark_no_show' appointment.id %}">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-danger btn-small">Mark No Show</button>
-                </form>
-                {% endif %}
+        <!-- Today's Appointments -->
+        <div class="dashboard-card" style="padding:1.4rem;">
+            <div class="section-title"><i class="fa-solid fa-calendar-day"></i> Today</div>
+            <h3 style="margin:0 0 1rem;">Today's Appointments</h3>
+
+            {% for appointment in appointments %}
+            <div class="queue-item">
+                <p style="margin:0 0 0.35rem; font-weight:600; color:var(--text-main);">
+                    {{ appointment.patient.get_full_name }}
+                </p>
+                <p style="margin:0 0 0.35rem; font-size:0.84rem; color:var(--text-muted);">
+                    <i class="fa-regular fa-clock" style="margin-right:0.3rem;"></i>{{ appointment.start_datetime }}
+                </p>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:0.5rem;">
+                    <span class="status {{ appointment.status|lower }}">{{ appointment.status }}</span>
+                    {% if appointment.status == 'CONFIRMED' and appointment.start_datetime < now %}
+                    <form method="POST" action="{% url 'mark_no_show' appointment.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger btn-small">No Show</button>
+                    </form>
+                    {% endif %}
+                </div>
             </div>
             {% empty %}
-            <p style="color: var(--text-muted); text-align: center; padding: 2rem;">No appointments today.</p>
+            <div style="text-align:center; padding:2rem 0; color:var(--text-muted);">
+                <i class="fa-regular fa-calendar-xmark" style="font-size:1.6rem; display:block; margin-bottom:0.5rem; opacity:0.4;"></i>
+                No appointments today.
+            </div>
             {% endfor %}
         </div>
-        <div class="dashboard-card">
-            <h3 style="margin-bottom: 1.5rem; color: var(--text-main);">My Schedule</h3>
-            <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">View your availability and manage your schedule.</p>
-            <a href="{% url 'doctor_weekly_schedule' %}" class="btn" style="display: inline-block;">View Schedule</a>
-        </div>
 
-        <div class="dashboard-card">
-            <h3 style="margin-bottom: 1.5rem; color: var(--text-main);">Queue Management</h3>
-            <p style="color: var(--text-secondary); margin-bottom: 1rem; font-size: 0.95rem;">View and manage patient requests from the queue.</p>
-            <a href="{% url 'queue_manager' %}" class="btn" style="display: inline-block;">
-                <i class="fa-solid fa-list" style="margin-right: 0.5rem;"></i> Open Queue Manager
+        <!-- My Schedule -->
+        <div class="dashboard-card" style="padding:1.4rem;">
+            <div class="section-title"><i class="fa-solid fa-calendar-week"></i> Availability</div>
+            <h3 style="margin:0 0 0.5rem;">My Schedule</h3>
+            <p style="color:var(--text-muted); font-size:0.88rem; margin-bottom:1.25rem;">View your weekly availability and manage your working hours.</p>
+            <a href="{% url 'doctor_weekly_schedule' %}" class="btn btn-icon" style="text-decoration:none; font-size:0.85rem;">
+                <i class="fa-solid fa-calendar"></i> View Schedule
             </a>
         </div>
+
+        <!-- Queue Management -->
+        <div class="dashboard-card" style="padding:1.4rem;">
+            <div class="section-title"><i class="fa-solid fa-list-ol"></i> Queue</div>
+            <h3 style="margin:0 0 0.5rem;">Queue Management</h3>
+            <p style="color:var(--text-muted); font-size:0.88rem; margin-bottom:1.25rem;">Review and manage pending patient requests from the queue.</p>
+            <a href="{% url 'queue_manager' %}" class="btn btn-icon" style="text-decoration:none; font-size:0.85rem;">
+                <i class="fa-solid fa-list"></i> Open Queue Manager
+            </a>
+        </div>
+
     </div>
 </div>
 {% endblock %}

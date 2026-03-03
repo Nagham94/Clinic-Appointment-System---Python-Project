@@ -2,92 +2,53 @@
 {% block title %}User Management - ClinicLife{% endblock %}
 
 {% block content %}
-<div class="dashboard-container" style="max-width: 1200px; margin: 2rem auto; padding: 0 1.5rem;">
-    <div class="dashboard-card"
-        style="background: white; border-radius: 1.5rem; padding: 2rem; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-            <div>
-                <h2 style="font-size: 1.875rem; font-weight: 800; color: #1e293b;">User Management</h2>
-                <p style="color: #64748b;">View and manage all registered users in the system.</p>
-            </div>
-            <a href="{% url 'admin_dashboard' %}" class="btn-secondary"
-                style="padding: 0.75rem 1.5rem; border-radius: 0.75rem; text-decoration: none;">Back to Dashboard</a>
-        </div>
+<div class="dashboard-container fade-in-up">
 
-        <div style="overflow-x: auto;">
-            <table style="width: 100%; border-collapse: separate; border-spacing: 0 0.5rem;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem; flex-wrap:wrap; gap:1rem;">
+        <div>
+            <div class="section-title"><i class="fa-solid fa-list-ul"></i> Directory</div>
+            <h1 style="margin:0; font-size:1.75rem;">All Registered Users</h1>
+            <p style="color:var(--text-muted); margin:0.3rem 0 0; font-size:0.9rem;">Browse every account in the system.</p>
+        </div>
+        <a href="{% url 'admin_dashboard' %}" class="btn btn-icon" style="text-decoration:none; font-size:0.85rem;">
+            <i class="fa-solid fa-arrow-left"></i> Dashboard
+        </a>
+    </div>
+
+    <div class="dashboard-card" style="padding:0; overflow:hidden;">
+        <div class="table-container">
+            <table>
                 <thead>
-                    <tr
-                        style="text-align: left; color: #64748b; font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.05em;">
-                        <th style="padding: 1rem;">Username</th>
-                        <th style="padding: 1rem;">First Name</th>
-                        <th style="padding: 1rem;">Last Name</th>
-                        <th style="padding: 1rem;">Email</th>
-                        <th style="padding: 1rem;">Role</th>
-                        <th style="padding: 1rem;">Date Joined</th>
+                    <tr>
+                        <th style="padding:1rem 1.1rem;">Username</th>
+                        <th style="padding:1rem 1.1rem;">First Name</th>
+                        <th style="padding:1rem 1.1rem;">Last Name</th>
+                        <th style="padding:1rem 1.1rem;">Email</th>
+                        <th style="padding:1rem 1.1rem;">Role</th>
+                        <th style="padding:1rem 1.1rem;">Date Joined</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for user in users %}
-                    <tr style="background: #f8fafc; transition: transform 0.2s; border-radius: 0.5rem;">
-                        <td
-                            style="padding: 1.25rem 1rem; font-weight: 600; color: #0f172a; border-top-left-radius: 0.5rem; border-bottom-left-radius: 0.5rem;">
-                            {{ user.username }}</td>
-                        <td style="padding: 1.25rem 1rem; color: #64748b;">{{ user.first_name|default:"-" }}</td>
-                        <td style="padding: 1.25rem 1rem; color: #64748b;">{{ user.last_name|default:"-" }}</td>
-                        <td style="padding: 1.25rem 1rem; color: #64748b;">{{ user.email }}</td>
-                        <td style="padding: 1.25rem 1rem;">
-                            <span class="role-badge role-{{ user.role|lower }}">
-                                {{ user.get_role_display }}
-                            </span>
+                    <tr>
+                        <td style="padding:0.9rem 1.1rem; font-weight:600; color:var(--text-main);">{{ user.username }}</td>
+                        <td style="padding:0.9rem 1.1rem; color:var(--text-secondary);">{{ user.first_name|default:"—" }}</td>
+                        <td style="padding:0.9rem 1.1rem; color:var(--text-secondary);">{{ user.last_name|default:"—" }}</td>
+                        <td style="padding:0.9rem 1.1rem; color:var(--text-muted); font-size:0.88rem;">{{ user.email }}</td>
+                        <td style="padding:0.9rem 1.1rem;">
+                            <span class="role-badge role-{{ user.role|lower }}">{{ user.get_role_display }}</span>
                         </td>
-                        <td
-                            style="padding: 1.25rem 1rem; color: #64748b; border-top-right-radius: 0.5rem; border-bottom-right-radius: 0.5rem;">
-                            {{ user.date_joined|date:"M d, Y" }}</td>
+                        <td style="padding:0.9rem 1.1rem; color:var(--text-muted); font-size:0.85rem;">{{ user.date_joined|date:"M d, Y" }}</td>
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="4" style="text-align: center; padding: 3rem; color: #94a3b8;">No users found.</td>
+                        <td colspan="6" style="padding:3rem; text-align:center; color:var(--text-muted);">No users found.</td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
     </div>
+
 </div>
-
-<style>
-    .role-badge {
-        padding: 0.375rem 0.75rem;
-        border-radius: 9999px;
-        font-size: 0.75rem;
-        font-weight: 700;
-    }
-
-    .role-admin {
-        background: #fee2e2;
-        color: #991b1b;
-    }
-
-    .role-doctor {
-        background: #fef9c3;
-        color: #854d0e;
-    }
-
-    .role-receptionist {
-        background: #f3e8ff;
-        color: #6b21a8;
-    }
-
-    .role-patient {
-        background: #dcfce7;
-        color: #166534;
-    }
-
-    tbody tr:hover {
-        transform: scale(1.005);
-        background: #f1f5f9 !important;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-    }
-</style>
 {% endblock %}

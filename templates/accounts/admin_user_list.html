@@ -2,48 +2,61 @@
 {% block title %}User Management - ClinicLife{% endblock %}
 
 {% block content %}
-<div class="dashboard-container">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+<div class="dashboard-container fade-in-up">
+
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem; flex-wrap:wrap; gap:1rem;">
         <div>
-            <h1>User Management</h1>
-            <p style="color: var(--text-muted);">View and manage all system users.</p>
+            <div class="section-title"><i class="fa-solid fa-users-gear"></i> Administration</div>
+            <h1 style="margin:0; font-size:1.75rem;">User Management</h1>
+            <p style="color:var(--text-muted); margin:0.3rem 0 0; font-size:0.9rem;">View and manage all system accounts.</p>
         </div>
-        <a href="{% url 'admin_create_user' %}" class="btn-primary" style="text-decoration: none;">Add New User</a>
+        <div style="display:flex; gap:0.65rem;">
+            <a href="{% url 'admin_dashboard' %}" class="btn btn-icon" style="text-decoration:none; font-size:0.85rem;">
+                <i class="fa-solid fa-arrow-left"></i> Dashboard
+            </a>
+            <a href="{% url 'admin_create_user' %}" class="btn-primary btn-icon" style="text-decoration:none; font-size:0.85rem;">
+                <i class="fa-solid fa-user-plus"></i> Add User
+            </a>
+        </div>
     </div>
 
-    <div class="dashboard-card">
-        <table style="width: 100%; border-collapse: collapse;">
-            <thead>
-                <tr style="text-align: left; border-bottom: 2px solid var(--border-color);">
-                    <th style="padding: 1rem;">Username</th>
-                    <th style="padding: 1rem;">Full Name</th>
-                    <th style="padding: 1rem;">Role</th>
-                    <th style="padding: 1rem;">Email</th>
-                    <th style="padding: 1rem;">Joined Date</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for u in users %}
-                <tr style="border-bottom: 1px solid var(--border-color);">
-                    <td style="padding: 1rem; font-weight: 600;">{{ u.username }}</td>
-                    <td style="padding: 1rem;">{{ u.get_full_name }}</td>
-                    <td style="padding: 1rem;">
-                        <span
-                            class="role-badge {% if u.role == 'ADMIN' %}badge-admin{% elif u.role == 'DOCTOR' %}badge-doctor{% elif u.role == 'RECEPTIONIST' %}badge-receptionist{% else %}badge-patient{% endif %}">
-                            {{ u.get_role_display }}
-                        </span>
-                    </td>
-                    <td style="padding: 1rem;">{{ u.email }}</td>
-                    <td style="padding: 1rem; color: var(--text-muted);">{{ u.date_joined|date:"M d, Y" }}</td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="5" style="padding: 2rem; text-align: center; color: var(--text-muted);">No users found.
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    <div class="dashboard-card" style="padding:0; overflow:hidden;">
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="padding:1rem 1.1rem;">Username</th>
+                        <th style="padding:1rem 1.1rem;">Full Name</th>
+                        <th style="padding:1rem 1.1rem;">Role</th>
+                        <th style="padding:1rem 1.1rem;">Email</th>
+                        <th style="padding:1rem 1.1rem;">Joined</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for u in users %}
+                    <tr>
+                        <td style="padding:0.9rem 1.1rem; font-weight:600; color:var(--text-main);">{{ u.username }}</td>
+                        <td style="padding:0.9rem 1.1rem; color:var(--text-secondary);">{{ u.get_full_name|default:"—" }}</td>
+                        <td style="padding:0.9rem 1.1rem;">
+                            <span class="role-badge {% if u.role == 'ADMIN' %}badge-admin{% elif u.role == 'DOCTOR' %}badge-doctor{% elif u.role == 'RECEPTIONIST' %}badge-receptionist{% else %}badge-patient{% endif %}">
+                                {{ u.get_role_display }}
+                            </span>
+                        </td>
+                        <td style="padding:0.9rem 1.1rem; color:var(--text-muted); font-size:0.88rem;">{{ u.email }}</td>
+                        <td style="padding:0.9rem 1.1rem; color:var(--text-muted); font-size:0.85rem;">{{ u.date_joined|date:"M d, Y" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" style="padding:3rem; text-align:center; color:var(--text-muted);">
+                            <i class="fa-solid fa-users-slash" style="font-size:1.5rem; display:block; margin-bottom:0.5rem; opacity:0.4;"></i>
+                            No users found.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
+
 </div>
 {% endblock %}

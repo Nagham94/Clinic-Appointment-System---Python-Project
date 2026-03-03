@@ -1,80 +1,70 @@
-{% extends "schedule_base.html" %}
+{% extends "base.html" %}
 {% load schedule_tags %}
-{% block title %}Doctor Schedules{% endblock %}
+{% block title %}Doctor Schedules - ClinicLife{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2><i class="bi bi-calendar-week"></i> Doctor Weekly Schedules</h2>
+<div class="schedule-container fade-in-up">
+
+    <div class="schedule-page-header">
         <div>
-            <a href="{% url 'exception_list' %}" class="btn btn-outline-secondary me-2">
-                <i class="bi bi-calendar-x"></i> Manage Exceptions
+            <div class="section-title"><i class="fa-solid fa-calendar-week"></i> Scheduling</div>
+            <h1>Doctor Weekly Schedules</h1>
+            <p>Manage each doctor's working hours and slot configuration.</p>
+        </div>
+        <div class="schedule-header-actions">
+            <a href="{% url 'exception_list' %}" class="btn btn-icon" style="text-decoration:none; font-size:0.85rem;">
+                <i class="fa-solid fa-calendar-xmark"></i> Exceptions
             </a>
-            <a href="{% url 'schedule_create' %}" class="btn btn-primary">
-                <i class="bi bi-plus-circle"></i> Add Schedule
+            <a href="{% url 'schedule_create' %}" class="btn-primary btn-icon" style="text-decoration:none; font-size:0.85rem;">
+                <i class="fa-solid fa-plus"></i> Add Schedule
             </a>
         </div>
     </div>
 
-    {% if messages %}
-        {% for message in messages %}
-            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        {% endfor %}
-    {% endif %}
-
     {% if grouped_schedules %}
         {% for doctor, days in grouped_schedules.items %}
-        <div class="card mb-4 shadow-sm">
-            <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">
-                    <i class="bi bi-person-badge"></i> Dr. {{ doctor.get_full_name|default:doctor.username }}
+        <div class="doctor-schedule-block">
+
+            <div class="doctor-block-header">
+                <h5>
+                    <i class="fa-solid fa-user-doctor" style="color:var(--accent);"></i>
+                    Dr. {{ doctor.get_full_name|default:doctor.username }}
                 </h5>
-                <span class="badge bg-light text-dark">
-                    {{ days|length }} day{{ days|length|pluralize }} scheduled
-                </span>
+                <span class="days-count-badge">{{ days|length }} day{{ days|length|pluralize }}</span>
             </div>
-            <div class="card-body p-0">
-                <div class="row g-0">
+
+            <div class="week-grid-scroll">
+                <div class="week-grid">
                     {% for day_name in day_names %}
                         {% with schedule=days|get_item:day_name %}
-                        <div class="col border-end" style="min-width: 130px;">
-                            <div class="text-center fw-bold py-2 
-                                {% if schedule %}bg-primary bg-opacity-10{% else %}bg-light text-muted{% endif %}">
+                        <div class="day-col">
+                            <div class="day-col-header {% if schedule %}has-schedule{% else %}no-schedule{% endif %}">
                                 {{ day_name }}
                             </div>
-                            <div class="text-center p-2" style="min-height: 120px;">
+                            <div class="day-col-body {% if schedule %}has-schedule{% else %}no-schedule{% endif %}">
                                 {% if schedule %}
-                                    <div class="mb-1">
-                                        <i class="bi bi-clock text-success"></i><br>
-                                        <strong>{{ schedule.start_time|time:"H:i" }}</strong>
-                                        <span class="text-muted">-</span>
-                                        <strong>{{ schedule.end_time|time:"H:i" }}</strong>
+                                    <div class="day-time">
+                                        {{ schedule.start_time|time:"H:i" }}
+                                        <span class="day-time-sep">–</span>
+                                        {{ schedule.end_time|time:"H:i" }}
                                     </div>
-                                    <div class="small text-muted mb-2">
-                                        <i class="bi bi-hourglass-split"></i> {{ schedule.slot_duration }}min slots
+                                    <div class="day-meta">
+                                        <i class="fa-regular fa-clock"></i> {{ schedule.slot_duration }}min slots
                                         {% if schedule.buffer_time %}
-                                            <br><i class="bi bi-pause-circle"></i> {{ schedule.buffer_time }}min buffer
+                                            <br><i class="fa-solid fa-pause"></i> {{ schedule.buffer_time }}min buffer
                                         {% endif %}
                                     </div>
-                                    <div class="btn-group btn-group-sm">
-                                        <a href="{% url 'schedule_update' schedule.pk %}" 
-                                           class="btn btn-outline-warning btn-sm" title="Edit">
-                                            <i class="bi bi-pencil"></i>
+                                    <div class="day-actions">
+                                        <a href="{% url 'schedule_update' schedule.pk %}" class="day-action-btn edit" title="Edit">
+                                            <i class="fa-solid fa-pencil"></i>
                                         </a>
-                                        <a href="{% url 'schedule_delete' schedule.pk %}" 
-                                           class="btn btn-outline-danger btn-sm" title="Delete">
-                                            <i class="bi bi-trash"></i>
+                                        <a href="{% url 'schedule_delete' schedule.pk %}" class="day-action-btn delete" title="Delete">
+                                            <i class="fa-solid fa-trash"></i>
                                         </a>
                                     </div>
                                 {% else %}
-                                    <div class="text-muted mt-3">
-                                        <i class="bi bi-moon" style="font-size: 1.5rem;"></i>
-                                        <br>
-                                        <small>Day Off</small>
-                                    </div>
+                                    <i class="fa-solid fa-moon day-off-icon"></i>
+                                    <span class="day-off-label">Day Off</span>
                                 {% endif %}
                             </div>
                         </div>
@@ -82,12 +72,15 @@
                     {% endfor %}
                 </div>
             </div>
+
         </div>
         {% endfor %}
     {% else %}
-        <div class="alert alert-info">
-            <i class="bi bi-info-circle"></i> No schedules found. Click "Add Schedule" to create one.
+        <div class="empty-state">
+            <i class="fa-regular fa-calendar-xmark"></i>
+            No schedules found. Click <strong>Add Schedule</strong> to create one.
         </div>
     {% endif %}
+
 </div>
 {% endblock %}
