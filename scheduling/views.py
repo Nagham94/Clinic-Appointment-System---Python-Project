@@ -277,15 +277,23 @@ class DoctorQueueView(LoginRequiredMixin, UserPassesTestMixin, ListView):
     def handle_no_permission(self):
         messages.error(self.request, "Only doctors can access the queue dashboard.")
         return redirect('dashboard_redirect')
-
+    # Filter appointments with status
     def get_queryset(self):
         today = timezone.localtime().date()
-        
+        status = self.request.GET.get('status', 'CHECKED_IN')
+        allowed = {'CHECKED_IN', 'COMPLETED', 'CONFIRMED'}
+        if status not in allowed:
+            status = 'CHECKED_IN'
+
+        order = 'start_datetime' if status == 'CONFIRMED' else 'checked_in_at'
+
         return Appointment.objects.filter(
             doctor=self.request.user,
             start_datetime__date=today,
-            status='CHECKED_IN',
-        ).select_related('patient').order_by('checked_in_at')
+            status=status,
+        ).select_related('patient').order_by(order)
+
+   
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -295,6 +303,7 @@ class DoctorQueueView(LoginRequiredMixin, UserPassesTestMixin, ListView):
         
         context['now'] = now
         context['today'] = today
+        context['active_status'] = self.request.GET.get('status', 'CHECKED_IN')
 
         # calculate waiting time
         queue_with_wait = []

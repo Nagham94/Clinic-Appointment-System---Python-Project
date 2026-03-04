@@ -16,7 +16,7 @@
                     <div class="profile-field">
                         <span class="profile-label">Specialization</span>
                         <span class="profile-value" style="color:var(--accent);">
-                            {% if user.doctorprofile %}{{ user.doctorprofile.specialization }}{% else %}General
+                            {% if user.doctorprofile %} {{ user.doctorprofile.specialization }}{% else %}General
                             Medicine{% endif %}
                         </span>
                     </div>
@@ -24,8 +24,7 @@
                     <div class="profile-field" style="flex:1; min-width:250px;">
                         <span class="profile-label">Professional Bio</span>
                         <span class="profile-value"
-                            style="font-weight:400; color:var(--text-secondary); font-size:0.9rem;">{{
-                            user.doctorprofile.bio }}</span>
+                            style="font-weight:400; color:var(--text-secondary); font-size:0.9rem;">{{ user.doctorprofile.bio }}</span>
                     </div>
                     {% endif %}
                 </div>
@@ -109,14 +108,17 @@
         </div>
 
         <!-- Queue Manager — TEAMMATES' page -->
+         <!-- Queue Management -->
         <div class="dashboard-card" style="padding:1.4rem;">
-            <div class="section-title"><i class="fa-solid fa-list-ol"></i> Requests</div>
+            <div class="section-title"><i class="fa-solid fa-list-ol"></i> Queue</div>
             <h3 style="margin:0 0 0.5rem;">Queue Manager</h3>
-            <p style="color:var(--text-muted); font-size:0.88rem; margin-bottom:1.25rem;">
-                Accept or reject pending appointment requests.
-            </p>
-            <a href="{% url 'queue_manager' %}" class="btn btn-icon" style="text-decoration:none; font-size:0.85rem;">
-                <i class="fa-solid fa-list"></i> Manage Requests
+            <p style="color:var(--text-muted); font-size:0.88rem; margin-bottom:1.25rem;">View and manage all patient appointment requests.</p>
+            <a href="{% url 'queue_manager' %}" class="btn btn-icon" style="text-decoration:none; font-size:0.85rem; width: 65%;">
+                <i class="fa-solid fa-list"></i> Open Queue Manager
+            </a>
+            
+            <a href="{% url 'staff_appointments' %}" class="btn btn-icon" style="text-decoration:none; font-size:0.85rem; width: 65%; margin-top: 10px;">
+                <i class="fa-solid fa-calendar-days"></i> Search Appointments
             </a>
         </div>
 
