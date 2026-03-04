@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% block title %}Appointments - Staff{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width:1100px; margin:1.25rem auto;">
+  <h1>Appointments</h1>
+
+  <form method="get" style="display:flex; gap:0.5rem; flex-wrap:wrap; margin-bottom:1rem;">
+    <input type="text" name="q" placeholder="Search by appointment ID or patient name" value="{{ selected.q|default:'' }}" style="flex:1; padding:0.5rem;" />
+
+    <select name="status" style="padding:0.5rem;">
+      <option value="">All Statuses</option>
+      {% for key, label in statuses.choices %}
+      <option value="{{ key }}" {% if selected.status == key %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+
+    {% if user.role != 'DOCTOR' %}
+    <select name="doctor" style="padding:0.5rem;">
+      <option value="">Any Doctor</option>
+      {% for d in doctors %}
+      <option value="{{ d.id }}" {% if selected.doctor_id == d.id|stringformat:"s" %}selected{% endif %}>{{ d.get_full_name|default:d.username }}</option>
+      {% endfor %}
+    </select>
+    {% else %}
+    <input type="hidden" name="doctor" value="{{ user.id }}" />
+    {% endif %}
+
+    <select name="patient" style="padding:0.5rem;">
+      <option value="">Any Patient</option>
+      {% for p in patients %}
+      <option value="{{ p.id }}" {% if selected.patient_id == p.id|stringformat:"s" %}selected{% endif %}>{{ p.get_full_name|default:p.username }}</option>
+      {% endfor %}
+    </select>
+
+    <input type="date" name="start_date" value="{{ selected.start_date|default:'' }}" style="padding:0.4rem;" />
+    <input type="date" name="end_date" value="{{ selected.end_date|default:'' }}" style="padding:0.4rem;" />
+
+    <button class="btn-primary" type="submit" style="padding:0.5rem 0.75rem;">Filter</button>
+    <a href="{% url 'staff_appointments' %}" class="btn-secondary" style="padding:0.5rem 0.75rem; text-decoration:none;">Clear</a>
+  </form>
+
+  <table style="width:100%; border-collapse:collapse;">
+    <thead>
+      <tr style="text-align:left; border-bottom:1px solid #ddd;">
+        <th style="padding:0.5rem;">ID</th>
+        <th style="padding:0.5rem;">Start</th>
+        <th style="padding:0.5rem;">Doctor</th>
+        <th style="padding:0.5rem;">Patient</th>
+        <th style="padding:0.5rem;">Status</th>
+        <th style="padding:0.5rem;">Reason</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for a in appointments %}
+      <tr style="border-bottom:1px solid #f1f1f1;">
+        <td style="padding:0.5rem;">{{ a.id }}</td>
+        <td style="padding:0.5rem;">{{ a.start_datetime }}</td>
+        <td style="padding:0.5rem;">{{ a.doctor.get_full_name|default:a.doctor.username }}</td>
+        <td style="padding:0.5rem;">{{ a.patient.get_full_name|default:a.patient.username }}</td>
+        <td style="padding:0.5rem;">{{ a.get_status_display }}</td>
+        <td style="padding:0.5rem;">{{ a.reason|default:'-' }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="6" style="padding:1rem;">No appointments found.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

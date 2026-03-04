@@ -10,6 +10,8 @@ from scheduling.services import generate_daily_slots
 
 from sqlite3 import IntegrityError
 from django.db import transaction
+from django.db.models import Q
+from accounts.decorators import role_required
 
 
 # User model import for referencing in views
@@ -244,5 +246,77 @@ def confirm_appointment(request, pk):
         messages.success(request, "Appointment Confirmed Successfully.")
 
     return redirect('queue_manager')
+
+
+"""
+search and filter view for staff to manage appointments, with access control so doctors only see their own appointments but receptionists and admins can see all.
+Supports filtering by status, date, doctor, patient and a search box that looks up patient
+"""
+@login_required
+@role_required(["DOCTOR", "RECEPTIONIST", "ADMIN"]) 
+# to display all appointments
+def staff_appointments(request):
+    # join with doctor and patient to display their names and all appointments
+    qs = Appointment.objects.select_related('patient', 'doctor').all()
+
+    status = request.GET.get('status')
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+    doctor_id = request.GET.get('doctor')
+    patient_id = request.GET.get('patient')
+    q = request.GET.get('q')
+    
+    # filter by status -> confirmed, cancelled, no-show, .....
+    if status:
+        qs = qs.filter(status=status)
+
+    # date range filter -> filter by start/end date
+    try:
+        if start_date:
+            qs = qs.filter(start_datetime__date__gte=datetime.fromisoformat(start_date).date())
+        if end_date:
+            qs = qs.filter(start_datetime__date__lte=datetime.fromisoformat(end_date).date())
+    except ValueError:
+        messages.warning(request, 'Invalid date format. Use YYYY-MM-DD.')
+    
+    # filter by doctor or patient id 
+    if doctor_id:
+        qs = qs.filter(doctor__id=doctor_id)
+    if patient_id:
+        qs = qs.filter(patient__id=patient_id)
+
+    # If the logged in user is a doctor, only show their appointments
+    if request.user.role == 'DOCTOR':
+        qs = qs.filter(doctor=request.user)
+        doctor_id = str(request.user.id)
+    
+    # search box to look up patient by name, also allow searching by appointment id
+    if q:
+        q = q.strip()
+        filters = Q(patient__username__icontains=q) | Q(patient__first_name__icontains=q) | Q(patient__last_name__icontains=q)
+        if q.isdigit():
+            filters |= Q(id=int(q))
+        qs = qs.filter(filters)
+    
+    users = get_user_model().objects.filter(Q(role='DOCTOR') | Q(role='PATIENT'))
+    doctors = users.filter(role='DOCTOR')
+    patients = users.filter(role='PATIENT')
+
+    context = {
+        'appointments': qs.order_by('-start_datetime')[:200],
+        'doctors': doctors,
+        'patients': patients,
+        'statuses': Appointment.Status,
+        'selected': {
+            'status': status,
+            'start_date': start_date,
+            'end_date': end_date,
+            'doctor_id': doctor_id,
+            'patient_id': patient_id,
+            'q': q,
+        }
+    }
+
+    return render(request, 'appointments/staff_appointments.html', context)
 
 

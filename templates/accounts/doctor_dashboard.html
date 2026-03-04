@@ -30,10 +30,15 @@
                     {% endif %}
                 </div>
             </div>
-            <a href="{% url 'update_profile' %}" class="btn btn-icon"
-                style="white-space:nowrap; text-decoration:none; font-size:0.85rem;">
-                <i class="fa-solid fa-user-pen"></i> Edit Profile
-            </a>
+            <div style="display:flex; gap:0.5rem; align-items:center;">
+                <a href="{% url 'staff_appointments' %}" class="btn btn-icon" style="text-decoration:none; font-size:0.85rem;">
+                    <i class="fa-solid fa-calendar-lines"></i> View Appointments
+                </a>
+                <a href="{% url 'update_profile' %}" class="btn btn-icon"
+                    style="white-space:nowrap; text-decoration:none; font-size:0.85rem;">
+                    <i class="fa-solid fa-user-pen"></i> Edit Profile
+                </a>
+            </div>
         </div>
     </div>
 
