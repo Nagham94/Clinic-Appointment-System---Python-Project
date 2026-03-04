@@ -46,31 +46,14 @@
         </div>
 
         <!-- Today's Confirmed -->
-        <div class="dashboard-card" style="padding:1.4rem;">
-            <div class="section-title"><i class="fa-solid fa-circle-check" style="color:var(--success);"></i> Confirmed</div>
-            <h3 style="margin:0 0 1rem;">Today's Appointments</h3>
-
-            {% for appointment in appointments %}
-                {% if appointment.status == 'CONFIRMED' %}
-                <div class="queue-item">
-                    <p style="margin:0 0 0.25rem; font-weight:600; color:var(--text-main);">{{ appointment.patient.get_full_name }}</p>
-                    <p style="margin:0 0 0.6rem; font-size:0.83rem; color:var(--text-muted);"><i class="fa-regular fa-clock" style="margin-right:0.3rem;"></i>{{ appointment.start_datetime }}</p>
-                    {% if appointment.start_datetime < now %}
-                    <form method="POST" action="{% url 'mark_no_show' appointment.id %}">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-danger btn-small">
-                            <i class="fa-solid fa-user-slash"></i> No Show
-                        </button>
-                    </form>
-                    {% endif %}
-                </div>
-                {% endif %}
-            {% empty %}
-                <div style="text-align:center; padding:1.5rem 0; color:var(--text-muted); font-size:0.88rem;">
-                    <i class="fa-regular fa-calendar-check" style="font-size:1.4rem; display:block; margin-bottom:0.5rem; opacity:0.4;"></i>
-                    No confirmed appointments.
-                </div>
-            {% endfor %}
+         <div class="dashboard-card" style="padding:1.4rem;">
+            <div class="section-title"><i class="fa-solid fa-list-ol"></i> Confirmed</div>
+            <h3 style="margin:0 0 0.5rem;">Today's Appointments</h3>
+            <p style="color:var(--text-muted); font-size:0.88rem; margin-bottom:1.25rem;">View and manage all patient appointment requests.</p>
+            <a href="{% url 'confirmed_appointments' %}" class="btn btn-icon" style="text-decoration:none; font-size:0.85rem;">
+                <i class="fa-solid fa-list"></i> Open Confirmed List
+            </a>
+            
         </div>
 
         <!-- Queue Management -->
@@ -78,10 +61,11 @@
             <div class="section-title"><i class="fa-solid fa-list-ol"></i> Queue</div>
             <h3 style="margin:0 0 0.5rem;">Queue Manager</h3>
             <p style="color:var(--text-muted); font-size:0.88rem; margin-bottom:1.25rem;">View and manage all patient appointment requests.</p>
-            <a href="{% url 'queue_manager' %}" class="btn btn-icon" style="text-decoration:none; font-size:0.85rem;">
+            <a href="{% url 'queue_manager' %}" class="btn btn-icon" style="text-decoration:none; font-size:0.85rem; width: 65%;">
                 <i class="fa-solid fa-list"></i> Open Queue Manager
             </a>
-            <a href="{% url 'staff_appointments' %}" class="btn btn-icon" style="text-decoration:none; font-size:0.85rem; margin-left:0.4rem;">
+            
+            <a href="{% url 'staff_appointments' %}" class="btn btn-icon" style="text-decoration:none; font-size:0.85rem; width: 65%; margin-top: 10px;">
                 <i class="fa-solid fa-calendar-days"></i> View Appointments
             </a>
         </div>

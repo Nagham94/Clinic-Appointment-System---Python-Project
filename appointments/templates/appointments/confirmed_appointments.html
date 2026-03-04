@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+{% block title %}Confirmed Appointments - ClinicLife{% endblock %}
+
+{% block content %}
+<div class="dashboard-container fade-in-up">
+
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem; flex-wrap:wrap; gap:1rem;">
+        <div>
+            <div class="section-title"><i class="fa-solid fa-circle-check"></i> Appointments</div>
+            <h1 style="margin:0; font-size:1.75rem;">Confirmed Appointments</h1>
+            <p style="color:var(--text-muted); margin:0.3rem 0 0; font-size:0.9rem;">Check in patients or mark no-shows for confirmed bookings.</p>
+        </div>
+        <div style="display:flex; gap:0.6rem; flex-wrap:wrap; align-items:center;">
+            <form method="get" style="display:flex; align-items:center; gap:0.5rem;">
+                <input
+                    type="date"
+                    name="date"
+                    value="{{ selected_date }}"
+                    style="border:1.5px solid var(--border-color, #e2e8f0); border-radius:8px; padding:0.45rem 0.8rem; font-size:0.85rem; font-family:inherit; color:var(--text-main); background:var(--card-bg, #fff); outline:none;"
+                >
+                <button type="submit" class="btn-primary btn-small btn-icon">
+                    <i class="fa-solid fa-filter"></i> Filter
+                </button>
+                {% if selected_date %}
+                <a href="{% url 'confirmed_appointments' %}" class="btn btn-icon btn-small" style="text-decoration:none; font-size:0.82rem;">
+                    <i class="fa-solid fa-xmark"></i> Clear
+                </a>
+                {% endif %}
+            </form>
+            <a href="{% url 'receptionist_dashboard' %}" class="btn btn-icon" style="text-decoration:none; font-size:0.85rem;">
+                <i class="fa-solid fa-arrow-left"></i> Back to Dashboard
+            </a>
+        </div>
+    </div>
+
+    <div class="dashboard-card" style="padding:1.5rem;">
+
+        {% for appointment in appointments %}
+        <div class="queue-item" id="apt-{{ appointment.id }}">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:0.75rem;">
+                <div>
+                    <p style="margin:0 0 0.25rem; font-weight:700; color:var(--text-main); font-size:1rem;">
+                        {{ appointment.patient.get_full_name }}
+                    </p>
+                    <p style="margin:0 0 0.2rem; font-size:0.85rem; color:var(--text-muted);">
+                        <i class="fa-solid fa-user-doctor" style="margin-right:0.35rem; color:var(--accent);"></i>Dr. {{ appointment.doctor.get_full_name }}
+                    </p>
+                    <p style="margin:0 0 0.2rem; font-size:0.83rem; color:var(--text-muted);">
+                        <i class="fa-regular fa-clock" style="margin-right:0.35rem;"></i>{{ appointment.start_datetime|date:"D, M j Y · g:i A" }} – {{ appointment.end_datetime|date:"g:i A" }}
+                    </p>
+                    {% if appointment.reason %}
+                    <p style="margin:0.15rem 0 0; font-size:0.82rem; color:var(--text-muted);">
+                        <i class="fa-solid fa-notes-medical" style="margin-right:0.35rem;"></i>{{ appointment.reason|truncatechars:60 }}
+                    </p>
+                    {% endif %}
+                </div>
+                <div style="display:flex; gap:0.55rem; flex-wrap:wrap; align-items:center;">
+                    {% if request.user.role == 'RECEPTIONIST' or request.user.role == 'ADMIN' %}
+                    <form method="post" action="{% url 'checkin_patient' appointment.pk %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-primary btn-small btn-icon">
+                            <i class="fa-solid fa-right-to-bracket"></i> Check In
+                        </button>
+                    </form>
+                    {% endif %}
+                    <form method="post" action="{% url 'mark_no_show' appointment.pk %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger btn-small btn-icon" onclick="return confirm('Mark this appointment as no-show?');">
+                            <i class="fa-solid fa-user-slash"></i> No-Show
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div style="text-align:center; padding:3rem; color:var(--text-muted);">
+            <i class="fa-solid fa-calendar-check" style="font-size:2rem; display:block; margin-bottom:0.75rem; opacity:0.35;"></i>
+            <p style="margin:0; font-size:0.95rem;">
+                {% if selected_date %}
+                    No confirmed appointments on {{ selected_date }}.
+                    <a href="{% url 'confirmed_appointments' %}" style="color:var(--accent);">View all</a>
+                {% else %}
+                    No confirmed appointments yet.
+                {% endif %}
+            </p>
+        </div>
+        {% endfor %}
+
+    </div>
+</div>
+{% endblock %}

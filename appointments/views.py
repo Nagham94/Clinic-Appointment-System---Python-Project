@@ -248,6 +248,61 @@ def confirm_appointment(request, pk):
     return redirect('queue_manager')
 
 
+@login_required
+@role_required(["DOCTOR", "RECEPTIONIST", "ADMIN"])
+def show_confirmed_appointments(request):
+    """
+    Shows all CONFIRMED appointments.
+    Doctors only see their own; receptionists/admins see all.
+    """
+
+    qs = Appointment.objects.select_related('patient', 'doctor').filter(status='CONFIRMED')
+    if request.user.role == 'DOCTOR':
+        qs = qs.filter(doctor=request.user)
+    
+    selected_date = request.GET.get('date')
+    if selected_date:
+        try:
+            # filter by date only (ignore time) using start_datetime__date
+            date_obj = datetime.fromisoformat(selected_date).date()
+            qs = qs.filter(start_datetime__date=date_obj)
+        except ValueError:
+            messages.warning(request, 'Invalid date format.')
+    
+    return render(request, 'appointments/confirmed_appointments.html', {
+        # limit to 200 most recent to avoid performance issues, and order by start time descending so upcoming appointments show first
+        'appointments': qs.order_by('-start_datetime')[:200],
+        'selected_date': selected_date
+    })
+
+@login_required
+@role_required(["RECEPTIONIST", "ADMIN"])
+def checkin_patient(request, pk):
+    """
+    Receptionist checks in a patient.
+    Only CONFIRMED appointments can be checked in.
+    Sets checked_in_at timestamp and changes status to CHECKED_IN.
+    """
+    appointment = get_object_or_404(Appointment, id=pk)
+
+    if appointment.status != 'CONFIRMED':
+        messages.error(request, 'Only confirmed appointments can be checked in.')
+        return redirect('confirmed_appointments')
+
+    if request.method == 'POST':
+        appointment.status = 'CHECKED_IN'
+        appointment.checked_in_at = timezone.now()
+        appointment.save()
+        messages.success(
+            request,
+            f'{appointment.patient.get_full_name() or appointment.patient.username} has been checked in successfully.'
+        )
+        return redirect('confirmed_appointments')
+
+    return render(request, 'appointments/checkin_confirm.html', {
+        'appointment': appointment
+    })
+
 """
 search and filter view for staff to manage appointments, with access control so doctors only see their own appointments but receptionists and admins can see all.
 Supports filtering by status, date, doctor, patient and a search box that looks up patient
