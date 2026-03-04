@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+{% block title %}Consultation Detail - ClinicLife{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <div class="dashboard-card" style="max-width: 800px; margin: 0 auto; border-top: 5px solid var(--accent);">
+        <div
+            style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 2rem; border-bottom: 1px solid var(--border-color); padding-bottom: 1.5rem;">
+            <div>
+                <h2 style="margin-bottom: 0.5rem;"><i class="fa-solid fa-file-invoice-dotted"
+                        style="color: var(--accent); margin-right: 12px;"></i>Consultation Summary</h2>
+                <p style="color: var(--text-muted);">Appointment on {{ consultation.appointment.start_datetime|date:"F
+                    j, Y" }} at {{ consultation.appointment.start_datetime|date:"g:i A" }}</p>
+            </div>
+            <div style="text-align: right;">
+                <span class="badge"
+                    style="background: var(--bg-main); border: 1px solid var(--border-color); padding: 0.5rem 1rem; border-radius: 8px;">
+                    ID: #{{ consultation.id|stringformat:"04d" }}
+                </span>
+            </div>
+        </div>
+
+        <div class="detail-grid"
+            style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2.5rem;">
+            <div class="info-group">
+                <label
+                    style="display: block; color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; margin-bottom: 0.5rem;">Doctor</label>
+                <p style="font-weight: 600; font-size: 1.1rem;">Dr.
+                    {% if consultation.appointment.doctor.first_name or consultation.appointment.doctor.last_name %}
+                    {{ consultation.appointment.doctor.get_full_name }}
+                    {% else %}
+                    {{ consultation.appointment.doctor.username }}
+                    {% endif %}
+                </p>
+                <p style="color: var(--accent); font-size: 0.9rem;">{{
+                    consultation.appointment.doctor.doctorprofile.specialization|default:"General Medicine" }}</p>
+            </div>
+            <div class="info-group">
+                <label
+                    style="display: block; color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; margin-bottom: 0.5rem;">Patient</label>
+                <p style="font-weight: 600; font-size: 1.1rem;">
+                    {% if consultation.appointment.patient.first_name or consultation.appointment.patient.last_name %}
+                    {{ consultation.appointment.patient.get_full_name }}
+                    {% else %}
+                    {{ consultation.appointment.patient.username }}
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+
+        <div class="consultation-section"
+            style="margin-bottom: 2.5rem; background: var(--bg-main); padding: 1.5rem; border-radius: 12px;">
+            <h3 style="margin-bottom: 1rem; color: var(--text-primary);"><i class="fa-solid fa-stethoscope"
+                    style="margin-right: 10px; color: var(--accent);"></i>Diagnosis</h3>
+            <p style="font-size: 1.1rem; line-height: 1.6; color: var(--text-primary); font-weight: 500;">
+                {{ consultation.diagnosis }}
+            </p>
+        </div>
+
+        {% if show_notes and consultation.notes %}
+        <div class="consultation-section" style="margin-bottom: 2.5rem;">
+            <h3 style="margin-bottom: 1rem; color: var(--text-primary);"><i class="fa-solid fa-notes-medical"
+                    style="margin-right: 10px; color: var(--accent);"></i>Clinical Notes</h3>
+            <div
+                style="background: #fffbeb; border-left: 4px solid #f59e0b; padding: 1.5rem; border-radius: 0 8px 8px 0; color: #92400e;">
+                {{ consultation.notes|linebreaks }}
+            </div>
+        </div>
+        {% elif not show_notes %}
+        <div class="alert alert-info"
+            style="margin-top: 1rem; background: var(--accent-light); border: none; color: var(--accent);">
+            <i class="fa-solid fa-shield-halved" style="margin-right: 8px;"></i> Clinical notes are restricted for
+            non-medical staff.
+        </div>
+        {% endif %}
+
+        <div class="consultation-section" style="margin-bottom: 2.5rem;">
+            <h3
+                style="margin-bottom: 1.5rem; color: var(--text-primary); border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">
+                <i class="fa-solid fa-pills" style="margin-right: 10px; color: var(--accent);"></i>Prescriptions
+            </h3>
+            {% if consultation.prescriptions.all %}
+            <div class="prescription-grid"
+                style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1rem;">
+                {% for medication in consultation.prescriptions.all %}
+                <div
+                    style="border: 1px solid var(--border-color); padding: 1rem; border-radius: 12px; background: white;">
+                    <h4 style="margin-bottom: 0.5rem; color: var(--accent);">{{ medication.drug_name }}</h4>
+                    <p style="margin-bottom: 0.25rem;"><strong>Dosage:</strong> {{ medication.dosage }}</p>
+                    <p><strong>Duration:</strong> {{ medication.duration }}</p>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p style="color: var(--text-muted); font-style: italic;">No medications prescribed.</p>
+            {% endif %}
+        </div>
+
+        <div class="consultation-section" style="margin-bottom: 2rem;">
+            <h3
+                style="margin-bottom: 1.5rem; color: var(--text-primary); border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">
+                <i class="fa-solid fa-vial" style="margin-right: 10px; color: var(--accent);"></i>Requested Tests
+            </h3>
+            {% if consultation.tests.all %}
+            <ul style="list-style: none; padding: 0; display: flex; flex-direction: column; gap: 0.75rem;">
+                {% for test in consultation.tests.all %}
+                <li
+                    style="background: var(--bg-main); padding: 0.8rem 1.25rem; border-radius: 8px; border: 1px solid var(--border-color); font-weight: 500; font-size: 1.05rem;">
+                    <i class="fa-solid fa-microscope"
+                        style="margin-right: 10px; font-size: 1rem; color: var(--accent);"></i>{{ test.test_name }}
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p style="color: var(--text-muted); font-style: italic;">No laboratory tests requested.</p>
+            {% endif %}
+        </div>
+
+        <div
+            style="margin-top: 3rem; text-align: center; border-top: 1px solid var(--border-color); padding-top: 2rem;">
+            <button onclick="window.print()" class="btn-secondary" style="margin-right: 1rem;">
+                <i class="fa-solid fa-print" style="margin-right: 8px;"></i> Print Summary
+            </button>
+            <a href="{% url 'dashboard_redirect' %}" class="btn-primary"
+                style="text-decoration: none; padding: 0.75rem 2rem;">
+                Back to Dashboard
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -27,4 +27,5 @@ urlpatterns = [
     path("available-slots/", AvailableSlotsView.as_view(), name="available_slots"),
     path("appointments/", include("appointments.urls")),
     path('scheduling/', include('scheduling.urls')),
+    path('medical/', include('medical.urls')),
 ]

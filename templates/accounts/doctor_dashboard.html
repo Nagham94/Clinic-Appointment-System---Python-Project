@@ -5,27 +5,33 @@
 <div class="dashboard-container fade-in-up">
 
     <!-- Doctor Profile Header -->
-    <div class="dashboard-card" style="margin-bottom:1.5rem; padding:1.75rem 2rem; border-left:3px solid var(--accent);">
+    <div class="dashboard-card"
+        style="margin-bottom:1.5rem; padding:1.75rem 2rem; border-left:3px solid var(--accent);">
         <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:1rem;">
             <div style="flex:1;">
-                <div class="section-title" style="color:var(--accent);"><i class="fa-solid fa-stethoscope"></i> Doctor Portal</div>
+                <div class="section-title" style="color:var(--accent);"><i class="fa-solid fa-stethoscope"></i> Doctor
+                    Portal</div>
                 <h2 style="margin:0 0 1rem;">Dr. {{ user.get_full_name|default:user.username }}</h2>
                 <div class="profile-meta">
                     <div class="profile-field">
                         <span class="profile-label">Specialization</span>
                         <span class="profile-value" style="color:var(--accent);">
-                            {% if user.doctorprofile %}{{ user.doctorprofile.specialization }}{% else %}General Medicine{% endif %}
+                            {% if user.doctorprofile %}{{ user.doctorprofile.specialization }}{% else %}General
+                            Medicine{% endif %}
                         </span>
                     </div>
                     {% if user.doctorprofile.bio %}
                     <div class="profile-field" style="flex:1; min-width:250px;">
                         <span class="profile-label">Professional Bio</span>
-                        <span class="profile-value" style="font-weight:400; color:var(--text-secondary); font-size:0.9rem;">{{ user.doctorprofile.bio }}</span>
+                        <span class="profile-value"
+                            style="font-weight:400; color:var(--text-secondary); font-size:0.9rem;">{{
+                            user.doctorprofile.bio }}</span>
                     </div>
                     {% endif %}
                 </div>
             </div>
-            <a href="{% url 'update_profile' %}" class="btn btn-icon" style="white-space:nowrap; text-decoration:none; font-size:0.85rem;">
+            <a href="{% url 'update_profile' %}" class="btn btn-icon"
+                style="white-space:nowrap; text-decoration:none; font-size:0.85rem;">
                 <i class="fa-solid fa-user-pen"></i> Edit Profile
             </a>
         </div>
@@ -48,17 +54,26 @@
                 </p>
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-top:0.5rem;">
                     <span class="status {{ appointment.status|lower }}">{{ appointment.status }}</span>
-                    {% if appointment.status == 'CONFIRMED' and appointment.start_datetime < now %}
-                    <form method="POST" action="{% url 'mark_no_show' appointment.id %}">
+                    {% if appointment.status == 'CONFIRMED' and appointment.start_datetime < now %} <form method="POST"
+                        action="{% url 'mark_no_show' appointment.id %}">
                         {% csrf_token %}
                         <button type="submit" class="btn btn-danger btn-small">No Show</button>
-                    </form>
-                    {% endif %}
+                        </form>
+                        {% elif appointment.status == 'COMPLETED' %}
+                        {% if appointment.consultation %}
+                        <a href="{% url 'consultation_detail' appointment.consultation.id %}"
+                            class="btn btn-secondary btn-small" style="text-decoration:none;">View Record</a>
+                        {% else %}
+                        <a href="{% url 'create_consultation' appointment.id %}" class="btn btn-primary btn-small"
+                            style="text-decoration:none;">Add Record</a>
+                        {% endif %}
+                        {% endif %}
                 </div>
             </div>
             {% empty %}
             <div style="text-align:center; padding:2rem 0; color:var(--text-muted);">
-                <i class="fa-regular fa-calendar-xmark" style="font-size:1.6rem; display:block; margin-bottom:0.5rem; opacity:0.4;"></i>
+                <i class="fa-regular fa-calendar-xmark"
+                    style="font-size:1.6rem; display:block; margin-bottom:0.5rem; opacity:0.4;"></i>
                 No appointments today.
             </div>
             {% endfor %}
@@ -68,13 +83,15 @@
         <div class="dashboard-card" style="padding:1.4rem;">
             <div class="section-title"><i class="fa-solid fa-calendar-week"></i> Availability</div>
             <h3 style="margin:0 0 0.5rem;">My Schedule</h3>
-            <p style="color:var(--text-muted); font-size:0.88rem; margin-bottom:1.25rem;">View your weekly availability and manage your working hours.</p>
-            <a href="{% url 'doctor_weekly_schedule' %}" class="btn btn-icon" style="text-decoration:none; font-size:0.85rem;">
+            <p style="color:var(--text-muted); font-size:0.88rem; margin-bottom:1.25rem;">View your weekly availability
+                and manage your working hours.</p>
+            <a href="{% url 'doctor_weekly_schedule' %}" class="btn btn-icon"
+                style="text-decoration:none; font-size:0.85rem;">
                 <i class="fa-solid fa-calendar"></i> View Schedule
             </a>
         </div>
 
-        <!-- Daily Queue — YOUR page -->    
+        <!-- Daily Queue — YOUR page -->
         <div class="dashboard-card" style="padding:1.4rem;">
             <div class="section-title"><i class="fa-solid fa-clipboard-list"></i> Daily Queue</div>
             <h3 style="margin:0 0 0.5rem;">Today's Queue</h3>

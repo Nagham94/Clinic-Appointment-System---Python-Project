@@ -15,6 +15,8 @@ from .models import DoctorSchedule, ScheduleException
 from .forms import DoctorScheduleForm, ScheduleExceptionForm
 from .services import generate_daily_slots
 
+import zoneinfo
+
 User = get_user_model()
 
 """
@@ -249,10 +251,22 @@ def doctor_weekly_schedule(request):
 """
 Doctor queue checked in patients
 """
+
+
 class DoctorQueueView(LoginRequiredMixin, UserPassesTestMixin, ListView):
     template_name = 'scheduling/doctor_queue.html'
     context_object_name = 'queue'
     login_url = 'login'
+
+    def dispatch(self, request, *args, **kwargs):
+        try:
+            tz = zoneinfo.ZoneInfo('Africa/Cairo')
+        except (ImportError, zoneinfo.ZoneInfoNotFoundError):
+            import pytz
+            tz = pytz.timezone('Africa/Cairo')
+            
+        timezone.activate(tz)
+        return super().dispatch(request, *args, **kwargs)
 
     def test_func(self):
         return (
@@ -265,18 +279,20 @@ class DoctorQueueView(LoginRequiredMixin, UserPassesTestMixin, ListView):
         return redirect('dashboard_redirect')
 
     def get_queryset(self):
-        today = timezone.now().date()
+        today = timezone.localtime().date()
+        
         return Appointment.objects.filter(
             doctor=self.request.user,
             start_datetime__date=today,
             status='CHECKED_IN',
         ).select_related('patient').order_by('checked_in_at')
 
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        now = timezone.localtime()
+        
+        now = timezone.localtime() 
         today = now.date()
+        
         context['now'] = now
         context['today'] = today
 

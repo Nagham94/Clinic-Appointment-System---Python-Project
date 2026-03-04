@@ -4,12 +4,14 @@
 {% block content %}
 <div class="appointments-wrapper fade-in-up">
 
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; flex-wrap:wrap; gap:1rem;">
+    <div
+        style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; flex-wrap:wrap; gap:1rem;">
         <div>
             <div class="section-title"><i class="fa-solid fa-calendar-days"></i> Patient Portal</div>
             <h1 style="margin:0; font-size:1.75rem;">My Appointments</h1>
         </div>
-        <a href="{% url 'book_appointment' %}" class="btn-primary btn-icon" style="text-decoration:none; font-size:0.88rem;">
+        <a href="{% url 'book_appointment' %}" class="btn-primary btn-icon"
+            style="text-decoration:none; font-size:0.88rem;">
             <i class="fa-solid fa-calendar-plus"></i> Book New
         </a>
     </div>
@@ -34,7 +36,8 @@
                 <tbody>
                     {% for appointment in appointments %}
                     <tr>
-                        <td style="font-size:0.8rem; color:var(--text-muted); font-family:'Syne',sans-serif; font-weight:700;">
+                        <td
+                            style="font-size:0.8rem; color:var(--text-muted); font-family:'Syne',sans-serif; font-weight:700;">
                             APT-{{ appointment.id }}
                         </td>
                         <td style="font-weight:600; color:var(--text-main);">
@@ -53,38 +56,53 @@
                         </td>
                         <td>
                             {% if appointment.status == 'REQUESTED' or appointment.status == 'CONFIRMED' %}
-                                <div style="display:flex; gap:0.4rem; flex-wrap:wrap;">
-                                    <form method="POST" action="{% url 'cancel_appointment' appointment.id %}" style="display:inline;">
-                                        {% csrf_token %}
-                                        <button type="submit" class="cancel-btn"
-                                            onclick="return confirm('Cancel this appointment?');">
-                                            <i class="fa-solid fa-xmark"></i> Cancel
-                                        </button>
-                                    </form>
-                                    <a href="{% url 'reschedule_appointment' appointment.id %}" class="reschedule-btn btn-icon" style="text-decoration:none; display:inline-flex;">
-                                        <i class="fa-solid fa-rotate"></i> Reschedule
-                                    </a>
-                                </div>
-
-                            {% elif appointment.status == 'CANCELLED' %}
-                                <form method="POST" action="{% url 'delete_appointment' appointment.id %}" style="display:inline;">
+                            <div style="display:flex; gap:0.4rem; flex-wrap:wrap;">
+                                <form method="POST" action="{% url 'cancel_appointment' appointment.id %}"
+                                    style="display:inline;">
                                     {% csrf_token %}
                                     <button type="submit" class="cancel-btn"
-                                        onclick="return confirm('Delete this record permanently?');">
-                                        <i class="fa-solid fa-trash"></i> Delete
+                                        onclick="return confirm('Cancel this appointment?');">
+                                        <i class="fa-solid fa-xmark"></i> Cancel
                                     </button>
                                 </form>
+                                <a href="{% url 'reschedule_appointment' appointment.id %}"
+                                    class="reschedule-btn btn-icon" style="text-decoration:none; display:inline-flex;">
+                                    <i class="fa-solid fa-rotate"></i> Reschedule
+                                </a>
+                            </div>
+
+                            {% elif appointment.status == 'CANCELLED' %}
+                            <form method="POST" action="{% url 'delete_appointment' appointment.id %}"
+                                style="display:inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="cancel-btn"
+                                    onclick="return confirm('Delete this record permanently?');">
+                                    <i class="fa-solid fa-trash"></i> Delete
+                                </button>
+                            </form>
+
+                            {% elif appointment.status == 'COMPLETED' %}
+                            {% if appointment.consultation %}
+                            <a href="{% url 'consultation_detail' appointment.consultation.id %}"
+                                class="btn btn-secondary btn-small"
+                                style="text-decoration:none; display:inline-flex; align-items:center; gap:0.3rem;"><i
+                                    class="fa-solid fa-file-medical"></i> View Record</a>
+                            {% else %}
+                            <span style="color:var(--text-muted); font-size:0.85rem;">No record</span>
+                            {% endif %}
 
                             {% else %}
-                                <span style="color:var(--text-muted); font-size:0.85rem;">—</span>
+                            <span style="color:var(--text-muted); font-size:0.85rem;">—</span>
                             {% endif %}
                         </td>
                     </tr>
                     {% empty %}
                     <tr>
                         <td colspan="6" class="empty">
-                            <i class="fa-regular fa-calendar-xmark" style="font-size:1.6rem; display:block; margin-bottom:0.6rem; opacity:0.35;"></i>
-                            No appointments found. <a href="{% url 'book_appointment' %}" style="color:var(--primary); font-weight:600;">Book one now →</a>
+                            <i class="fa-regular fa-calendar-xmark"
+                                style="font-size:1.6rem; display:block; margin-bottom:0.6rem; opacity:0.35;"></i>
+                            No appointments found. <a href="{% url 'book_appointment' %}"
+                                style="color:var(--primary); font-weight:600;">Book one now →</a>
                         </td>
                     </tr>
                     {% endfor %}

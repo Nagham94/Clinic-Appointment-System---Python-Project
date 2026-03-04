@@ -1,0 +1,422 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load widget_tweaks %}
+
+{% block title %}Consultation - {{ appointment.patient.get_full_name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .consultation-container {
+        max-width: 900px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+    }
+
+    .patient-header {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        margin-bottom: 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-left: 4px solid var(--primary-color);
+    }
+
+    .section-card {
+        background: white;
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        margin-bottom: 2rem;
+    }
+
+    .section-title {
+        color: var(--secondary-color);
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid #e2e8f0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        display: block;
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+        color: #4a5568;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        transition: all 0.3s ease;
+    }
+
+    .form-control:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        outline: none;
+    }
+
+    /* Formset Styles */
+    .formset-row {
+        background: #f8fafc;
+        padding: 1.5rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        border: 1px solid #e2e8f0;
+        position: relative;
+    }
+
+    .remove-row-btn {
+        position: absolute;
+        top: 0.5rem;
+        right: 0.5rem;
+        color: #ef4444;
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 0.25rem;
+    }
+
+    .add-row-btn {
+        background: #f1f5f9;
+        color: #475569;
+        border: 1px dashed #cbd5e1;
+        padding: 0.75rem 1.5rem;
+        border-radius: 6px;
+        cursor: pointer;
+        width: 100%;
+        font-weight: 500;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .add-row-btn:hover {
+        background: #e2e8f0;
+        border-color: #94a3b8;
+    }
+
+    .delete-checkbox-wrapper {
+        display: none;
+        /* Hide django's default delete checkbox, we'll handle with JS */
+    }
+
+    .submit-section {
+        display: flex;
+        justify-content: flex-end;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 6px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+        border: none;
+    }
+
+    .btn-primary {
+        background: var(--primary-color);
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: var(--secondary-color);
+    }
+
+    .btn-secondary {
+        background: #e2e8f0;
+        color: #4a5568;
+        text-decoration: none;
+    }
+
+    .btn-secondary:hover {
+        background: #cbd5e1;
+    }
+
+    .form-error {
+        color: #ef4444;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="consultation-container">
+    <div class="patient-header">
+        <div>
+            <h2 style="margin: 0; color: var(--secondary-color);">{{ appointment.patient.get_full_name }}</h2>
+            <p style="margin: 0.5rem 0 0 0; color: #64748b;">
+                <i class="fas fa-calendar-alt"></i> {{ appointment.start_datetime|date:"F j, Y, P" }}
+            </p>
+        </div>
+        <div style="text-align: right;">
+            <span class="badge"
+                style="background: #eff6ff; color: var(--primary-color); padding: 0.5rem 1rem; border-radius: 9999px; font-weight: 500;">
+                Consultation Record
+            </span>
+        </div>
+    </div>
+
+    <!-- Error Messages -->
+    {% if messages %}
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }}"
+        style="padding: 1rem; border-radius: 6px; margin-bottom: 2rem; background: #fee2e2; color: #991b1b; border: 1px solid #f87171;">
+        {{ message }}
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    <form method="post" id="consultation-form">
+        {% csrf_token %}
+
+        <!-- Medical Record Section -->
+        <div class="section-card">
+            <h3 class="section-title"><i class="fas fa-notes-medical"></i> Medical Record</h3>
+
+            <div class="form-group">
+                <label class="form-label" for="{{ form.diagnosis.id_for_label }}">Diagnosis <span
+                        style="color: #ef4444;">*</span></label>
+                {{ form.diagnosis|add_class:"form-control" }}
+                {% if form.diagnosis.errors %}
+                <div class="form-error">{{ form.diagnosis.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="{{ form.notes.id_for_label }}">Clinical Notes</label>
+                {{ form.notes|add_class:"form-control" }}
+                <small style="color: #94a3b8; display: block; margin-top: 0.25rem;">Internal notes, visible to doctors
+                    only.</small>
+                {% if form.notes.errors %}
+                <div class="form-error">{{ form.notes.errors.0 }}</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Prescriptions Section -->
+        <div class="section-card">
+            <h3 class="section-title"><i class="fas fa-pills"></i> Prescriptions</h3>
+            {{ prescription_formset.management_form }}
+
+            <div id="prescription-forms">
+                {% for form in prescription_formset %}
+                <div class="formset-row prescription-form">
+                    <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 1rem;">
+                        <!-- Hidden fields including id and DELETE -->
+                        {% for hidden in form.hidden_fields %}
+                        {{ hidden }}
+                        {% endfor %}
+
+                        <div class="form-group" style="margin: 0;">
+                            <label class="form-label">Drug Name</label>
+                            {{ form.drug_name|add_class:"form-control" }}
+                            {% if form.drug_name.errors %}
+                            <div class="form-error">{{ form.drug_name.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="form-group" style="margin: 0;">
+                            <label class="form-label">Dosage</label>
+                            {{ form.dosage|add_class:"form-control" }}
+                            {% if form.dosage.errors %}
+                            <div class="form-error">{{ form.dosage.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="form-group" style="margin: 0;">
+                            <label class="form-label">Duration</label>
+                            {{ form.duration|add_class:"form-control" }}
+                            {% if form.duration.errors %}
+                            <div class="form-error">{{ form.duration.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    {% if form.instance.pk %}
+                    <div class="delete-checkbox-wrapper">
+                        {{ form.DELETE }}
+                    </div>
+                    <button type="button" class="remove-row-btn" title="Remove Prescription"
+                        onclick="markForDeletion(this)">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    {% else %}
+                    <button type="button" class="remove-row-btn" title="Remove Prescription"
+                        onclick="removeNewRow(this)">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Hidden empty form for JS cloning -->
+            <div id="empty-prescription-form" style="display: none;">
+                <div class="formset-row prescription-form">
+                    <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 1rem;">
+                        {% for hidden in prescription_formset.empty_form.hidden_fields %}
+                        {{ hidden }}
+                        {% endfor %}
+                        <div class="form-group" style="margin: 0;">
+                            <label class="form-label">Drug Name</label>
+                            {{ prescription_formset.empty_form.drug_name|add_class:"form-control" }}
+                        </div>
+                        <div class="form-group" style="margin: 0;">
+                            <label class="form-label">Dosage</label>
+                            {{ prescription_formset.empty_form.dosage|add_class:"form-control" }}
+                        </div>
+                        <div class="form-group" style="margin: 0;">
+                            <label class="form-label">Duration</label>
+                            {{ prescription_formset.empty_form.duration|add_class:"form-control" }}
+                        </div>
+                    </div>
+                    <button type="button" class="remove-row-btn" title="Remove Prescription"
+                        onclick="removeNewRow(this)">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+
+            <button type="button" class="add-row-btn" id="add-prescription">
+                <i class="fas fa-plus"></i> Add Another Medication
+            </button>
+        </div>
+
+        <!-- Requested Tests Section -->
+        <div class="section-card">
+            <h3 class="section-title"><i class="fas fa-vial"></i> Requested Tests</h3>
+            {{ test_formset.management_form }}
+
+            <div id="test-forms">
+                {% for form in test_formset %}
+                <div class="formset-row test-form">
+                    {% for hidden in form.hidden_fields %}
+                    {{ hidden }}
+                    {% endfor %}
+                    <div class="form-group" style="margin: 0;">
+                        <label class="form-label">Test Name</label>
+                        {{ form.test_name|add_class:"form-control" }}
+                        {% if form.test_name.errors %}
+                        <div class="form-error">{{ form.test_name.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    {% if form.instance.pk %}
+                    <div class="delete-checkbox-wrapper">
+                        {{ form.DELETE }}
+                    </div>
+                    <button type="button" class="remove-row-btn" title="Remove Test" onclick="markForDeletion(this)">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    {% else %}
+                    <button type="button" class="remove-row-btn" title="Remove Test" onclick="removeNewRow(this)">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Hidden empty form for JS cloning -->
+            <div id="empty-test-form" style="display: none;">
+                <div class="formset-row test-form">
+                    {% for hidden in test_formset.empty_form.hidden_fields %}
+                    {{ hidden }}
+                    {% endfor %}
+                    <div class="form-group" style="margin: 0;">
+                        <label class="form-label">Test Name</label>
+                        {{ test_formset.empty_form.test_name|add_class:"form-control" }}
+                    </div>
+                    <button type="button" class="remove-row-btn" title="Remove Test" onclick="removeNewRow(this)">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+
+            <button type="button" class="add-row-btn" id="add-test">
+                <i class="fas fa-plus"></i> Add Test Request
+            </button>
+        </div>
+
+        <div class="submit-section">
+            <a href="{% url 'doctor_dashboard' %}" class="btn btn-secondary">Cancel</a>
+            <button type="submit" class="btn btn-primary" id="save-consultation-btn">
+                <i class="fas fa-save"></i> Save Consultation Record
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+
+        // Helper to setup formset adding
+        function setupFormsetAdd(prefix, btnId, containerId, emptyFormId) {
+            const addBtn = document.getElementById(btnId);
+            const container = document.getElementById(containerId);
+            const emptyFormHTML = document.getElementById(emptyFormId).innerHTML;
+            const totalForms = document.getElementById(`id_${prefix}-TOTAL_FORMS`);
+
+            addBtn.addEventListener('click', function () {
+                const currentFormCount = parseInt(totalForms.value);
+
+                // Replace __prefix__ with the current index
+                const newFormStr = emptyFormHTML.replace(/__prefix__/g, currentFormCount);
+
+                // Insert new form
+                container.insertAdjacentHTML('beforeend', newFormStr);
+
+                // Update total forms count
+                totalForms.value = currentFormCount + 1;
+            });
+        }
+
+        setupFormsetAdd('prescriptions', 'add-prescription', 'prescription-forms', 'empty-prescription-form');
+        setupFormsetAdd('tests', 'add-test', 'test-forms', 'empty-test-form');
+
+        // Update Appointment status feedback on submit
+        document.getElementById('consultation-form').addEventListener('submit', function () {
+            const btn = document.getElementById('save-consultation-btn');
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+            btn.disabled = true;
+        });
+    });
+
+    // Handle Removing dynamically added rows
+    function removeNewRow(btn) {
+        const row = btn.closest('.formset-row');
+        row.remove();
+        // Ideally, we might need to decrement TOTAL_FORMS or re-index, 
+        // but Django's formset handles missing indices fine as long as TOTAL_FORMS is >= highest index sent
+    }
+
+    // Handle marking existing rows for deletion
+    function markForDeletion(btn) {
+        const row = btn.closest('.formset-row');
+        // Find the hidden delete checkbox and check it
+        const deleteCheckbox = row.querySelector('input[type="checkbox"][name$="-DELETE"]');
+        if (deleteCheckbox) {
+            deleteCheckbox.checked = true;
+            row.style.display = 'none'; // Hide the row
+        }
+    }
+</script>
+{% endblock %}
