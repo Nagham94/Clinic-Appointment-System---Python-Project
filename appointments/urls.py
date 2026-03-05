@@ -4,10 +4,6 @@ from . import views
 
 urlpatterns = [
     path('book/', views.book_appointment, name='book_appointment'),
-
-    # for doctor id
-    #  path('book/<int:doctor_id>/', views.book_appointment, name='book_appointment'),
-
     path('appointment/<int:pk>/delete/', views.delete_appointment, name='delete_appointment'),
     path('my-appointments/', views.my_appointments, name='my_appointments'),
     path('cancel/<int:appointment_id>/', views.cancel_appointment, name='cancel_appointment'),
@@ -17,5 +13,8 @@ urlpatterns = [
     path('staff/', views.staff_appointments, name='staff_appointments'),
 
     path('confirmed/', views.show_confirmed_appointments, name='confirmed_appointments'),
-    path('<int:pk>/checkin/', views.checkin_patient, name='checkin_patient')
+    path('<int:pk>/checkin/', views.checkin_patient, name='checkin_patient'),
+
+    path('book/<int:doctor_id>/', views.book_appointment, name='book_appointment_from_DoctorList'),
+    path('book/<int:doctor_id>/', views.book_appointment, name='book_appointment')
 ]
