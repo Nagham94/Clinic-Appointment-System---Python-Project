@@ -10,20 +10,20 @@
     --danger: #ef4444;
     --info: #38bdf8;
 
-    --bg-main: #020817;
-    --bg-surface: #0c1526;
-    --bg-soft: #111c34;
-    --bg-elevated: #162033;
+    --bg-main: #0d1424;
+    --bg-surface: #141f35;
+    --bg-soft: #1a2840;
+    --bg-elevated: #1e2f4a;
 
-    --text-main: #e8edf5;
-    --text-secondary: #c1cede;
-    --text-muted: #8899b4;
+    --text-main: #edf2fb;
+    --text-secondary: #cad5e8;
+    --text-muted: #8fa3c0;
 
-    --border: rgba(148, 163, 184, 0.15);
-    --border-hover: rgba(96, 165, 250, 0.4);
-    --shadow-sm: 0 8px 24px rgba(2, 6, 23, 0.5);
-    --shadow-md: 0 20px 48px rgba(2, 6, 23, 0.65);
-    --shadow-glow: 0 0 40px rgba(59, 130, 246, 0.12);
+    --border: rgba(148, 163, 184, 0.22);
+    --border-hover: rgba(96, 165, 250, 0.5);
+    --shadow-sm: 0 8px 24px rgba(2, 6, 23, 0.4);
+    --shadow-md: 0 20px 48px rgba(2, 6, 23, 0.5);
+    --shadow-glow: 0 0 40px rgba(59, 130, 246, 0.15);
 
     --radius-xs: 6px;
     --radius-sm: 10px;
@@ -48,10 +48,10 @@ body {
     font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
     color: var(--text-main);
     background:
-        radial-gradient(ellipse 80% 60% at 10% -5%, rgba(59, 130, 246, 0.18), transparent 50%),
-        radial-gradient(ellipse 60% 50% at 90% 100%, rgba(34, 211, 238, 0.12), transparent 45%),
-        radial-gradient(ellipse 50% 40% at 50% 50%, rgba(52, 211, 153, 0.05), transparent 60%),
-        linear-gradient(170deg, #020817 0%, #08112a 45%, #0c1a2e 100%);
+        radial-gradient(ellipse 80% 60% at 10% -5%, rgba(59, 130, 246, 0.14), transparent 50%),
+        radial-gradient(ellipse 60% 50% at 90% 100%, rgba(34, 211, 238, 0.09), transparent 45%),
+        radial-gradient(ellipse 50% 40% at 50% 50%, rgba(52, 211, 153, 0.04), transparent 60%),
+        linear-gradient(170deg, #0d1424 0%, #111e36 45%, #152038 100%);
     background-attachment: fixed;
     line-height: 1.6;
 }
@@ -173,8 +173,8 @@ select option { background: #0c1526; color: var(--text-main); }
 .appointments-card,
 .booking-card,
 .card {
-    background: rgba(12, 21, 38, 0.75);
-    border: 1px solid var(--border);
+    background: rgba(20, 31, 53, 0.82);
+    border: 1px solid rgba(148, 163, 184, 0.22);
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-sm);
     backdrop-filter: blur(12px);
@@ -223,8 +223,8 @@ tbody tr:hover { background: rgba(37, 99, 235, 0.06); }
     gap: 1rem;
     padding: 0 1.5rem;
     height: 58px;
-    background: rgba(2, 8, 23, 0.88);
-    border-bottom: 1px solid var(--border);
+    background: rgba(10, 16, 32, 0.92);
+    border-bottom: 1px solid rgba(148, 163, 184, 0.18);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
 }
@@ -417,6 +417,7 @@ tbody tr:hover { background: rgba(37, 99, 235, 0.06); }
 .status.cancelled { background: rgba(239,68,68,0.18);   color: #fca5a5; }
 .status.pending   { background: rgba(139,92,246,0.18);  color: #c4b5fd; }
 .status.checked_in { background: rgba(14,165,233,0.18); color: #7dd3fc; }
+.status.no_show    { background: rgba(220,38,38,0.18);  color: #fecaca; }
 
 /* ── Form groups ── */
 .form-group {

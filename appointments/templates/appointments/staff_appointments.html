@@ -1,70 +1,152 @@
 {% extends 'base.html' %}
 {% block title %}Appointments - Staff{% endblock %}
 
+{% block extra_css %}
+<style>
+    input[type="date"] {
+        color-scheme: dark;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container" style="max-width:1100px; margin:1.25rem auto;">
-  <h1>Appointments</h1>
+<div class="dashboard-container fade-in-up">
 
-  <form method="get" style="display:flex; gap:0.5rem; flex-wrap:wrap; margin-bottom:1rem;">
-    <input type="text" name="q" placeholder="Search by appointment ID or patient name" value="{{ selected.q|default:'' }}" style="flex:1; padding:0.5rem;" />
+    <!-- ══════ HEADER ══════ -->
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem; flex-wrap:wrap; gap:1rem;">
+        <div>
+            <div class="section-title"><i class="fa-solid fa-calendar-days"></i> Staff Panel</div>
+            <h1 style="margin:0; font-size:1.75rem;">Appointments</h1>
+            <p style="color:var(--text-muted); margin:0.3rem 0 0; font-size:0.9rem;">Search and filter all appointment records.</p>
+        </div>
+    </div>
 
-    <select name="status" style="padding:0.5rem;">
-      <option value="">All Statuses</option>
-      {% for key, label in statuses.choices %}
-      <option value="{{ key }}" {% if selected.status == key %}selected{% endif %}>{{ label }}</option>
-      {% endfor %}
-    </select>
+    <!-- ══════ FILTER FORM ══════ -->
+    <div class="dashboard-card" style="padding:1.25rem 1.5rem; margin-bottom:1.5rem;">
+        <form method="get">
+            <div style="display:grid; grid-template-columns:2fr 1fr 1fr 1fr; gap:0.75rem; margin-bottom:0.75rem;">
 
-    {% if user.role != 'DOCTOR' %}
-    <select name="doctor" style="padding:0.5rem;">
-      <option value="">Any Doctor</option>
-      {% for d in doctors %}
-      <option value="{{ d.id }}" {% if selected.doctor_id == d.id|stringformat:"s" %}selected{% endif %}>{{ d.get_full_name|default:d.username }}</option>
-      {% endfor %}
-    </select>
-    {% else %}
-    <input type="hidden" name="doctor" value="{{ user.id }}" />
-    {% endif %}
+                <input
+                    type="text"
+                    name="q"
+                    placeholder="Search by ID or patient name…"
+                    value="{{ selected.q|default:'' }}"
+                    style="width:100%;"
+                />
 
-    <select name="patient" style="padding:0.5rem;">
-      <option value="">Any Patient</option>
-      {% for p in patients %}
-      <option value="{{ p.id }}" {% if selected.patient_id == p.id|stringformat:"s" %}selected{% endif %}>{{ p.get_full_name|default:p.username }}</option>
-      {% endfor %}
-    </select>
+                <select name="status" style="width:100%;">
+                    <option value="">All Statuses</option>
+                    {% for key, label in statuses.choices %}
+                    <option value="{{ key }}" {% if selected.status == key %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
 
-    <input type="date" name="start_date" value="{{ selected.start_date|default:'' }}" style="padding:0.4rem;" />
-    <input type="date" name="end_date" value="{{ selected.end_date|default:'' }}" style="padding:0.4rem;" />
+                {% if user.role != 'DOCTOR' %}
+                <select name="doctor" style="width:100%;">
+                    <option value="">Any Doctor</option>
+                    {% for d in doctors %}
+                    <option value="{{ d.id }}" {% if selected.doctor_id == d.id|stringformat:"s" %}selected{% endif %}>
+                        Dr. {{ d.get_full_name|default:d.username }}
+                    </option>
+                    {% endfor %}
+                </select>
+                {% else %}
+                <input type="hidden" name="doctor" value="{{ user.id }}" />
+                <div></div>
+                {% endif %}
 
-    <button class="btn-primary" type="submit" style="padding:0.5rem 0.75rem;">Filter</button>
-    <a href="{% url 'staff_appointments' %}" class="btn-secondary" style="padding:0.5rem 0.75rem; text-decoration:none;">Clear</a>
-  </form>
+                <select name="patient" style="width:100%;">
+                    <option value="">Any Patient</option>
+                    {% for p in patients %}
+                    <option value="{{ p.id }}" {% if selected.patient_id == p.id|stringformat:"s" %}selected{% endif %}>
+                        {{ p.get_full_name|default:p.username }}
+                    </option>
+                    {% endfor %}
+                </select>
 
-  <table style="width:100%; border-collapse:collapse;">
-    <thead>
-      <tr style="text-align:left; border-bottom:1px solid #ddd;">
-        <th style="padding:0.5rem;">ID</th>
-        <th style="padding:0.5rem;">Start</th>
-        <th style="padding:0.5rem;">Doctor</th>
-        <th style="padding:0.5rem;">Patient</th>
-        <th style="padding:0.5rem;">Status</th>
-        <th style="padding:0.5rem;">Reason</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for a in appointments %}
-      <tr style="border-bottom:1px solid #f1f1f1;">
-        <td style="padding:0.5rem;">{{ a.id }}</td>
-        <td style="padding:0.5rem;">{{ a.start_datetime }}</td>
-        <td style="padding:0.5rem;">{{ a.doctor.get_full_name|default:a.doctor.username }}</td>
-        <td style="padding:0.5rem;">{{ a.patient.get_full_name|default:a.patient.username }}</td>
-        <td style="padding:0.5rem;">{{ a.get_status_display }}</td>
-        <td style="padding:0.5rem;">{{ a.reason|default:'-' }}</td>
-      </tr>
-      {% empty %}
-      <tr><td colspan="6" style="padding:1rem;">No appointments found.</td></tr>
-      {% endfor %}
-    </tbody>
-  </table>
+            </div>
+
+            <div style="display:flex; gap:0.75rem; align-items:center; flex-wrap:wrap;">
+                <div style="display:flex; align-items:center; gap:0.5rem;">
+                    <label style="font-size:0.8rem; color:var(--text-muted); white-space:nowrap;">From</label>
+                    <input type="date" name="start_date" value="{{ selected.start_date|default:'' }}" style="width:auto;" />
+                </div>
+                <div style="display:flex; align-items:center; gap:0.5rem;">
+                    <label style="font-size:0.8rem; color:var(--text-muted); white-space:nowrap;">To</label>
+                    <input type="date" name="end_date" value="{{ selected.end_date|default:'' }}" style="width:auto;" />
+                </div>
+                <div style="display:flex; gap:0.5rem; margin-left:auto;">
+                    <a href="{% url 'staff_appointments' %}" class="btn btn-icon" style="text-decoration:none; font-size:0.85rem;">
+                        <i class="fa-solid fa-xmark"></i> Clear
+                    </a>
+                    <button type="submit" class="btn-primary btn-icon" style="font-size:0.85rem;">
+                        <i class="fa-solid fa-filter"></i> Filter
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- ══════ TABLE ══════ -->
+    <div class="dashboard-card" style="padding:0; overflow:hidden;">
+        <div style="padding:1.25rem 1.5rem; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+            <h3 style="margin:0; font-size:1rem;">Results</h3>
+            <span class="days-count-badge">{{ appointments|length }} appointment{{ appointments|length|pluralize }}</span>
+        </div>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Date & Time</th>
+                        <th>Doctor</th>
+                        <th>Patient</th>
+                        <th>Status</th>
+                        <th>Reason</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for a in appointments %}
+                    <tr>
+                        <td style="font-size:0.8rem; color:var(--text-muted); font-family:'Syne',sans-serif; font-weight:700;">
+                            APT-{{ a.id }}
+                        </td>
+                        <td style="color:var(--text-secondary);">
+                            {{ a.start_datetime|date:"M d, Y" }}
+                            <span style="display:block; font-size:0.78rem; color:var(--text-muted);">
+                                {{ a.start_datetime|time:"h:i A" }} – {{ a.end_datetime|time:"h:i A" }}
+                            </span>
+                        </td>
+                        <td style="font-weight:600; color:var(--text-main);">
+                            Dr. {{ a.doctor.get_full_name|default:a.doctor.username }}
+                        </td>
+                        <td style="color:var(--text-secondary);">
+                            {{ a.patient.get_full_name|default:a.patient.username }}
+                        </td>
+                        <td>
+                            <span class="status {{ a.status|lower }}">
+                                {% if a.status == 'NO_SHOW' %}Didn't Show
+                                {% elif a.status == 'CHECKED_IN' %}Checked In
+                                {% else %}{{ a.status|capfirst|lower|title }}
+                                {% endif %}
+                            </span>
+                        </td>
+                        <td style="color:var(--text-muted); font-size:0.85rem; max-width:200px;">
+                            {{ a.reason|default:'—'|truncatechars:50 }}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="empty">
+                            <i class="fa-regular fa-calendar-xmark" style="font-size:1.6rem; display:block; margin-bottom:0.6rem; opacity:0.35;"></i>
+                            No appointments found matching your filters.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
 </div>
 {% endblock %}

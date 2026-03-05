@@ -90,13 +90,13 @@ def book_appointment(request):
 
 @login_required
 def my_appointments(request):
-    
-    appointments = Appointment.objects.filter(patient=request.user)
+    appointments = Appointment.objects.filter(
+        patient=request.user
+    ).order_by('-start_datetime')
 
     return render(request, 'appointments/my_appointments.html', {
         'appointments': appointments
     })
-
 
 @login_required
 def cancel_appointment(request, appointment_id):
@@ -135,6 +135,7 @@ def delete_appointment(request, pk):
     return redirect('my_appointments')
 
 @login_required
+@role_required(["PATIENT", "RECEPTIONIST"])
 def reschedule_appointment(request, appointment_id):
     appointment = get_object_or_404(Appointment, id=appointment_id)
 
@@ -251,33 +252,35 @@ def show_confirmed_appointments(request):
     """
     Shows all CONFIRMED appointments.
     Doctors only see their own; receptionists/admins see all.
+    Defaults to today's date if no date filter is provided.
     """
-
     qs = Appointment.objects.select_related('patient', 'doctor').filter(status='CONFIRMED')
+
     if request.user.role == 'DOCTOR':
         qs = qs.filter(doctor=request.user)
-    
+
     selected_date = request.GET.get('date')
-    if selected_date:
-        try:
-            # filter by date only (ignore time) using start_datetime__date
-            date_obj = datetime.fromisoformat(selected_date).date()
-            qs = qs.filter(start_datetime__date=date_obj)
-        except ValueError:
-            messages.warning(request, 'Invalid date format.')
-    
+
+    # Default to today if no date provided
+    if not selected_date:
+        selected_date = timezone.localtime().date().isoformat()
+
+    try:
+        date_obj = datetime.fromisoformat(selected_date).date()
+        qs = qs.filter(start_datetime__date=date_obj)
+    except ValueError:
+        messages.warning(request, 'Invalid date format.')
+
     return render(request, 'appointments/confirmed_appointments.html', {
-        # limit to 200 most recent to avoid performance issues, and order by start time descending so upcoming appointments show first
-        'appointments': qs.order_by('-start_datetime')[:200],
-        'selected_date': selected_date
+        'appointments': qs.order_by('start_datetime')[:200],
+        'selected_date': selected_date,
     })
 
-
 @login_required
-@role_required(["RECEPTIONIST", "ADMIN"])
+@role_required(["RECEPTIONIST", "DOCTOR"])
 def mark_no_show(request, pk):
     """
-    Receptionist marks an appointment as No Show.
+    Receptionist and Doctor marks an appointment as No Show.
     Only CONFIRMED appointments past their start time can be marked as no show.
     """
     appointment = get_object_or_404(Appointment, id=pk)

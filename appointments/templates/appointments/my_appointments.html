@@ -51,7 +51,13 @@
                         </td>
                         <td>
                             <span class="status {{ appointment.status|lower }}">
-                                {{ appointment.status }}
+                                {% if appointment.status == 'NO_SHOW' %}
+                                    No Show
+                                {% elif appointment.status == 'CHECKED_IN' %}
+                                    Checked In
+                                {% else %}
+                                    {{ appointment.status }}
+                                {% endif %}
                             </span>
                         </td>
                         <td>
@@ -90,6 +96,15 @@
                             {% else %}
                             <span style="color:var(--text-muted); font-size:0.85rem;">No record</span>
                             {% endif %}
+                            {% elif appointment.status == 'NO_SHOW' %}
+                            <form method="POST" action="{% url 'delete_appointment' appointment.id %}"
+                                style="display:inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="cancel-btn"
+                                    onclick="return confirm('Delete this record permanently?');">
+                                    <i class="fa-solid fa-trash"></i> Delete
+                                </button>
+                            </form>
 
                             {% else %}
                             <span style="color:var(--text-muted); font-size:0.85rem;">—</span>
