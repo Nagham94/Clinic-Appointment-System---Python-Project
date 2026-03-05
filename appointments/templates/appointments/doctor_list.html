@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Our Doctors{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+
+    <h2 style="margin-bottom:2rem;">Our Doctors</h2>
+
+    <div class="dashboard-grid"
+        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;">
+
+        {% for doctor in doctors %}
+        <div class="dashboard-card" style="text-align:center; padding:1.5rem;">
+
+            <!-- Doctor Image -->
+            {% if doctor.doctorprofile.image %}
+                <img src="{{ doctor.doctorprofile.image.url }}"
+                     style="width:100px; height:100px; border-radius:50%; object-fit:cover; margin-bottom:1rem;">
+            {% else %}
+                <div style="width:100px; height:100px; border-radius:50%;
+                            background:#eee; margin:auto; margin-bottom:1rem;"></div>
+            {% endif %}
+
+            <!-- Doctor Name -->
+            <h3>Dr. {{ doctor.get_full_name|default:doctor.username }}</h3>
+
+            <!-- Specialization -->
+            <p style="color:var(--accent); font-weight:600;">
+                {{ doctor.doctorprofile.specialization|default:"General Medicine" }}
+            </p>
+
+            <!-- Book Button -->
+            <a href="{% url 'book_appointment_from_DoctorList' doctor.id %}"
+               class="btn-primary"
+               style="text-decoration:none; display:inline-block; margin-top:1rem;">
+                Book Appointment
+            </a>
+
+        </div>
+        {% empty %}
+            <p>No doctors available.</p>
+        {% endfor %}
+
+    </div>
+</div>
+{% endblock %}

@@ -37,7 +37,7 @@ def create_consultation(request, appointment_id):
             test_formset.instance = consultation
             test_formset.save()
 
-            # Mark appointment as completed
+            
             if appointment.status != 'COMPLETED':
                 appointment.status = 'COMPLETED'
                 appointment.save()
@@ -59,11 +59,48 @@ def create_consultation(request, appointment_id):
 
 
 @login_required
+@user_passes_test(is_doctor)
+def edit_consultation(request, consultation_id):
+    consultation = get_object_or_404(Consultation, id=consultation_id)
+    appointment = consultation.appointment
+
+    if appointment.doctor != request.user:
+        messages.error(request, "You can only edit consultations for your own appointments.")
+        return redirect('doctor_dashboard')
+
+    if request.method == 'POST':
+        form = ConsultationForm(request.POST, instance=consultation)
+        prescription_formset = PrescriptionFormSet(request.POST, instance=consultation)
+        test_formset = RequestedTestFormSet(request.POST, instance=consultation)
+
+        if form.is_valid() and prescription_formset.is_valid() and test_formset.is_valid():
+            form.save()
+            prescription_formset.save()
+            test_formset.save()
+
+            messages.success(request, "Consultation record updated successfully.")
+            return redirect('consultation_detail', consultation_id=consultation.id)
+    else:
+        form = ConsultationForm(instance=consultation)
+        prescription_formset = PrescriptionFormSet(instance=consultation)
+        test_formset = RequestedTestFormSet(instance=consultation)
+
+    context = {
+        'form': form,
+        'prescription_formset': prescription_formset,
+        'test_formset': test_formset,
+        'appointment': appointment,
+        'consultation': consultation,
+    }
+    return render(request, 'medical/edit_consultation.html', context)
+
+
+@login_required
 def consultation_detail(request, consultation_id):
     consultation = get_object_or_404(Consultation, id=consultation_id)
     appointment = consultation.appointment
 
-    # Restrict access
+    
     if request.user.role == 'RECEPTIONIST':
          messages.error(request, "Receptionists do not have access to medical records.")
          return redirect('dashboard_redirect')

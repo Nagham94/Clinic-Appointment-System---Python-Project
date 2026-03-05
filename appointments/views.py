@@ -12,7 +12,9 @@ from django.db import IntegrityError
 from django.db import transaction
 from django.db.models import Q
 from accounts.decorators import role_required
+from accounts.models import User
 
+# from scheduling.models import
 
 # User model import for referencing in views
 User = get_user_model()
@@ -122,7 +124,6 @@ def cancel_appointment(request, appointment_id):
 
     return render(request, 'appointments/cancel_confirm.html', {'appointment': appointment})
 
-
 @login_required
 def delete_appointment(request, pk):
     appointment = get_object_or_404(Appointment, id=pk)
@@ -229,7 +230,6 @@ def reschedule_appointment(request, appointment_id):
         'today': timezone.now().date(),
     })
 
-
 def confirm_appointment(request, pk):
     appointment = get_object_or_404(Appointment, id=pk)
 
@@ -244,7 +244,6 @@ def confirm_appointment(request, pk):
         messages.success(request, "Appointment Confirmed Successfully.")
 
     return redirect('queue_manager')
-
 
 @login_required
 @role_required(["DOCTOR", "RECEPTIONIST", "ADMIN"])
@@ -420,4 +419,88 @@ def staff_appointments(request):
 
     return render(request, 'appointments/staff_appointments.html', context)
 
+@login_required
+def my_appointments(request):
+    appointments = Appointment.objects.filter(patient=request.user)
 
+    return render(request, 'appointments/my_appointments.html', {
+        'appointments': appointments
+    })
+
+def doctor_list_view(request):
+    doctors = User.objects.filter(role='DOCTOR')
+
+    context = {
+        'doctors': doctors
+    }
+
+    return render(request, 'appointments/doctor_list.html', context)
+# shahdd
+def book_appointment_from_DoctorList(request, doctor_id):
+    if request.method == 'POST':
+        doctor_id = request.POST.get('doctor')
+        reason = request.POST.get('reason')
+        start_str = request.POST.get('start_datetime')
+        end_str = request.POST.get('end_datetime')
+
+        try:
+            start_datetime = timezone.make_aware(datetime.fromisoformat(start_str))
+            end_datetime = timezone.make_aware(datetime.fromisoformat(end_str))
+        except (ValueError, TypeError):
+            messages.error(request, 'Invalid slot selected.')
+            return redirect('book_appointment')
+
+        if start_datetime < timezone.now():
+            messages.error(request, 'Cannot book an appointment in the past.')
+            return redirect('book_appointment')
+
+        doctor = get_object_or_404(User, id=doctor_id, role='DOCTOR')
+
+        # Validate submitted slot exists in generated slots
+        available_slots = generate_daily_slots(doctor, start_datetime.date())
+        naive_start = start_datetime.replace(tzinfo=None)
+        naive_end = end_datetime.replace(tzinfo=None)
+
+        if (naive_start, naive_end) not in available_slots:
+            messages.error(request, 'This slot is not available. Please choose another.')
+            return redirect('book_appointment')
+
+        # Check patient doesn't have overlapping appointment
+        if Appointment.objects.filter(
+            patient=request.user,
+            status__in=['REQUESTED', 'CONFIRMED'],
+            start_datetime__lt=end_datetime,
+            end_datetime__gt=start_datetime
+        ).exists():
+            messages.error(request, 'You already have an appointment during this time.')
+            return redirect('book_appointment')
+
+        # Direct DB check to avoid naive/aware mismatch bug in generate_daily_slots
+        if Appointment.objects.filter(
+            doctor=doctor,
+            start_datetime=start_datetime,
+            status__in=['REQUESTED', 'CONFIRMED']
+        ).exists():
+            messages.error(request, 'This slot is no longer available. Please choose another.')
+            return redirect('book_appointment')
+
+        # Handle race condition where two patients book the same slot simultaneously
+        try:
+            with transaction.atomic():
+                Appointment.objects.create(
+                    patient=request.user,
+                    doctor=doctor,
+                    start_datetime=start_datetime,
+                    end_datetime=end_datetime,
+                    reason=reason,
+                    status='REQUESTED'
+                )
+        except IntegrityError:
+            messages.error(request, 'This slot was just booked by someone else. Please choose another.')
+            return redirect('book_appointment')
+
+        messages.success(request, 'Your appointment has been requested successfully.')
+        return redirect('patient_dashboard')
+
+    doctors = User.objects.filter(role='DOCTOR')
+    return render(request, "appointments/book_appointment.html", {"doctor": doctors})
