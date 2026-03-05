@@ -13,36 +13,18 @@
 
     <div class="dashboard-grid">
 
-        <!-- Pending Requests -->
+          <!-- Queue Management -->
         <div class="dashboard-card" style="padding:1.4rem;">
-            <div class="section-title"><i class="fa-regular fa-clock"></i> Pending</div>
-            <h3 style="margin:0 0 1rem;">Booking Requests</h3>
-
-            {% for appointment in appointments %}
-                {% if appointment.status == 'REQUESTED' %}
-                <div class="queue-item">
-                    <p style="margin:0 0 0.25rem; font-weight:600; color:var(--text-main);">{{ appointment.patient.get_full_name }}</p>
-                    <p style="margin:0 0 0.25rem; font-size:0.83rem; color:var(--text-muted);">Dr. {{ appointment.doctor.get_full_name }}</p>
-                    <p style="margin:0 0 0.6rem; font-size:0.82rem; color:var(--text-muted);"><i class="fa-regular fa-clock" style="margin-right:0.3rem;"></i>{{ appointment.start_datetime }}</p>
-                    <div style="display:flex; gap:0.5rem;">
-                        <a href="{% url 'queue_manager' %}#apt-{{ appointment.id }}" class="btn btn-small btn-icon" style="text-decoration:none; color:var(--accent);">
-                            <i class="fa-solid fa-check"></i> Confirm
-                        </a>
-                        <form method="POST" action="{% url 'cancel_appointment' appointment.id %}" style="display:inline;">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-danger btn-small" onclick="return confirm('Cancel this request?');">
-                                <i class="fa-solid fa-xmark"></i> Cancel
-                            </button>
-                        </form>
-                    </div>
-                </div>
-                {% endif %}
-            {% empty %}
-                <div style="text-align:center; padding:1.5rem 0; color:var(--text-muted); font-size:0.88rem;">
-                    <i class="fa-solid fa-inbox" style="font-size:1.4rem; display:block; margin-bottom:0.5rem; opacity:0.4;"></i>
-                    No pending requests.
-                </div>
-            {% endfor %}
+            <div class="section-title"><i class="fa-solid fa-list-ol"></i> Queue</div>
+            <h3 style="margin:0 0 0.5rem;">Queue Manager</h3>
+            <p style="color:var(--text-muted); font-size:0.88rem; margin-bottom:1.25rem;">View and manage all patient appointment requests.</p>
+            <a href="{% url 'queue_manager' %}" class="btn btn-icon" style="text-decoration:none; font-size:0.85rem; width: 65%;">
+                <i class="fa-solid fa-list"></i> Open Queue Manager
+            </a>
+            
+            <a href="{% url 'staff_appointments' %}" class="btn btn-icon" style="text-decoration:none; font-size:0.85rem; width: 65%; margin-top: 10px;">
+                <i class="fa-solid fa-calendar-days"></i> Search Appointments
+            </a>
         </div>
 
         <!-- Today's Confirmed -->
@@ -56,19 +38,7 @@
             
         </div>
 
-        <!-- Queue Management -->
-        <div class="dashboard-card" style="padding:1.4rem;">
-            <div class="section-title"><i class="fa-solid fa-list-ol"></i> Queue</div>
-            <h3 style="margin:0 0 0.5rem;">Queue Manager</h3>
-            <p style="color:var(--text-muted); font-size:0.88rem; margin-bottom:1.25rem;">View and manage all patient appointment requests.</p>
-            <a href="{% url 'queue_manager' %}" class="btn btn-icon" style="text-decoration:none; font-size:0.85rem; width: 65%;">
-                <i class="fa-solid fa-list"></i> Open Queue Manager
-            </a>
-            
-            <a href="{% url 'staff_appointments' %}" class="btn btn-icon" style="text-decoration:none; font-size:0.85rem; width: 65%; margin-top: 10px;">
-                <i class="fa-solid fa-calendar-days"></i> Search Appointments
-            </a>
-        </div>
+      
 
         <!-- Doctor Schedules -->
         <div class="dashboard-card" style="padding:1.4rem;">
