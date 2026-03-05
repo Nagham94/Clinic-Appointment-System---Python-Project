@@ -160,6 +160,9 @@ def queue_manager_view(request):
         status='REQUESTED'
     ).order_by('start_datetime')
 
+    if request.user.is_authenticated and request.user.role == 'DOCTOR':
+        requested_appointments = requested_appointments.filter(doctor=request.user)
+
     context = {
         'appointments': requested_appointments
     }

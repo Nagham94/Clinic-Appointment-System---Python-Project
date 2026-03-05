@@ -202,12 +202,24 @@
                         </div>
 
                     {% elif active_status == 'COMPLETED' %}
+                        <a href="{% url 'consultation_detail' item.appointment.consultation.id %}"
+                        class="btn btn-icon btn-small" style="text-decoration:none; font-size:0.82rem;">
+                        <i class="fa-solid fa-file-waveform"></i> View Record
+                    </a>
                         <span class="status completed" style="display:inline-flex; align-items:center; gap:0.3rem;">
                             <i class="fa-solid fa-circle-check"></i> Completed
                         </span>
 
                     {% else %}
-                        <span class="status confirmed" style="display:inline-block;">Confirmed</span>
+
+                     <form method="post" action="{% url 'mark_no_show' item.appointment.pk  %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger btn-small btn-icon" onclick="return confirm('Mark this appointment as no-show?');">
+                            <i class="fa-solid fa-user-slash"></i> No-Show
+                        </button>
+                    
+                        <span class="status confirmed" style="display:inline-block; ">Confirmed</span>
+                        
                     {% endif %}
                 </div>
 

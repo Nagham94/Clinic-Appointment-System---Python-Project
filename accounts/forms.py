@@ -2,6 +2,8 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from .models import User, PatientProfile, DoctorProfile, ReceptionistProfile
 from django.contrib.auth import authenticate
+from django.utils import timezone
+import re
 
 class PatientRegistrationForm(UserCreationForm):
     first_name = forms.CharField(max_length=30, required=True)
@@ -93,6 +95,37 @@ class PatientProfileForm(forms.ModelForm):
         widgets = {
             'date_of_birth': forms.DateInput(attrs={'type': 'date'}),
         }
+
+    # phone number validation
+    def clean_phone(self):
+        phone = self.cleaned_data.get('phone', '').strip()
+
+        if phone:
+            egyptian_phone_regex = re.compile(
+                r'^(\+20|0020)?0(10|11|12|15)\d{8}$'
+            )
+            cleaned_phone = re.sub(r'[\s\-]', '', phone)
+            if not egyptian_phone_regex.match(cleaned_phone):
+                raise forms.ValidationError(
+                    "Enter a valid Egyptian phone number. "
+                    "Valid Egyptian operators start with 010, 011, 012, or 015, "
+                    "e.g. 01012345678 or +201012345678."
+                )
+
+        return phone
+
+    # dob validation
+    def clean_date_of_birth(self):
+        dob = self.cleaned_data.get('date_of_birth')
+        if dob:  
+            today = timezone.now().date()
+
+            if dob > today:
+                raise forms.ValidationError(
+                    "Date of birth cannot be in the future."
+                )
+
+        return dob
 
 class DoctorProfileForm(forms.ModelForm):
     class Meta:
