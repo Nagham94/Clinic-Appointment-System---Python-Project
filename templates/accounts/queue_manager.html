@@ -52,7 +52,7 @@
                         </button>
                     </form>
 
-                   {% if request.user.role == 'Receptionist' %}
+                   {% if request.user.role == 'RECEPTIONIST' %}
                     <a href="{% url 'reschedule_appointment' appointment.id %}"
                         class="btn btn-warning btn-small btn-icon" style="text-decoration:none;">
                         <i class="fa-solid fa-sync"></i> Reschedule
