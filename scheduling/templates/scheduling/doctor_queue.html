@@ -2,6 +2,26 @@
 {% load tz %}
 {% block title %}Patient Queue - ClinicLife{% endblock %}
 
+{% block extra_css %}
+<style>
+    .stat-card-active { outline-offset: 2px; }
+    .stat-card-active-primary { outline: 2px solid var(--primary); }
+    .stat-card-active-info    { outline: 2px solid var(--info); }
+    .stat-card-active-success { outline: 2px solid var(--success); }
+
+    .queue-position-badge {
+        width: 38px; height: 38px; border-radius: 50%;
+        color: #fff; display: flex; align-items: center; justify-content: center;
+        font-weight: 700; font-size: 0.95rem; font-family: 'Syne', sans-serif; flex-shrink: 0;
+    }
+    .queue-badge-success { background: var(--success); }
+    .queue-badge-info    { background: var(--info); }
+    .queue-badge-accent  { background: var(--accent); }
+
+    .queue-item-completed { border-left: 3px solid var(--success); opacity: 0.88; }
+</style>
+{% endblock %}
+
 {% block content %}
 {% timezone "Africa/Cairo" %}
 <div class="dashboard-container fade-in-up">
@@ -40,8 +60,8 @@
         style="display:grid; grid-template-columns:repeat(4,1fr); gap:1rem; margin-bottom:1.5rem;">
 
         <a href="?status=CHECKED_IN" style="text-decoration:none;">
-            <div class="dashboard-card"
-                style="padding:1.15rem; text-align:center; border-left:3px solid var(--primary); {% if active_status == 'CHECKED_IN' %}outline:2px solid var(--primary); outline-offset:2px;{% endif %}">
+            <div class="dashboard-card {% if active_status == 'CHECKED_IN' %}stat-card-active stat-card-active-primary{% endif %}"
+                style="padding:1.15rem; text-align:center; border-left:3px solid var(--primary);">
                 <div class="stat-icon blue" style="margin:0 auto 0.5rem;">
                     <i class="fa-solid fa-users"></i>
                 </div>
@@ -51,8 +71,8 @@
         </a>
 
         <a href="?status=CONFIRMED" style="text-decoration:none;">
-            <div class="dashboard-card"
-                style="padding:1.15rem; text-align:center; border-left:3px solid var(--info); {% if active_status == 'CONFIRMED' %}outline:2px solid var(--info); outline-offset:2px;{% endif %}">
+            <div class="dashboard-card {% if active_status == 'CONFIRMED' %}stat-card-active stat-card-active-info{% endif %}"
+                style="padding:1.15rem; text-align:center; border-left:3px solid var(--info);">
                 <div class="stat-icon cyan" style="margin:0 auto 0.5rem;">
                     <i class="fa-solid fa-calendar-check"></i>
                 </div>
@@ -62,8 +82,8 @@
         </a>
 
         <a href="?status=COMPLETED" style="text-decoration:none;">
-            <div class="dashboard-card"
-                style="padding:1.15rem; text-align:center; border-left:3px solid var(--success); {% if active_status == 'COMPLETED' %}outline:2px solid var(--success); outline-offset:2px;{% endif %}">
+            <div class="dashboard-card {% if active_status == 'COMPLETED' %}stat-card-active stat-card-active-success{% endif %}"
+                style="padding:1.15rem; text-align:center; border-left:3px solid var(--success);">
                 <div class="stat-icon green" style="margin:0 auto 0.5rem;">
                     <i class="fa-solid fa-circle-check"></i>
                 </div>
@@ -97,10 +117,10 @@
                     <h3 style="margin:0;">Awaiting Check-In</h3>
                 {% endif %}
             </div>
-            <span class="days-count-badge"
-                {% if active_status == 'COMPLETED' %}style="background:rgba(34,197,94,0.12); color:#86efac; border-color:rgba(34,197,94,0.2);"
-                {% elif active_status == 'CONFIRMED' %}style="background:rgba(56,189,248,0.14); color:#7dd3fc; border-color:rgba(56,189,248,0.2);"
-                {% endif %}>
+            <span class="days-count-badge
+                {% if active_status == 'COMPLETED' %}badge-success
+                {% elif active_status == 'CONFIRMED' %}badge-info
+                {% endif %}">
                 {{ queue_with_wait|length }} patient{{ queue_with_wait|length|pluralize }}
             </span>
         </div>
@@ -117,82 +137,81 @@
                 <div class="queue-item queue-item-long">
                 {% endif %}
             {% elif active_status == 'COMPLETED' %}
-                <div class="queue-item" style="border-left:3px solid var(--success); opacity:0.88;">
+                <div class="queue-item queue-item-completed">
             {% else %}
                 <div class="queue-item">
             {% endif %}
 
-            <!-- Left: Position + Patient Info -->
-            <div style="display:flex; align-items:center; gap:1rem; flex:1; min-width:250px;">
-                <div style="width:38px; height:38px; border-radius:50%;
-                    background:{% if active_status == 'COMPLETED' %}var(--success){% elif active_status == 'CONFIRMED' %}var(--info){% else %}var(--accent){% endif %};
-                    color:#fff; display:flex; align-items:center; justify-content:center;
-                    font-weight:700; font-size:0.95rem; font-family:'Syne',sans-serif; flex-shrink:0;">
-                    {{ item.position }}
-                </div>
-                <div>
-                    <p style="margin:0 0 0.25rem; font-weight:600; color:var(--text-main); font-size:0.98rem;">
-                        <i class="fa-solid fa-user" style="margin-right:0.3rem; font-size:0.82rem; opacity:0.5;"></i>
-                        {{ item.appointment.patient.get_full_name|default:item.appointment.patient.username }}
-                    </p>
-                    <p style="margin:0 0 0.15rem; font-size:0.82rem; color:var(--text-muted);">
-                        <i class="fa-regular fa-clock" style="margin-right:0.3rem;"></i>
-                        Appointment: {{ item.appointment.start_datetime|time:"h:i A" }} – {{ item.appointment.end_datetime|time:"h:i A" }}
-                    </p>
-                    {% if item.check_in_time %}
-                    <p style="margin:0; font-size:0.82rem; color:var(--text-muted);">
-                        <i class="fa-solid fa-right-to-bracket" style="margin-right:0.3rem;"></i>
-                        Checked in: {{ item.check_in_time|time:"h:i A" }}
-                    </p>
-                    {% endif %}
-                    {% if item.appointment.reason %}
-                    <p style="margin:0.2rem 0 0; font-size:0.78rem; color:var(--text-muted); font-style:italic;">
-                        <i class="fa-solid fa-comment" style="margin-right:0.25rem;"></i>
-                        {{ item.appointment.reason|truncatewords:12 }}
-                    </p>
-                    {% endif %}
-                </div>
-            </div>
+                <!-- Left: Position + Patient Info -->
+                <div style="display:flex; align-items:center; gap:1rem; flex:1; min-width:250px;">
 
-            <!-- Right: Badge / Action -->
-            <div style="text-align:right; flex-shrink:0;">
-                {% if active_status == 'CHECKED_IN' %}
-                    {% if item.wait_minutes < 15 %}
-                    <div class="queue-wait-badge queue-wait-ok">
-                        <span class="queue-pulse-dot queue-dot-ok"></span>
-                    {% elif item.wait_minutes < 30 %}
-                    <div class="queue-wait-badge queue-wait-warn">
-                        <span class="queue-pulse-dot queue-dot-warn"></span>
-                    {% else %}
-                    <div class="queue-wait-badge queue-wait-long">
-                        <span class="queue-pulse-dot queue-dot-long"></span>
-                    {% endif %}
-                        {% if item.wait_hours > 0 %}
-                            {{ item.wait_hours }}h {{ item.wait_mins }}m
-                        {% else %}
-                            {{ item.wait_mins }} min
+                    <div class="queue-position-badge {% if active_status == 'COMPLETED' %}queue-badge-success{% elif active_status == 'CONFIRMED' %}queue-badge-info{% else %}queue-badge-accent{% endif %}">
+                        {{ item.position }}
+                    </div>
+
+                    <div>
+                        <p style="margin:0 0 0.25rem; font-weight:600; color:var(--text-main); font-size:0.98rem;">
+                            <i class="fa-solid fa-user" style="margin-right:0.3rem; font-size:0.82rem; opacity:0.5;"></i>
+                            {{ item.appointment.patient.get_full_name|default:item.appointment.patient.username }}
+                        </p>
+                        <p style="margin:0 0 0.15rem; font-size:0.82rem; color:var(--text-muted);">
+                            <i class="fa-regular fa-clock" style="margin-right:0.3rem;"></i>
+                            Appointment: {{ item.appointment.start_datetime|time:"h:i A" }} – {{ item.appointment.end_datetime|time:"h:i A" }}
+                        </p>
+                        {% if item.check_in_time %}
+                        <p style="margin:0; font-size:0.82rem; color:var(--text-muted);">
+                            <i class="fa-solid fa-right-to-bracket" style="margin-right:0.3rem;"></i>
+                            Checked in: {{ item.check_in_time|time:"h:i A" }}
+                        </p>
+                        {% endif %}
+                        {% if item.appointment.reason %}
+                        <p style="margin:0.2rem 0 0; font-size:0.78rem; color:var(--text-muted); font-style:italic;">
+                            <i class="fa-solid fa-comment" style="margin-right:0.25rem;"></i>
+                            {{ item.appointment.reason|truncatewords:12 }}
+                        </p>
                         {% endif %}
                     </div>
-                    <p style="margin:0.25rem 0 0; font-size:0.72rem; color:var(--text-muted);">waiting</p>
-                    <div style="margin-top:0.6rem;">
-                        <a href="{% url 'create_consultation' item.appointment.id %}"
-                            class="btn btn-primary btn-small"
-                            style="font-size:0.75rem; padding:0.35rem 0.6rem; text-decoration:none; display:inline-block;">
-                            Start Consult <i class="fa-solid fa-arrow-right" style="margin-left:4px;"></i>
-                        </a>
-                    </div>
+                </div>
 
-                {% elif active_status == 'COMPLETED' %}
-                    <span class="status completed" style="display:inline-flex; align-items:center; gap:0.3rem;">
-                        <i class="fa-solid fa-circle-check"></i> Completed
-                    </span>
+                <!-- Right: Badge / Action -->
+                <div style="text-align:right; flex-shrink:0;">
+                    {% if active_status == 'CHECKED_IN' %}
+                        {% if item.wait_minutes < 15 %}
+                        <div class="queue-wait-badge queue-wait-ok">
+                            <span class="queue-pulse-dot queue-dot-ok"></span>
+                        {% elif item.wait_minutes < 30 %}
+                        <div class="queue-wait-badge queue-wait-warn">
+                            <span class="queue-pulse-dot queue-dot-warn"></span>
+                        {% else %}
+                        <div class="queue-wait-badge queue-wait-long">
+                            <span class="queue-pulse-dot queue-dot-long"></span>
+                        {% endif %}
+                            {% if item.wait_hours > 0 %}
+                                {{ item.wait_hours }}h {{ item.wait_mins }}m
+                            {% else %}
+                                {{ item.wait_mins }} min
+                            {% endif %}
+                        </div>
+                        <p style="margin:0.25rem 0 0; font-size:0.72rem; color:var(--text-muted);">waiting</p>
+                        <div style="margin-top:0.6rem;">
+                            <a href="{% url 'create_consultation' item.appointment.id %}"
+                                class="btn btn-primary btn-small"
+                                style="font-size:0.75rem; padding:0.35rem 0.6rem; text-decoration:none; display:inline-block;">
+                                Start Consult <i class="fa-solid fa-arrow-right" style="margin-left:4px;"></i>
+                            </a>
+                        </div>
 
-                {% else %}
-                    <span class="status confirmed" style="display:inline-block;">Confirmed</span>
-                {% endif %}
+                    {% elif active_status == 'COMPLETED' %}
+                        <span class="status completed" style="display:inline-flex; align-items:center; gap:0.3rem;">
+                            <i class="fa-solid fa-circle-check"></i> Completed
+                        </span>
+
+                    {% else %}
+                        <span class="status confirmed" style="display:inline-block;">Confirmed</span>
+                    {% endif %}
+                </div>
+
             </div>
-
-        </div>
         {% endfor %}
 
         {% else %}
@@ -216,7 +235,6 @@
 </div>
 {% endtimezone %}
 {% endblock %}
-
 
 {% block extra_js %}
 <script>

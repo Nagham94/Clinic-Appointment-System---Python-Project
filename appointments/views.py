@@ -221,17 +221,6 @@ def reschedule_appointment(request, appointment_id):
     })
 
 
-def mark_no_show(request, pk):
-    appointment = get_object_or_404(Appointment, id=pk)
-
-    if appointment.status == 'CONFIRMED' and appointment.start_datetime < timezone.now():
-        appointment.status = 'NO_SHOW'
-        appointment.save()
-        messages.warning(request, "Appointment marked as No Show.")
-
-    # return redirect('doctor_dashboard')
-    return redirect(request.META.get('HTTP_REFERER'))
-
 def confirm_appointment(request, pk):
     appointment = get_object_or_404(Appointment, id=pk)
 
@@ -275,6 +264,34 @@ def show_confirmed_appointments(request):
         'selected_date': selected_date
     })
 
+
+@login_required
+@role_required(["RECEPTIONIST", "ADMIN"])
+def mark_no_show(request, pk):
+    """
+    Receptionist marks an appointment as No Show.
+    Only CONFIRMED appointments past their start time can be marked as no show.
+    """
+    appointment = get_object_or_404(Appointment, id=pk)
+
+    if appointment.status != 'CONFIRMED':
+        messages.error(request, 'Only confirmed appointments can be marked as no show.')
+        return redirect(request.META.get('HTTP_REFERER') or 'confirmed_appointments')
+
+    if appointment.start_datetime >= timezone.now():
+        messages.error(request, 'Cannot mark as no show before the appointment time.')
+        return redirect(request.META.get('HTTP_REFERER') or 'confirmed_appointments')
+
+    appointment.status = 'NO_SHOW'
+    appointment.save()
+
+    messages.warning(
+        request,
+        f'{appointment.patient.get_full_name() or appointment.patient.username} has been marked as no show.'
+    )
+    
+    return redirect(request.META.get('HTTP_REFERER') or 'confirmed_appointments')
+
 @login_required
 @role_required(["RECEPTIONIST", "ADMIN"])
 def checkin_patient(request, pk):
@@ -287,22 +304,16 @@ def checkin_patient(request, pk):
 
     if appointment.status != 'CONFIRMED':
         messages.error(request, 'Only confirmed appointments can be checked in.')
-        return redirect('confirmed_appointments')
+        return redirect(request.META.get('HTTP_REFERER') or 'confirmed_appointments')
 
-    if request.method == 'POST':
-        appointment.status = 'CHECKED_IN'
-        appointment.checked_in_at = timezone.now()
-        appointment.save()
-        messages.success(
-            request,
-            f'{appointment.patient.get_full_name() or appointment.patient.username} has been checked in successfully.'
-        )
-        return redirect('confirmed_appointments')
-
-    return render(request, 'appointments/checkin_confirm.html', {
-        'appointment': appointment
-    })
-
+    appointment.status = 'CHECKED_IN'
+    appointment.checked_in_at = timezone.now()
+    appointment.save()
+    messages.success(
+        request,
+        f'{appointment.patient.get_full_name() or appointment.patient.username} has been checked in successfully.'
+    )
+    return redirect(request.META.get('HTTP_REFERER') or 'confirmed_appointments')
 """
 search and filter view for staff to manage appointments, with access control so doctors only see their own appointments but receptionists and admins can see all.
 Supports filtering by status, date, doctor, patient and a search box that looks up patient

@@ -292,9 +292,7 @@ class DoctorQueueView(LoginRequiredMixin, UserPassesTestMixin, ListView):
             start_datetime__date=today,
             status=status,
         ).select_related('patient').order_by(order)
-
-   
-
+    
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         
@@ -305,11 +303,18 @@ class DoctorQueueView(LoginRequiredMixin, UserPassesTestMixin, ListView):
         context['today'] = today
         context['active_status'] = self.request.GET.get('status', 'CHECKED_IN')
 
-        # calculate waiting time
+        # Always compute all counts independently
+        base = Appointment.objects.filter(doctor=self.request.user, start_datetime__date=today)
+
+        context['total_waiting']      = base.filter(status='CHECKED_IN').count()
+        context['completed_today']    = base.filter(status='COMPLETED').count()
+        context['no_show_today']      = base.filter(status='NO_SHOW').count()
+        context['upcoming_confirmed'] = base.filter(status='CONFIRMED').select_related('patient').order_by('start_datetime')
+
+        # Build queue_with_wait from the filtered queryset (whatever tab is active)
         queue_with_wait = []
         for position, appointment in enumerate(context['queue'], start=1):
             check_in_time = appointment.checked_in_at
-
             if check_in_time:
                 wait_delta = now - check_in_time
                 total_minutes = int(wait_delta.total_seconds() // 60)
@@ -330,25 +335,5 @@ class DoctorQueueView(LoginRequiredMixin, UserPassesTestMixin, ListView):
             })
 
         context['queue_with_wait'] = queue_with_wait
-        context['total_waiting'] = len(queue_with_wait)
-
-        # today's other appointments
-        context['upcoming_confirmed'] = Appointment.objects.filter(
-            doctor=self.request.user,
-            start_datetime__date=today,
-            status='CONFIRMED',
-        ).select_related('patient').order_by('start_datetime')
-
-        context['completed_today'] = Appointment.objects.filter(
-            doctor=self.request.user,
-            start_datetime__date=today,
-            status='COMPLETED',
-        ).count()
-
-        context['no_show_today'] = Appointment.objects.filter(
-            doctor=self.request.user,
-            start_datetime__date=today,
-            status='NO_SHOW',
-        ).count()
 
         return context

@@ -54,6 +54,8 @@
                     </p>
                     {% endif %}
                 </div>
+                <!-- Action Buttons -->
+                 <!-- Check In and No-Show -->
                 <div style="display:flex; gap:0.55rem; flex-wrap:wrap; align-items:center;">
                     {% if request.user.role == 'RECEPTIONIST' or request.user.role == 'ADMIN' %}
                     <form method="post" action="{% url 'checkin_patient' appointment.pk %}">
@@ -63,6 +65,7 @@
                         </button>
                     </form>
                     {% endif %}
+
                     <form method="post" action="{% url 'mark_no_show' appointment.pk %}">
                         {% csrf_token %}
                         <button type="submit" class="btn btn-danger btn-small btn-icon" onclick="return confirm('Mark this appointment as no-show?');">
