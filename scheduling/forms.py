@@ -33,7 +33,7 @@ class DoctorScheduleForm(forms.ModelForm):
                 choices=[(15, '15 minutes'), (30, '30 minutes')],
                 attrs={'class': 'form-select'}
             ),
-            'buffer_time': forms.NumberInput(attrs={'class': 'form-control', 'min': 0, 'max': 30}),
+            'buffer_time': forms.NumberInput(attrs={'class': 'form-control', 'min': 5, 'max': 30}),
         }
 
     def __init__(self, *args, **kwargs):
@@ -47,6 +47,10 @@ class DoctorScheduleForm(forms.ModelForm):
         end_time = cleaned_data.get('end_time')
         doctor = cleaned_data.get('doctor')
         day_of_week = cleaned_data.get('day_of_week')
+        buffer_time = cleaned_data.get('buffer_time')
+
+        if buffer_time is not None and buffer_time < 5:
+            raise forms.ValidationError("Buffer time must be at least 5 minutes.")
 
         if start_time and end_time:
             if start_time >= end_time:
