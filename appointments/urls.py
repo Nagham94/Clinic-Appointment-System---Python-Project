@@ -6,7 +6,7 @@ urlpatterns = [
     path('book/', views.book_appointment, name='book_appointment'),
 
     # for doctor id
-    #  path('book/<int:doctor_id>/', views.book_appointment, name='book_appointment'),
+      path('book/<int:doctor_id>/', views.book_appointment_from_DoctorList, name='book_appointment_from_DoctorList'),
 
     path('appointment/<int:pk>/delete/', views.delete_appointment, name='delete_appointment'),
     path('my-appointments/', views.my_appointments, name='my_appointments'),
@@ -17,5 +17,9 @@ urlpatterns = [
     path('staff/', views.staff_appointments, name='staff_appointments'),
 
     path('confirmed/', views.show_confirmed_appointments, name='confirmed_appointments'),
-    path('<int:pk>/checkin/', views.checkin_patient, name='checkin_patient')
+    path('<int:pk>/checkin/', views.checkin_patient, name='checkin_patient'),
+
+
+
+    path('doctors/', views.doctor_list_view, name='doctor_list'),
 ]
