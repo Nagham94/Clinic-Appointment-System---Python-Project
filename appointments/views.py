@@ -314,6 +314,22 @@ def checkin_patient(request, pk):
         f'{appointment.patient.get_full_name() or appointment.patient.username} has been checked in successfully.'
     )
     return redirect(request.META.get('HTTP_REFERER') or 'confirmed_appointments')
+
+@login_required
+@role_required(["DOCTOR"])
+def completed_appointments(request):
+    """
+    Shows all COMPLETED appointments for the logged-in doctor.
+    """
+    qs = Appointment.objects.select_related('patient', 'doctor').filter(
+        status='COMPLETED',
+        doctor=request.user
+    ).order_by('-start_datetime')
+
+    return render(request, 'appointments/completed_appointments.html', {
+        'appointments': qs
+    })
+
 """
 search and filter view for staff to manage appointments, with access control so doctors only see their own appointments but receptionists and admins can see all.
 Supports filtering by status, date, doctor, patient and a search box that looks up patient

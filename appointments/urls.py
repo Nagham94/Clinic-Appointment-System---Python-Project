@@ -17,5 +17,6 @@ urlpatterns = [
     path('staff/', views.staff_appointments, name='staff_appointments'),
 
     path('confirmed/', views.show_confirmed_appointments, name='confirmed_appointments'),
-    path('<int:pk>/checkin/', views.checkin_patient, name='checkin_patient')
+    path('<int:pk>/checkin/', views.checkin_patient, name='checkin_patient'),
+    path('appointments/completed/', views.completed_appointments, name='completed_appointments'),
 ]
