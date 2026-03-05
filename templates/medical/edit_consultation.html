@@ -1,0 +1,236 @@
+{% extends 'base.html' %}
+{% block title %}Edit Consultation - ClinicLife{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        function addForm(listId, prefix) {
+            const list = document.getElementById(listId);
+            const totalForms = document.getElementById(`id_${prefix}-TOTAL_FORMS`);
+            const currentCount = parseInt(totalForms.value);
+
+            const firstItem = list.querySelector(`.${prefix.slice(0, -1)}-item`);
+            const newForm = firstItem.cloneNode(true);
+
+            // Clear inputs and update names/IDs
+            newForm.querySelectorAll('input, select, textarea').forEach(input => {
+                const nameMatch = input.name.match(new RegExp(`${prefix}-(\\d+)-`));
+                if (nameMatch) {
+                    input.name = input.name.replace(`${prefix}-${nameMatch[1]}-`, `${prefix}-${currentCount}-`);
+                    input.id = input.id.replace(`id_${prefix}-${nameMatch[1]}-`, `id_${prefix}-${currentCount}-`);
+                }
+                input.value = '';
+                if (input.type === 'checkbox') input.checked = false;
+            });
+
+            // Update labels
+            newForm.querySelectorAll('label').forEach(label => {
+                if (label.getAttribute('for')) {
+                    const idMatch = label.getAttribute('for').match(new RegExp(`id_${prefix}-(\\d+)-`));
+                    if (idMatch) {
+                        label.setAttribute('for', label.getAttribute('for').replace(`id_${prefix}-${idMatch[1]}-`, `id_${prefix}-${currentCount}-`));
+                    }
+                }
+            });
+
+            list.appendChild(newForm);
+            totalForms.value = currentCount + 1;
+
+            // Add event listener to new remove button
+            newForm.querySelector('.remove-btn').addEventListener('click', function () {
+                if (list.children.length > 1) {
+                    newForm.remove();
+                    totalForms.value = parseInt(totalForms.value) - 1;
+                    // Note: This logic for TOTAL_FORMS is simplified for new forms only. 
+                    // Django management form usually requires sequential IDs.
+                }
+            });
+        }
+
+        document.getElementById('add-prescription').addEventListener('click', () => addForm('prescription-list', 'prescriptions'));
+        document.getElementById('add-test').addEventListener('click', () => addForm('test-list', 'tests'));
+
+        // Handle initial remove buttons
+        document.querySelectorAll('.remove-btn').forEach(btn => {
+            btn.addEventListener('click', function () {
+                const list = this.closest('[id$="-list"]');
+                const item = this.closest('[class$="-item"]');
+                if (list.children.length > 1) {
+                    item.remove();
+                    const prefix = list.id.split('-')[0] + 's';
+                    const totalForms = document.getElementById(`id_${prefix}-TOTAL_FORMS`);
+                    totalForms.value = parseInt(totalForms.value) - 1;
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <div class="dashboard-card" style="max-width: 900px; margin: 0 auto;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+            <h2><i class="fa-solid fa-file-medical" style="color: var(--accent); margin-right: 12px;"></i>Edit
+                Consultation
+                Record</h2>
+            <span class="badge"
+                style="background: var(--accent-light); color: var(--accent); padding: 0.5rem 1rem; border-radius: 20px;">
+                Patient:
+                {% if appointment.patient.get_full_name %}
+                {{ appointment.patient.get_full_name }}
+                {% else %}
+                {{ appointment.patient.username }}
+                {% endif %}
+            </span>
+        </div>
+
+        <form method="post" class="emr-form">
+            {% csrf_token %}
+
+            <div class="form-section">
+                <h3
+                    style="border-bottom: 2px solid var(--border-color); padding-bottom: 0.5rem; margin-bottom: 1.5rem;">
+                    Clinical Assessment</h3>
+                <div class="form-group">
+                    <label for="{{ form.diagnosis.id_for_label }}">Diagnosis</label>
+                    {{ form.diagnosis }}
+                    {% if form.diagnosis.errors %}
+                    <div class="error-msg">{{ form.diagnosis.errors }}</div>
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.notes.id_for_label }}">Clinical Notes (Optional)</label>
+                    {{ form.notes }}
+                    {% if form.notes.errors %}
+                    <div class="error-msg">{{ form.notes.errors }}</div>
+                    {% endif %}
+                    <small style="color: var(--text-muted);">These notes will be hidden from receptionists.</small>
+                </div>
+            </div>
+
+            <div class="form-section" style="margin-top: 2rem;">
+                <h3
+                    style="border-bottom: 2px solid var(--border-color); padding-bottom: 0.5rem; margin-bottom: 1.5rem;">
+                    Prescription</h3>
+                {{ prescription_formset.management_form }}
+                <div id="prescription-list">
+                    {% for p_form in prescription_formset %}
+                    <div class="prescription-item"
+                        style="display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 1rem; margin-bottom: 1rem; background: var(--bg-card); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color);">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label style="font-size: 0.8rem;">Drug Name</label>
+                            {{ p_form.drug_name }}
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label style="font-size: 0.8rem;">Dosage</label>
+                            {{ p_form.dosage }}
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label style="font-size: 0.8rem;">Duration</label>
+                            {{ p_form.duration }}
+                        </div>
+                        <div style="display: flex; align-items: flex-end; padding-bottom: 8px;">
+                            {% if p_form.instance.pk %}
+                            <div style="display:none">{{ p_form.DELETE }}{{ p_form.id }}</div>
+                            {% endif %}
+                            <button type="button" class="remove-btn"
+                                style="background: none; border: none; color: #ef4444; cursor: pointer; font-size: 1.2rem;"
+                                title="Remove">
+                                <i class="fa-solid fa-circle-minus"></i>
+                            </button>
+                        </div>
+                        {% for hidden in p_form.hidden_fields %}
+                        {{ hidden }}
+                        {% endfor %}
+                    </div>
+                    {% endfor %}
+                </div>
+                <button type="button" id="add-prescription" class="btn-secondary"
+                    style="margin-top: 0.5rem; padding: 0.5rem 1rem; font-size: 0.85rem; border: 1px dashed var(--accent);">
+                    <i class="fa-solid fa-plus" style="margin-right: 6px;"></i> Add Medication
+                </button>
+            </div>
+
+            <div class="form-section" style="margin-top: 2rem;">
+                <h3
+                    style="border-bottom: 2px solid var(--border-color); padding-bottom: 0.5rem; margin-bottom: 1.5rem;">
+                    Requested Tests</h3>
+                {{ test_formset.management_form }}
+                <div id="test-list">
+                    {% for t_form in test_formset %}
+                    <div class="test-item"
+                        style="display: grid; grid-template-columns: 1fr auto; gap: 1rem; margin-bottom: 1rem; background: var(--bg-card); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color);">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label style="font-size: 0.8rem;">Test Name</label>
+                            {{ t_form.test_name }}
+                        </div>
+                        <div style="display: flex; align-items: flex-end; padding-bottom: 8px;">
+                            {% if t_form.instance.pk %}
+                            <div style="display:none">{{ t_form.DELETE }}{{ t_form.id }}</div>
+                            {% endif %}
+                            <button type="button" class="remove-btn"
+                                style="background: none; border: none; color: #ef4444; cursor: pointer; font-size: 1.2rem;"
+                                title="Remove">
+                                <i class="fa-solid fa-circle-minus"></i>
+                            </button>
+                        </div>
+                        {% for hidden in t_form.hidden_fields %}
+                        {{ hidden }}
+                        {% endfor %}
+                    </div>
+                    {% endfor %}
+                </div>
+                <button type="button" id="add-test" class="btn-secondary"
+                    style="margin-top: 0.5rem; padding: 0.5rem 1rem; font-size: 0.85rem; border: 1px dashed var(--accent);">
+                    <i class="fa-solid fa-plus" style="margin-right: 6px;"></i> Add Test
+                </button>
+            </div>
+
+            <div
+                style="margin-top: 3rem; display: flex; gap: 1rem; border-top: 1px solid var(--border-color); padding-top: 2rem;">
+                <button type="submit" class="btn-primary" style="padding: 1rem 2.5rem;">
+                    <i class="fa-solid fa-save" style="margin-right: 8px;"></i> Save Changes
+                </button>
+                <a href="{% url 'consultation_detail' consultation.id %}" class="btn-secondary"
+                    style="text-decoration: none; padding: 1rem 2rem; display: flex; align-items: center;">
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    .emr-form textarea,
+    .emr-form input[type="text"] {
+        width: 100%;
+        padding: 0.8rem;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        background: var(--bg-main);
+        color: var(--text-primary);
+        font-family: inherit;
+        transition: border-color 0.3s;
+    }
+
+    .emr-form textarea:focus,
+    .emr-form input[type="text"]:focus {
+        border-color: var(--accent);
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.1);
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        color: var(--text-muted);
+    }
+
+    .prescription-item input,
+    .test-item input {
+        background: var(--bg-main) !important;
+    }
+</style>
+{% endblock %}
