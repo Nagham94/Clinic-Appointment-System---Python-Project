@@ -19,7 +19,13 @@
                 <select name="doctor" id="doctorSelect" class="field-control" required>
                     <option value="">Choose a doctor…</option>
                     {% for doctor in doctors %}
-                    <option value="{{ doctor.id }}">Dr. {{ doctor.get_full_name|default:doctor.username }}</option>
+                        <option value="{{ doctor.id }}"
+                        {% if doctor.id == selected_doctor_id %}
+                            selected
+                        {% endif %}
+                        >
+                            Dr. {{ doctor.get_full_name }}
+                        </option>
                     {% endfor %}
                 </select>
             </div>

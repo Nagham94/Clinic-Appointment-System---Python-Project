@@ -503,4 +503,10 @@ def book_appointment_from_DoctorList(request, doctor_id):
         return redirect('patient_dashboard')
 
     doctors = User.objects.filter(role='DOCTOR')
-    return render(request, "appointments/book_appointment.html", {"doctor": doctors})
+
+    context = {
+        "doctors": doctors,
+        "selected_doctor_id": doctor_id
+    }
+    # return render(request, "appointments/book_appointment.html", {"doctor": doctors})
+    return render(request, "appointments/book_appointment.html", context)
