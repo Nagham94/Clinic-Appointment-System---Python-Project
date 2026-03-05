@@ -8,7 +8,7 @@ from datetime import datetime
 from django.contrib.auth import get_user_model
 from scheduling.services import generate_daily_slots
 
-from sqlite3 import IntegrityError
+from django.db import IntegrityError
 from django.db import transaction
 from django.db.models import Q
 from accounts.decorators import role_required
@@ -129,20 +129,28 @@ def delete_appointment(request, pk):
 def reschedule_appointment(request, appointment_id):
     appointment = get_object_or_404(Appointment, id=appointment_id)
 
+    is_receptionist = request.user.role == 'RECEPTIONIST'
+    redirect_target =  ('queue_manager' if is_receptionist else 'my_appointments')
+
     # only patient who owns the appointment or receptionist can reschedule
     if request.user != appointment.patient and request.user.role != 'RECEPTIONIST':
         messages.error(request, 'You do not have permission to reschedule this appointment.')
-        return redirect('my_appointments')
+        return redirect(redirect_target)
     
     # only appointments in REQUESTED or CONFIRMED state can be rescheduled
     if appointment.status not in ['REQUESTED', 'CONFIRMED']:
         messages.error(request, 'This appointment cannot be rescheduled.')
-        return redirect('my_appointments')
+        return redirect(redirect_target)
     
     if request.method == 'POST':
         start_date_str = request.POST.get('start_datetime')
         end_date_str = request.POST.get('end_datetime')
         reason = request.POST.get('reason','')
+
+        if not start_date_str or not end_date_str:
+            messages.error(request, 'Please select a time slot.')
+            return redirect('reschedule_appointment', appointment_id=appointment_id)
+    
         try:
             start_datetime = timezone.make_aware(datetime.fromisoformat(start_date_str))
             end_datetime = timezone.make_aware(datetime.fromisoformat(end_date_str))
@@ -201,7 +209,7 @@ def reschedule_appointment(request, appointment_id):
             return redirect('reschedule_appointment', appointment_id=appointment_id)
         
         messages.success(request, 'Your appointment has been rescheduled successfully.')
-        return redirect('my_appointments')
+        return redirect(redirect_target)
     
     # GET — load the form with the doctor pre-selected
     doctors = User.objects.filter(role='DOCTOR')
@@ -302,6 +310,30 @@ def checkin_patient(request, pk):
         f'{appointment.patient.get_full_name() or appointment.patient.username} has been checked in successfully.'
     )
     return redirect(request.META.get('HTTP_REFERER') or 'confirmed_appointments')
+
+@login_required
+@role_required(["DOCTOR", "PATIENT"])
+def completed_appointments(request):
+    """
+    Shows all COMPLETED appointments.
+    Doctors see their own; patients see their own.
+    """
+    if request.user.role == 'DOCTOR':
+        qs = Appointment.objects.select_related('patient', 'doctor').filter(
+            status='COMPLETED',
+            doctor=request.user
+        ).order_by('-start_datetime')
+        template = 'appointments/completed_appointments.html'
+
+    else:  # PATIENT
+        qs = Appointment.objects.select_related('patient', 'doctor').filter(
+            status='COMPLETED',
+            patient=request.user
+        ).order_by('-start_datetime')
+        template = 'appointments/patient_completed_appointments.html'
+
+    return render(request, template, {'appointments': qs})
+
 """
 search and filter view for staff to manage appointments, with access control so doctors only see their own appointments but receptionists and admins can see all.
 Supports filtering by status, date, doctor, patient and a search box that looks up patient

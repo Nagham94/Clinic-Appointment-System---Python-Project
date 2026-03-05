@@ -4,9 +4,7 @@
 {% block content %}
 <div class="booking-wrapper fade-in-up">
 
-    <a href="{% url 'my_appointments' %}" class="back-link">
-        <i class="fa-solid fa-arrow-left"></i> Back to My Appointments
-    </a>
+
 
     <div class="booking-header">
         <p class="eyebrow">Change of Plans</p>
@@ -30,6 +28,7 @@
 
     <div class="booking-card">
         <form method="POST" id="rescheduleForm">
+           
             {% csrf_token %}
 
             <input type="hidden" name="doctor" value="{{ appointment.doctor.id }}">

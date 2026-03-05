@@ -30,9 +30,7 @@
                 </div>
             </div>
             <div style="display:flex; gap:0.5rem; align-items:center;">
-                <a href="{% url 'staff_appointments' %}" class="btn btn-icon" style="text-decoration:none; font-size:0.85rem;">
-                    <i class="fa-solid fa-calendar-lines"></i> View Appointments
-                </a>
+               
                 <a href="{% url 'update_profile' %}" class="btn btn-icon"
                     style="white-space:nowrap; text-decoration:none; font-size:0.85rem;">
                     <i class="fa-solid fa-user-pen"></i> Edit Profile
@@ -43,45 +41,7 @@
 
     <div class="dashboard-grid">
 
-        <!-- Today's Appointments -->
-        <div class="dashboard-card" style="padding:1.4rem;">
-            <div class="section-title"><i class="fa-solid fa-calendar-day"></i> Today</div>
-            <h3 style="margin:0 0 1rem;">Today's Appointments</h3>
-
-            {% for appointment in appointments %}
-            <div class="queue-item">
-                <p style="margin:0 0 0.35rem; font-weight:600; color:var(--text-main);">
-                    {{ appointment.patient.get_full_name }}
-                </p>
-                <p style="margin:0 0 0.35rem; font-size:0.84rem; color:var(--text-muted);">
-                    <i class="fa-regular fa-clock" style="margin-right:0.3rem;"></i>{{ appointment.start_datetime }}
-                </p>
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:0.5rem;">
-                    <span class="status {{ appointment.status|lower }}">{{ appointment.status }}</span>
-                    {% if appointment.status == 'CONFIRMED' and appointment.start_datetime < now %} <form method="POST"
-                        action="{% url 'mark_no_show' appointment.id %}">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-danger btn-small">No Show</button>
-                        </form>
-                        {% elif appointment.status == 'COMPLETED' %}
-                        {% if appointment.consultation %}
-                        <a href="{% url 'consultation_detail' appointment.consultation.id %}"
-                            class="btn btn-secondary btn-small" style="text-decoration:none;">View Record</a>
-                        {% else %}
-                        <a href="{% url 'create_consultation' appointment.id %}" class="btn btn-primary btn-small"
-                            style="text-decoration:none;">Add Record</a>
-                        {% endif %}
-                        {% endif %}
-                </div>
-            </div>
-            {% empty %}
-            <div style="text-align:center; padding:2rem 0; color:var(--text-muted);">
-                <i class="fa-regular fa-calendar-xmark"
-                    style="font-size:1.6rem; display:block; margin-bottom:0.5rem; opacity:0.4;"></i>
-                No appointments today.
-            </div>
-            {% endfor %}
-        </div>
+    
 
         <!-- My Schedule -->
         <div class="dashboard-card" style="padding:1.4rem;">
@@ -119,6 +79,18 @@
             
             <a href="{% url 'staff_appointments' %}" class="btn btn-icon" style="text-decoration:none; font-size:0.85rem; width: 65%; margin-top: 10px;">
                 <i class="fa-solid fa-calendar-days"></i> Search Appointments
+            </a>
+        </div>
+
+         <!-- Completed Appointments -->
+        <div class="dashboard-card" style="padding:1.4rem;">
+            <div class="section-title"><i class="fa-solid fa-clipboard-list"></i> Daily Queue</div>
+            <h3 style="margin:0 0 0.5rem;">Completed Appointments</h3>
+            <p style="color:var(--text-muted); font-size:0.88rem; margin-bottom:1.25rem;">
+                View completed appointments and their EMR.
+            </p>
+            <a href="{% url 'completed_appointments' %}" class="btn btn-icon" style="text-decoration:none; font-size:0.85rem;">
+                <i class="fa-solid fa-clipboard-list"></i> Open Completed List
             </a>
         </div>
 
