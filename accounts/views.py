@@ -121,11 +121,19 @@ def update_profile_view(request):
         'profile_form': profile_form
     })
 
-
+# shahd new
 @login_required
 @role_required([User.Roles.PATIENT])
 def patient_dashboard_view(request):
-    return render(request, 'accounts/patient_dashboard.html')
+    doctors = User.objects.filter(role='DOCTOR')
+
+    context = {
+        "doctors": doctors
+    }
+
+    return render(request, "accounts/patient_dashboard.html", context)
+# def patient_dashboard_view(request):
+#     return render(request, 'accounts/patient_dashboard.html')
 
 
 @login_required

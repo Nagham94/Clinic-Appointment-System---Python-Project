@@ -148,6 +148,25 @@
 
             </div>
         </div>
+{#    our Doctors card    #}
+        <div class="dashboard-card" style="padding:1.4rem;">
+            <h3>Our Doctors</h3>
+
+            <div class="doctors-grid">
+                {% for doctor in doctors %}
+                <div class="doctor-card">
+
+                    <h4>Dr. {{ doctor.get_full_name }}</h4>
+                    <p>{{ doctor.specialization }}</p>
+
+                    <a href="{% url 'book_appointment_from_DoctorList' doctor.id %}" class="btn-primary">
+                        Book Appointment
+                    </a>
+
+                </div>
+                {% endfor %}
+            </div>
+        </div>
 
     </div>
 </div>

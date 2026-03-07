@@ -32,12 +32,6 @@
             {% if user.is_authenticated %}
             <a href="{% url 'dashboard_redirect' %}" class="nav-item">Dashboard</a>
 
-            <a href="{% url 'doctor_list' %}" class="nav-item">View Doctors</a>
-
-{#            {% if user.is_authenticated and user.role == "PATIENT" %}#}
-{#            <a href="{% url 'doctor_list' %}" class="nav-item">View Doctors</a>#}
-{#            {% endif %}#}
-
             <a href="{% url 'update_profile' %}" class="nav-item">Profile</a>
             <a href="{% url 'logout' %}" class="nav-item logout-link">Logout</a>
             {% else %}
