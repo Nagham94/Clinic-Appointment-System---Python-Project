@@ -1,15 +1,65 @@
 {% extends 'base.html' %}
+{% load custom_tags %}
 {% block title %}Admin Dashboard - ClinicLife{% endblock %}
+
+{% block extra_css %}
+<style>
+    .analytics-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1.5rem;
+        margin-top: 1rem;
+    }
+
+    .stat-item {
+        text-align: center;
+    }
+
+    .stat-label-small {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .stat-value-big {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-main);
+    }
+
+    .stat-value-big.completed {
+        color: #10B981;
+    }
+
+    .stat-value-big.cancelled {
+        color: #EF4444;
+    }
+
+    .stat-value-big.warning {
+        color: var(--warning-color);
+    }
+
+    .analytics-card {
+        margin-bottom: 2rem;
+        padding: 1.5rem;
+        background: linear-gradient(135deg, var(--bg-card) 0%, rgba(37, 99, 235, 0.05) 100%);
+        border: 1px solid rgba(37, 99, 235, 0.1);
+    }
+</style>
+{% endblock %}
 
 {% block content %}
 <div class="dashboard-container fade-in-up">
 
     <!-- Page Header -->
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem; flex-wrap:wrap; gap:1rem;">
+    <div
+        style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem; flex-wrap:wrap; gap:1rem;">
         <div>
             <div class="section-title"><i class="fa-solid fa-shield-halved"></i> Admin Console</div>
             <h1 style="margin:0; font-size:1.9rem;">System Overview</h1>
-            <p style="color:var(--text-muted); margin:0.3rem 0 0; font-size:0.92rem;">Manage workforce, schedules, and monitor clinic activity.</p>
+            <p style="color:var(--text-muted); margin:0.3rem 0 0; font-size:0.92rem;">Manage workforce, schedules, and
+                monitor clinic activity.</p>
         </div>
         <div style="display:flex; gap:0.75rem; flex-wrap:wrap;">
             <a href="{% url 'user_list' %}" class="btn btn-icon">
@@ -21,6 +71,34 @@
             <a href="{% url 'staff_appointments' %}" class="btn btn-icon" style="text-decoration:none;">
                 <i class="fa-solid fa-calendar-days"></i> Appointments
             </a>
+            <a href="{% url 'export_appointments_csv' %}" class="btn btn-success btn-icon"
+                style="text-decoration:none;">
+                <i class="fa-solid fa-file-csv"></i> Export CSV
+            </a>
+        </div>
+    </div>
+
+    <!-- Daily Activity (Analytics) -->
+    <div class="dashboard-card analytics-card">
+        <div class="section-title" style="color: var(--primary-color);"><i class="fa-solid fa-chart-line"></i> Today's
+            Clinic Activity</div>
+        <div class="analytics-grid">
+            <div class="stat-item">
+                <div class="stat-label-small">New Requests</div>
+                <div class="stat-value-big">{% stat_display stat_total %}</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label-small">Completed</div>
+                <div class="stat-value-big completed">{% stat_display stat_completed %}</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label-small">Cancelled</div>
+                <div class="stat-value-big cancelled">{% stat_display stat_cancelled %}</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label-small">No-Shows</div>
+                <div class="stat-value-big warning">{% stat_display stat_no_show %}</div>
+            </div>
         </div>
     </div>
 
@@ -76,12 +154,15 @@
         <div class="dashboard-card" style="padding:1.4rem;">
             <div class="section-title"><i class="fa-solid fa-calendar-days"></i> Scheduling</div>
             <h3 style="margin:0 0 0.4rem;">Doctor Schedules & Exceptions</h3>
-            <p style="color:var(--text-muted); font-size:0.88rem; margin-bottom:1.25rem;">Global override for doctor availability and time-offs.</p>
+            <p style="color:var(--text-muted); font-size:0.88rem; margin-bottom:1.25rem;">Global override for doctor
+                availability and time-offs.</p>
             <div style="display:flex; gap:0.65rem; flex-wrap:wrap;">
-                <a href="{% url 'schedule_list' %}" class="btn-primary btn-icon" style="text-decoration:none; font-size:0.85rem;">
+                <a href="{% url 'schedule_list' %}" class="btn-primary btn-icon"
+                    style="text-decoration:none; font-size:0.85rem;">
                     <i class="fa-solid fa-calendar-check"></i> Schedules
                 </a>
-                <a href="{% url 'exception_list' %}" class="btn btn-icon" style="text-decoration:none; font-size:0.85rem;">
+                <a href="{% url 'exception_list' %}" class="btn btn-icon"
+                    style="text-decoration:none; font-size:0.85rem;">
                     <i class="fa-solid fa-calendar-xmark"></i> Exceptions
                 </a>
             </div>
@@ -91,20 +172,24 @@
         <div class="dashboard-card" style="padding:1.4rem;">
             <div class="section-title"><i class="fa-solid fa-sliders"></i> Account</div>
             <h3 style="margin:0 0 0.4rem;">Quick Settings</h3>
-            <p style="color:var(--text-muted); font-size:0.88rem; margin-bottom:1.25rem;">Update your admin profile and security preferences.</p>
+            <p style="color:var(--text-muted); font-size:0.88rem; margin-bottom:1.25rem;">Update your admin profile and
+                security preferences.</p>
             <a href="{% url 'update_profile' %}" class="btn btn-icon" style="text-decoration:none; font-size:0.85rem;">
                 <i class="fa-solid fa-user-pen"></i> Edit My Profile
             </a>
         </div>
 
         <!-- Security badge -->
-        <div class="dashboard-card" style="padding:1.4rem; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; gap:0.75rem;">
-            <div style="width:52px; height:52px; border-radius:14px; background:rgba(37,99,235,0.15); display:grid; place-items:center;">
+        <div class="dashboard-card"
+            style="padding:1.4rem; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; gap:0.75rem;">
+            <div
+                style="width:52px; height:52px; border-radius:14px; background:rgba(37,99,235,0.15); display:grid; place-items:center;">
                 <i class="fa-solid fa-shield-halved" style="font-size:1.4rem; color:#93c5fd;"></i>
             </div>
             <div>
                 <p style="font-weight:700; margin:0 0 0.25rem; font-size:0.95rem;">Secure Admin Access</p>
-                <p style="color:var(--text-muted); font-size:0.82rem; margin:0;">Only authorized personnel can access these tools.</p>
+                <p style="color:var(--text-muted); font-size:0.82rem; margin:0;">Only authorized personnel can access
+                    these tools.</p>
             </div>
         </div>
 

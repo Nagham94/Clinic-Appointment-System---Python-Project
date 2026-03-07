@@ -15,6 +15,9 @@ urlpatterns = [
     
     path('admin/register/', views.admin_register_view, name='admin_register'),
     path('admin/users/', views.user_list_view, name='user_list'),
+    path('admin/users/<int:user_id>/toggle-status/', views.toggle_user_status, name='toggle_user_status'),
+    path('admin/users/<int:user_id>/change-role/', views.change_user_role, name='change_user_role'),
+    path('admin/users/<int:user_id>/edit/', views.admin_edit_user, name='admin_edit_user'),
     
     path('profile/update/', views.update_profile_view, name='update_profile'),
 
@@ -24,7 +27,7 @@ urlpatterns = [
 
 
 
-    # edited by shahd
+    
     path('receptionist/queue/', views.queue_manager_view, name='queue_manager'),
 
 ]

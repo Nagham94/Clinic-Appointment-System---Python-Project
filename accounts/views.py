@@ -1,9 +1,10 @@
 # from datetime import timezone
 
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout, authenticate
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
 
 from .forms import (
     PatientRegistrationForm, AdminUserCreationForm, LoginForm, 
@@ -126,7 +127,7 @@ def update_profile_view(request):
 def patient_dashboard_view(request):
     return render(request, 'accounts/patient_dashboard.html')
 
-##edited by shahd
+
 @login_required
 @role_required([User.Roles.DOCTOR])
 def doctor_dashboard_view(request):
@@ -140,7 +141,7 @@ def doctor_dashboard_view(request):
     }
     return render(request, 'accounts/doctor_dashboard.html')
 
-# //edited by shahd
+
 @login_required
 @role_required([User.Roles.RECEPTIONIST])
 def receptionist_dashboard_view(request):
@@ -153,7 +154,7 @@ def receptionist_dashboard_view(request):
     return render(request, 'accounts/receptionist_dashboard.html')
 
 
-# edited by shahd
+
 def queue_manager_view(request):
 
     requested_appointments = Appointment.objects.filter(
@@ -172,23 +173,114 @@ def queue_manager_view(request):
 @login_required
 @role_required([User.Roles.ADMIN])
 def admin_dashboard_view(request):
-    stats = {
+    from dashboard.models import DashboardStats
+    from django.utils import timezone
+    
+    today = timezone.now().date()
+    daily_stats, created = DashboardStats.objects.get_or_create(date=today)
+    
+    # If it's a new stats object or we want to ensure it's fresh, we can recalculate:
+    if created or daily_stats.total_appointments == 0:
+        from appointments.models import Appointment
+        daily_stats.total_appointments = Appointment.objects.filter(created_at__date=today).count()
+        daily_stats.completed_appointments = Appointment.objects.filter(status='COMPLETED', updated_at__date=today).count()
+        daily_stats.cancelled_appointments = Appointment.objects.filter(status='CANCELLED', updated_at__date=today).count()
+        daily_stats.no_show_appointments = Appointment.objects.filter(status='NO_SHOW', updated_at__date=today).count()
+        daily_stats.total_patients = User.objects.filter(role=User.Roles.PATIENT, is_active=True).count()
+        daily_stats.total_doctors = User.objects.filter(role=User.Roles.DOCTOR, is_active=True).count()
+        daily_stats.save()
+    
+    # Get historical stats for a simple chart (last 7 days)
+    history = DashboardStats.objects.all().order_by('-date')[:7]
+    
+    context = {
         'total_users': User.objects.count(),
         'patients': User.objects.filter(role=User.Roles.PATIENT).count(),
         'doctors': User.objects.filter(role=User.Roles.DOCTOR).count(),
         'receptionists': User.objects.filter(role=User.Roles.RECEPTIONIST).count(),
+        'stat_total': daily_stats.total_appointments,
+        'stat_completed': daily_stats.completed_appointments,
+        'stat_cancelled': daily_stats.cancelled_appointments,
+        'stat_no_show': daily_stats.no_show_appointments,
+        'history': history,
     }
-    return render(request, 'accounts/admin_dashboard.html', stats)
+    return render(request, 'accounts/admin_dashboard.html', context)
 
 
 @login_required
 @role_required([User.Roles.ADMIN])
 def user_list_view(request):
     users = User.objects.all().order_by('-date_joined')
-    return render(request, 'accounts/user_list.html', {'users': users})
+    return render(request, 'accounts/user_list.html', {'users': users, 'roles': User.Roles.choices})
 
-# ## Home view of doctors
-# def home(request):
-#     doctors = User.objects.filter(role='doctor')  # حسب الrole عندك
-#     return render(request, 'home.html', {'doctors': doctors})
 
+@login_required
+@role_required([User.Roles.ADMIN])
+@require_POST
+def toggle_user_status(request, user_id):
+    target_user = get_object_or_404(User, id=user_id)
+    if target_user == request.user:
+        messages.error(request, "You cannot deactivate your own account.")
+    else:
+        target_user.is_active = not target_user.is_active
+        target_user.save()
+        status = "activated" if target_user.is_active else "deactivated"
+        messages.success(request, f"User {target_user.username} has been {status}.")
+    return redirect('user_list')
+
+
+@login_required
+@role_required([User.Roles.ADMIN])
+@require_POST
+def change_user_role(request, user_id):
+    target_user = get_object_or_404(User, id=user_id)
+    new_role = request.POST.get('role')
+    
+    if new_role in User.Roles.values:
+        target_user.role = new_role
+        target_user.save()
+        messages.success(request, f"Role for {target_user.username} changed to {target_user.get_role_display()}.")
+    else:
+        messages.error(request, "Invalid role selected.")
+    
+    return redirect('user_list')
+
+@login_required
+@role_required([User.Roles.ADMIN])
+def admin_edit_user(request, user_id):
+    from .forms import AdminUserProfileUpdateForm
+    target_user = get_object_or_404(User, id=user_id)
+    
+    # Identify profile and form class
+    if target_user.role == User.Roles.PATIENT:
+        profile_instance, _ = PatientProfile.objects.get_or_create(user=target_user)
+        ProfileFormClass = PatientProfileForm
+    elif target_user.role == User.Roles.DOCTOR:
+        profile_instance, _ = DoctorProfile.objects.get_or_create(user=target_user)
+        ProfileFormClass = DoctorProfileForm
+    elif target_user.role == User.Roles.RECEPTIONIST:
+        profile_instance, _ = ReceptionistProfile.objects.get_or_create(user=target_user)
+        ProfileFormClass = ReceptionistProfileForm
+    else:
+        profile_instance = None
+        ProfileFormClass = None
+
+    if request.method == 'POST':
+        user_form = AdminUserProfileUpdateForm(request.POST, instance=target_user)
+        profile_form = ProfileFormClass(request.POST, instance=profile_instance) if ProfileFormClass else None
+        
+        if user_form.is_valid() and (profile_form is None or profile_form.is_valid()):
+            user_form.save()
+            if profile_form:
+                profile_form.save()
+            messages.success(request, f"User {target_user.username} has been updated successfully.")
+            return redirect('user_list')
+    else:
+        user_form = AdminUserProfileUpdateForm(instance=target_user)
+        profile_form = ProfileFormClass(instance=profile_instance) if ProfileFormClass else None
+        
+    return render(request, 'accounts/admin_edit_user.html', {
+        'target_user': target_user,
+        'user_form': user_form,
+        'profile_form': profile_form
+    })

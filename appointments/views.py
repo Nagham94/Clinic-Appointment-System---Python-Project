@@ -11,6 +11,8 @@ from scheduling.services import generate_daily_slots
 from django.db import IntegrityError
 from django.db import transaction
 from django.db.models import Q
+import csv
+from django.http import HttpResponse
 from accounts.decorators import role_required
 from accounts.models import User
 
@@ -510,3 +512,40 @@ def book_appointment_from_DoctorList(request, doctor_id):
     }
     # return render(request, "appointments/book_appointment.html", {"doctor": doctors})
     return render(request, "appointments/book_appointment.html", context)
+
+
+@login_required
+@role_required(["ADMIN"])
+def export_appointments_csv(request):
+    import csv
+    from django.http import HttpResponse
+    
+    appointments = Appointment.objects.all().select_related('patient', 'doctor').order_by('-start_datetime')
+    count = appointments.count()
+    
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = f'attachment; filename="appointments_{timezone.now().date()}.csv"'
+    
+
+    response['X-Appointment-Count'] = str(count)
+
+    writer = csv.writer(response)
+    writer.writerow(['ID', 'Patient', 'Doctor', 'Start', 'End', 'Status', 'Reason'])
+
+    for appt in appointments:
+        try:
+            start_str = appt.start_datetime.strftime('%Y-%m-%d %H:%M') if appt.start_datetime else "N/A"
+            end_str = appt.end_datetime.strftime('%Y-%m-%d %H:%M') if appt.end_datetime else "N/A"
+            writer.writerow([
+                appt.id,
+                appt.patient.username if appt.patient else "Deleted User",
+                appt.doctor.username if appt.doctor else "Deleted Doctor",
+                start_str,
+                end_str,
+                appt.get_status_display(),
+                appt.reason or ""
+            ])
+        except Exception as e:
+            writer.writerow([appt.id, "ERROR", str(e)])
+
+    return response

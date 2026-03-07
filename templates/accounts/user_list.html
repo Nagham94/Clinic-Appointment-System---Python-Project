@@ -1,14 +1,57 @@
 {% extends 'base.html' %}
+{% load custom_tags %}
 {% block title %}User Management - ClinicLife{% endblock %}
+
+{% block extra_css %}
+<style>
+    .user-table th,
+    .user-table td {
+        padding: 0.9rem 1.1rem;
+    }
+
+    .user-username {
+        font-weight: 600;
+        color: var(--text-main);
+    }
+
+    .user-name {
+        color: var(--text-secondary);
+    }
+
+    .user-email {
+        color: var(--text-muted);
+        font-size: 0.88rem;
+    }
+
+    .user-status-active {
+        color: #10B981;
+        font-weight: 600;
+        font-size: 0.85rem;
+    }
+
+    .user-status-inactive {
+        color: #EF4444;
+        font-weight: 600;
+        font-size: 0.85rem;
+    }
+
+    .user-date {
+        color: var(--text-muted);
+        font-size: 0.85rem;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
 <div class="dashboard-container fade-in-up">
 
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem; flex-wrap:wrap; gap:1rem;">
+    <div
+        style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem; flex-wrap:wrap; gap:1rem;">
         <div>
-            <div class="section-title"><i class="fa-solid fa-list-ul"></i> Directory</div>
+            <div class="section-title"><i class="fa-solid fa-list-ul"></i> Directory (FORCED FIX)</div>
             <h1 style="margin:0; font-size:1.75rem;">All Registered Users</h1>
-            <p style="color:var(--text-muted); margin:0.3rem 0 0; font-size:0.9rem;">Browse every account in the system.</p>
+            <p style="color:var(--text-muted); margin:0.3rem 0 0; font-size:0.9rem;">Browse every account in the system.
+            </p>
         </div>
         <a href="{% url 'admin_dashboard' %}" class="btn btn-icon" style="text-decoration:none; font-size:0.85rem;">
             <i class="fa-solid fa-arrow-left"></i> Dashboard
@@ -17,38 +60,86 @@
 
     <div class="dashboard-card" style="padding:0; overflow:hidden;">
         <div class="table-container">
-            <table>
+            <table class="user-table">
                 <thead>
                     <tr>
-                        <th style="padding:1rem 1.1rem;">Username</th>
-                        <th style="padding:1rem 1.1rem;">First Name</th>
-                        <th style="padding:1rem 1.1rem;">Last Name</th>
-                        <th style="padding:1rem 1.1rem;">Email</th>
-                        <th style="padding:1rem 1.1rem;">Role</th>
-                        <th style="padding:1rem 1.1rem;">Date Joined</th>
+                        <th>Username</th>
+                        <th>First Name</th>
+                        <th>Last Name</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Status</th>
+                        <th>Date Joined</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for user in users %}
-                    <tr>
-                        <td style="padding:0.9rem 1.1rem; font-weight:600; color:var(--text-main);">{{ user.username }}</td>
-                        <td style="padding:0.9rem 1.1rem; color:var(--text-secondary);">{{ user.first_name|default:"—" }}</td>
-                        <td style="padding:0.9rem 1.1rem; color:var(--text-secondary);">{{ user.last_name|default:"—" }}</td>
-                        <td style="padding:0.9rem 1.1rem; color:var(--text-muted); font-size:0.88rem;">{{ user.email }}</td>
-                        <td style="padding:0.9rem 1.1rem;">
+                    <tr {% if not user.is_active %}style="background: rgba(239, 68, 68, 0.05);" {% endif %}>
+                        <td class="user-username">{{ user.username }}</td>
+                        <td class="user-name">{% first_name_display user %}</td>
+                        <td class="user-name">{% last_name_display user %}</td>
+                        <td class="user-email">{{ user.email }}</td>
+                        <td>
                             <span class="role-badge role-{{ user.role|lower }}">{{ user.get_role_display }}</span>
                         </td>
-                        <td style="padding:0.9rem 1.1rem; color:var(--text-muted); font-size:0.85rem;">{{ user.date_joined|date:"M d, Y" }}</td>
+                        <td>
+                            {% if user.is_active %}
+                            <span class="user-status-active"><i class="fa-solid fa-circle-check"></i> Active</span>
+                            {% else %}
+                            <span class="user-status-inactive"><i class="fa-solid fa-circle-xmark"></i> Inactive</span>
+                            {% endif %}
+                        </td>
+                        <td class="user-date">{{ user.date_joined|format_date }}</td>
+                        <td>
+                            <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                <!-- Edit User Link -->
+                                <a href="{% url 'admin_edit_user' user.id %}" class="btn btn-icon"
+                                    style="padding: 0.45rem; font-size: 0.85rem; background: var(--bg-card); border: 1px solid var(--border-color); color: var(--primary-color);"
+                                    title="Edit Full Profile">
+                                    <i class="fa-solid fa-user-pen"></i>
+                                </a>
+
+                                <!-- Toggle Status Form -->
+                                <form action="{% url 'toggle_user_status' user.id %}" method="post"
+                                    style="display: inline;">
+                                    {% csrf_token %}
+                                    <button type="submit"
+                                        class="btn {% if user.is_active %}btn-danger{% else %}btn-success{% endif %}"
+                                        style="padding: 0.4rem 0.6rem; font-size: 0.75rem;"
+                                        onclick="return confirm('Are you sure you want to {% if user.is_active %}deactivate{% else %}activate{% endif %} this user?')">
+                                        {% if user.is_active %}Deactivate{% else %}Activate{% endif %}
+                                    </button>
+                                </form>
+
+                                <!-- Change Role Form -->
+                                <form action="{% url 'change_user_role' user.id %}" method="post"
+                                    style="display: inline; display: flex; gap: 0.2rem;">
+                                    {% csrf_token %}
+                                    <select name="role"
+                                        style="padding: 0.35rem; font-size: 0.75rem; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-main);">
+                                        {% for role_val, role_label in roles %}
+                                        <option value="{{ role_val }}" {% selected_if_equal user.role role_val %}>
+                                            {{ role_label }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <button type="submit" class="btn-primary"
+                                        style="padding: 0.4rem 0.6rem; font-size: 0.75rem;">
+                                        Update
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="6" style="padding:3rem; text-align:center; color:var(--text-muted);">No users found.</td>
+                        <td colspan="8" style="padding:3rem; text-align:center; color:var(--text-muted);">No users
+                            found.</td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
     </div>
-
 </div>
 {% endblock %}

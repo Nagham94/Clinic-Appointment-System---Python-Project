@@ -44,6 +44,8 @@ def create_consultation(request, appointment_id):
 
             messages.success(request, "Consultation record saved successfully.")
             return redirect('consultation_detail', consultation_id=consultation.id)
+        else:
+            messages.error(request, "Please correct the errors below. The Diagnosis field is mandatory.")
     else:
         form = ConsultationForm()
         prescription_formset = PrescriptionFormSet()
@@ -80,6 +82,8 @@ def edit_consultation(request, consultation_id):
 
             messages.success(request, "Consultation record updated successfully.")
             return redirect('consultation_detail', consultation_id=consultation.id)
+        else:
+            messages.error(request, "Please correct the errors below. The Diagnosis field is mandatory.")
     else:
         form = ConsultationForm(instance=consultation)
         prescription_formset = PrescriptionFormSet(instance=consultation)

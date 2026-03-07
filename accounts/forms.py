@@ -88,6 +88,11 @@ class UserProfileUpdateForm(forms.ModelForm):
         model = User
         fields = ['first_name', 'last_name', 'email']
 
+class AdminUserProfileUpdateForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ['first_name', 'last_name', 'email', 'role', 'is_active']
+
 class PatientProfileForm(forms.ModelForm):
     class Meta:
         model = PatientProfile

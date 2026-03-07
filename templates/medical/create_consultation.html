@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load custom_tags %}
 {% block title %}Create Consultation - ClinicLife{% endblock %}
 
 {% block extra_js %}
@@ -41,8 +42,6 @@
                 if (list.children.length > 1) {
                     newForm.remove();
                     totalForms.value = parseInt(totalForms.value) - 1;
-                    // Note: This logic for TOTAL_FORMS is simplified for new forms only. 
-                    // Django management form usually requires sequential IDs.
                 }
             });
         }
@@ -63,6 +62,22 @@
                 }
             });
         });
+
+        // Form validation for Diagnosis
+        const form = document.querySelector('.emr-form');
+        const diagnosisField = document.querySelector('textarea[name="diagnosis"]');
+
+        if (form && diagnosisField) {
+            form.addEventListener('submit', function (e) {
+                if (!diagnosisField.value.trim()) {
+                    e.preventDefault();
+                    alert('⚠️ Error: The Diagnosis field is mandatory. Please enter the medical diagnosis for the patient.');
+                    diagnosisField.focus();
+                    diagnosisField.style.borderColor = '#ef4444';
+                    diagnosisField.style.boxShadow = '0 0 0 3px rgba(239, 68, 68, 0.2)';
+                }
+            });
+        }
     });
 </script>
 {% endblock %}
@@ -79,26 +94,37 @@
             </span>
         </div>
 
-        <form method="post" class="emr-form">
+        <form method="post" class="emr-form" novalidate>
             {% csrf_token %}
+
+            <div class="messages-container-local">
+                {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %}">
+                    {{ message }}</div>
+                {% endfor %}
+                {% endif %}
+            </div>
 
             <div class="form-section">
                 <h3
                     style="border-bottom: 2px solid var(--border-color); padding-bottom: 0.5rem; margin-bottom: 1.5rem;">
                     Clinical Assessment</h3>
-                <div class="form-group">
-                    <label for="{{ form.diagnosis.id_for_label }}">Diagnosis</label>
+                <div class="form-group" id="diagnosis-group">
+                    <label for="{{ form.diagnosis.id_for_label }}">Diagnosis <span
+                            style="color: #ef4444;">*</span></label>
                     {{ form.diagnosis }}
-                    {% if form.diagnosis.errors %}
-                    <div class="error-msg">{{ form.diagnosis.errors }}</div>
-                    {% endif %}
+                    <div class="error-msg {% if not form.diagnosis.errors %}hidden{% endif %}">
+                        <i class="fa-solid fa-circle-exclamation"></i>
+                        {% render_errors form.diagnosis.errors %}
+                    </div>
                 </div>
                 <div class="form-group">
                     <label for="{{ form.notes.id_for_label }}">Clinical Notes (Optional)</label>
                     {{ form.notes }}
-                    {% if form.notes.errors %}
-                    <div class="error-msg">{{ form.notes.errors }}</div>
-                    {% endif %}
+                    <div class="error-msg {% if not form.notes.errors %}hidden{% endif %}">
+                        {% render_errors form.notes.errors %}
+                    </div>
                     <small style="color: var(--text-muted);">These notes will be hidden from receptionists.</small>
                 </div>
             </div>
@@ -222,6 +248,32 @@
     .prescription-item input,
     .test-item input {
         background: var(--bg-main) !important;
+    }
+
+    .error-msg {
+        color: #ef4444;
+        font-size: 0.85rem;
+        margin-top: 0.5rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .error-msg.hidden {
+        display: none;
+    }
+
+    .error-msg ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .alert-error {
+        color: #842029;
+        background-color: #f8d7da;
+        border-color: #f5c2c7;
     }
 </style>
 {% endblock %}

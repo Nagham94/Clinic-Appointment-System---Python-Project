@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+{% load custom_tags %}
+
+{% block title %}Edit User - {{ target_user.username }} - ClinicLife{% endblock %}
+
+{% block content %}
+<div class="auth-container fade-in-up" style="padding: 2rem 1rem; min-height: auto;">
+    <a href="{% url 'user_list' %}" class="back-link">
+        <i class="fa-solid fa-arrow-left"></i> Back to User Directory
+    </a>
+
+    <div class="auth-card" style="max-width: 650px; width: 100%;">
+        <div style="margin-bottom: 2rem;">
+            <h1 class="auth-title" style="font-size: 1.75rem; display: flex; align-items: center; gap: 0.75rem;">
+                <i class="fa-solid fa-user-gear" style="color: var(--primary);"></i> Edit Account
+            </h1>
+            <p class="auth-subtitle">Modifying profile for <strong>{{ target_user.username }}</strong></p>
+        </div>
+
+        <form method="post" id="editForm">
+            {% csrf_token %}
+
+            <div class="section-divider" style="margin-top: 0;">
+                <span>Basic Credentials</span>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="field-group">
+                    <label class="field-label">First Name</label>
+                    {{ user_form.first_name }}
+                    {% render_errors user_form.first_name.errors %}
+                </div>
+                <div class="field-group">
+                    <label class="field-label">Last Name</label>
+                    {{ user_form.last_name }}
+                    {% render_errors user_form.last_name.errors %}
+                </div>
+            </div>
+
+            <div class="field-group">
+                <label class="field-label">Email Address</label>
+                {{ user_form.email }}
+                {% render_errors user_form.email.errors %}
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="field-group">
+                    <label class="field-label">Account Role</label>
+                    {{ user_form.role }}
+                </div>
+                <div class="field-group">
+                    <label class="field-label">Status</label>
+                    <div
+                        style="display: flex; align-items: center; gap: 0.75rem; height: 45px; background: rgba(8, 17, 42, 0.4); border-radius: 8px; padding: 0 1rem; border: 1px solid var(--border);">
+                        {{ user_form.is_active }}
+                        <span
+                            class="{% if user_form.is_active.value %}text-success-bright{% else %}text-danger-bright{% endif %}"
+                            style="font-size: 0.88rem; font-weight: 600;">
+                            {% if user_form.is_active.value %}Active{% else %}Disabled{% endif %}
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            {% if profile_form %}
+            <div class="section-divider" style="margin: 2rem 0 1.5rem;">
+                <span>{{ target_user.get_role_display }} Profile Details</span>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem;">
+                {% for field in profile_form %}
+                <div class="field-group">
+                    <label class="field-label">{{ field.label }}</label>
+                    {{ field }}
+                    {% render_errors field.errors %}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <div style="margin-top: 2.5rem;">
+                <button type="submit" class="submit-btn" style="width: 100%;">
+                    <i class="fa-solid fa-cloud-arrow-up"></i> Update User Profile
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Apply global field-control class to all inputs
+        const inputs = document.querySelectorAll('input:not([type="checkbox"]), select, textarea');
+        inputs.forEach(input => {
+            input.classList.add('field-control');
+        });
+    });
+</script>
+{% endblock %}
