@@ -73,6 +73,86 @@
         transform: translateX(3px);
         color: var(--primary);
     }
+    /* spacing between sections */
+    .dashboard-grid{
+        margin-bottom:1.6rem;
+    }
+
+    /* Doctors Section */
+    .doctors-grid{
+        display:grid;
+        grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+        gap:1.2rem;
+        margin-top:1rem;
+    }
+
+    /* Doctor Card */
+    .doctor-card{
+        background:rgba(10,20,40,0.65);
+        border:1px solid var(--border);
+        border-radius:14px;
+        padding:1.4rem;
+        text-align:center;
+        transition:var(--transition);
+        position:relative;
+    }
+
+    .doctor-card:hover{
+        transform:translateY(-4px);
+        border-color:var(--border-hover);
+        background:rgba(20,30,55,0.8);
+    }
+
+    /* doctor avatar */
+    .doctor-avatar{
+        width:64px;
+        height:64px;
+        border-radius:50%;
+        margin:0 auto 0.6rem;
+        background:linear-gradient(135deg,#2563eb,#0891b2);
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        font-size:1.4rem;
+        color:white;
+    }
+
+    /* doctor name */
+    .doctor-name{
+        font-weight:700;
+        font-size:0.95rem;
+        margin-bottom:0.15rem;
+    }
+
+    /* specialization */
+    .doctor-specialty{
+        font-size:0.75rem;
+        color:var(--text-muted);
+        margin-bottom:0.5rem;
+    }
+
+    /* rating */
+    .doctor-rating{
+        color:#facc15;
+        font-size:0.8rem;
+        margin-bottom:0.7rem;
+    }
+
+    /* book button */
+    .book-btn{
+        display:inline-block;
+        padding:0.45rem 0.8rem;
+        border-radius:8px;
+        background:var(--primary);
+        color:white;
+        font-size:0.78rem;
+        text-decoration:none;
+        transition:var(--transition);
+    }
+
+    .book-btn:hover{
+        background:var(--primary-dark);
+    }
 </style>
 {% endblock %}
 
@@ -148,26 +228,42 @@
 
             </div>
         </div>
+    </div>
 {#    our Doctors card    #}
-        <div class="dashboard-card" style="padding:1.4rem;">
-            <h3>Our Doctors</h3>
+    <div class="dashboard-card" style="padding:1.4rem;">
+        <h3>Our Doctors</h3>
 
-            <div class="doctors-grid">
-                {% for doctor in doctors %}
-                <div class="doctor-card">
+        <div class="doctors-grid">
+            {% for doctor in doctors %}
+            <div class="doctor-card">
 
-                    <h4>Dr. {{ doctor.get_full_name }}</h4>
-                    <p>{{ doctor.specialization }}</p>
-
-                    <a href="{% url 'book_appointment_from_DoctorList' doctor.id %}" class="btn-primary">
-                        Book Appointment
-                    </a>
-
+                <div class="doctor-avatar">
+                    <i class="fa-solid fa-user-doctor"></i>
                 </div>
-                {% endfor %}
-            </div>
-        </div>
 
+                <div class="doctor-name">
+                    Dr. {{ doctor.get_full_name }}
+                </div>
+
+                <div class="doctor-specialty">
+                    {{ doctor.specialization|default:"General Physician" }}
+                </div>
+
+                <div class="doctor-rating">
+                    <i class="fa-solid fa-star"></i>
+                    <i class="fa-solid fa-star"></i>
+                    <i class="fa-solid fa-star"></i>
+                    <i class="fa-solid fa-star"></i>
+                    <i class="fa-solid fa-star-half-stroke"></i>
+                </div>
+
+                <a href="{% url 'book_appointment_from_DoctorList' doctor.id %}" class="book-btn">
+                    Book Appointment
+                </a>
+
+            </div>
+            {% endfor %}
+        </div>
     </div>
 </div>
 {% endblock %}
