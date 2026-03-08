@@ -16,14 +16,88 @@ from django.http import HttpResponse
 from accounts.decorators import role_required
 from accounts.models import User
 
-# from scheduling.models import
+
 
 # User model import for referencing in views
 User = get_user_model()
 
 
 @login_required
+@role_required(["PATIENT"])
 def book_appointment(request):
+    if request.method == 'POST':
+        doctor_id = request.POST.get('doctor')
+        reason = request.POST.get('reason')
+        start_str = request.POST.get('start_datetime')
+        end_str = request.POST.get('end_datetime')
+
+        try:
+            start_datetime = timezone.make_aware(datetime.fromisoformat(start_str))
+            end_datetime = timezone.make_aware(datetime.fromisoformat(end_str))
+        except (ValueError, TypeError):
+            messages.error(request, 'Invalid slot selected.')
+            return redirect('book_appointment')
+
+        if start_datetime < timezone.now():
+            messages.error(request, 'Cannot book an appointment in the past.')
+            return redirect('book_appointment')
+
+        doctor = get_object_or_404(User, id=doctor_id, role='DOCTOR')
+
+        # Validate submitted slot exists in generated slots
+        available_slots = generate_daily_slots(doctor, start_datetime.date())
+       
+
+        naive_start = start_datetime.replace(tzinfo=None)
+        naive_end = end_datetime.replace(tzinfo=None)
+
+        if (naive_start, naive_end) not in available_slots:
+            messages.error(request, 'This slot is not available. Please choose another.')
+            return redirect('book_appointment')
+
+        # Check patient doesn't have overlapping appointment
+        if Appointment.objects.filter(
+            patient=request.user,
+            status__in=['REQUESTED', 'CONFIRMED'],
+            start_datetime__lt=end_datetime,
+            end_datetime__gt=start_datetime
+        ).exists():
+            messages.error(request, 'You already have an appointment during this time.')
+            return redirect('book_appointment')
+
+        # Direct DB check to avoid naive/aware mismatch bug in generate_daily_slots
+        if Appointment.objects.filter(
+            doctor=doctor,
+            start_datetime=start_datetime,
+            status__in=['REQUESTED', 'CONFIRMED']
+        ).exists():
+            messages.error(request, 'This slot is no longer available. Please choose another.')
+            return redirect('book_appointment')
+
+        # Handle race condition where two patients book the same slot simultaneously
+        try:
+            with transaction.atomic():
+                Appointment.objects.create(
+                    patient=request.user,
+                    doctor=doctor,
+                    start_datetime=start_datetime,
+                    end_datetime=end_datetime,
+                    reason=reason,
+                    status='REQUESTED'
+                )
+        except IntegrityError:
+            messages.error(request, 'This slot was just booked by someone else. Please choose another.')
+            return redirect('book_appointment')
+
+        messages.success(request, 'Your appointment has been requested successfully.')
+        return redirect('patient_dashboard')
+
+    doctors = User.objects.filter(role='DOCTOR')
+    return render(request, 'appointments/book_appointment.html', {'doctors': doctors , 'today': timezone.now().date(),  'now': timezone.localtime().time()})
+
+@login_required
+@role_required(["PATIENT"])
+def book_appointment_from_DoctorList(request, doctor_id):
     if request.method == 'POST':
         doctor_id = request.POST.get('doctor')
         reason = request.POST.get('reason')
@@ -90,9 +164,17 @@ def book_appointment(request):
         return redirect('patient_dashboard')
 
     doctors = User.objects.filter(role='DOCTOR')
-    return render(request, 'appointments/book_appointment.html', {'doctors': doctors , 'today': timezone.now().date()})
+
+    context = {
+        "doctors": doctors,
+        "selected_doctor_id": doctor_id
+    }
+    # return render(request, "appointments/book_appointment.html", {"doctor": doctors})
+    return render(request, "appointments/book_appointment.html", context)
+
 
 @login_required
+@role_required(["PATIENT"])
 def my_appointments(request):
     appointments = Appointment.objects.filter(
         patient=request.user
@@ -102,11 +184,12 @@ def my_appointments(request):
         'appointments': appointments
     })
 
+
 @login_required
 def cancel_appointment(request, appointment_id):
     appointment = get_object_or_404(Appointment, id=appointment_id)
     
-    # Allow cancellation by patient, receptionist, or admin
+    # Allow cancellation by patient, receptionist, or patient's doctor
     is_patient = appointment.patient == request.user
     is_staff = request.user.role in ['RECEPTIONIST', 'DOCTOR']  # doctors can also cancel on behalf of patients
     
@@ -130,12 +213,16 @@ def cancel_appointment(request, appointment_id):
 def delete_appointment(request, pk):
     appointment = get_object_or_404(Appointment, id=pk)
 
-    # ممكن نضيف حماية زيادة
+    if appointment.status not in ['CANCELLED', 'NO_SHOW']:
+        messages.error(request, 'Only cancelled or no-show appointments can be deleted.')
+        return redirect('my_appointments')
+
     if request.user == appointment.patient:
         appointment.delete()
         messages.success(request, "Appointment deleted successfully.")
 
     return redirect('my_appointments')
+
 
 @login_required
 @role_required(["PATIENT", "RECEPTIONIST"])
@@ -232,6 +319,9 @@ def reschedule_appointment(request, appointment_id):
         'today': timezone.now().date(),
     })
 
+
+@login_required
+@role_required(["RECEPTIONIST", "DOCTOR"])
 def confirm_appointment(request, pk):
     appointment = get_object_or_404(Appointment, id=pk)
 
@@ -290,7 +380,7 @@ def mark_no_show(request, pk):
         messages.error(request, 'Only confirmed appointments can be marked as no show.')
         return redirect(request.META.get('HTTP_REFERER') or 'confirmed_appointments')
 
-    if appointment.start_datetime >= timezone.now():
+    if appointment.start_datetime >= timezone.localtime():
         messages.error(request, 'Cannot mark as no show before the appointment time.')
         return redirect(request.META.get('HTTP_REFERER') or 'confirmed_appointments')
 
@@ -305,7 +395,7 @@ def mark_no_show(request, pk):
     return redirect(request.META.get('HTTP_REFERER') or 'confirmed_appointments')
 
 @login_required
-@role_required(["RECEPTIONIST", "ADMIN"])
+@role_required(["RECEPTIONIST", "DOCTOR"])
 def checkin_patient(request, pk):
     """
     Receptionist checks in a patient.
@@ -328,7 +418,7 @@ def checkin_patient(request, pk):
     return redirect(request.META.get('HTTP_REFERER') or 'confirmed_appointments')
 
 @login_required
-@role_required(["DOCTOR", "PATIENT"])
+@role_required(["DOCTOR"])
 def completed_appointments(request):
     """
     Shows all COMPLETED appointments.
@@ -349,6 +439,7 @@ def completed_appointments(request):
         template = 'appointments/patient_completed_appointments.html'
 
     return render(request, template, {'appointments': qs})
+
 
 """
 search and filter view for staff to manage appointments, with access control so doctors only see their own appointments but receptionists and admins can see all.
@@ -437,82 +528,6 @@ def doctor_list_view(request):
     }
 
     return render(request, 'appointments/doctor_list.html', context)
-# shahdd
-def book_appointment_from_DoctorList(request, doctor_id):
-    if request.method == 'POST':
-        doctor_id = request.POST.get('doctor')
-        reason = request.POST.get('reason')
-        start_str = request.POST.get('start_datetime')
-        end_str = request.POST.get('end_datetime')
-
-        try:
-            start_datetime = timezone.make_aware(datetime.fromisoformat(start_str))
-            end_datetime = timezone.make_aware(datetime.fromisoformat(end_str))
-        except (ValueError, TypeError):
-            messages.error(request, 'Invalid slot selected.')
-            return redirect('book_appointment')
-
-        if start_datetime < timezone.now():
-            messages.error(request, 'Cannot book an appointment in the past.')
-            return redirect('book_appointment')
-
-        doctor = get_object_or_404(User, id=doctor_id, role='DOCTOR')
-
-        # Validate submitted slot exists in generated slots
-        available_slots = generate_daily_slots(doctor, start_datetime.date())
-        naive_start = start_datetime.replace(tzinfo=None)
-        naive_end = end_datetime.replace(tzinfo=None)
-
-        if (naive_start, naive_end) not in available_slots:
-            messages.error(request, 'This slot is not available. Please choose another.')
-            return redirect('book_appointment')
-
-        # Check patient doesn't have overlapping appointment
-        if Appointment.objects.filter(
-            patient=request.user,
-            status__in=['REQUESTED', 'CONFIRMED'],
-            start_datetime__lt=end_datetime,
-            end_datetime__gt=start_datetime
-        ).exists():
-            messages.error(request, 'You already have an appointment during this time.')
-            return redirect('book_appointment')
-
-        # Direct DB check to avoid naive/aware mismatch bug in generate_daily_slots
-        if Appointment.objects.filter(
-            doctor=doctor,
-            start_datetime=start_datetime,
-            status__in=['REQUESTED', 'CONFIRMED']
-        ).exists():
-            messages.error(request, 'This slot is no longer available. Please choose another.')
-            return redirect('book_appointment')
-
-        # Handle race condition where two patients book the same slot simultaneously
-        try:
-            with transaction.atomic():
-                Appointment.objects.create(
-                    patient=request.user,
-                    doctor=doctor,
-                    start_datetime=start_datetime,
-                    end_datetime=end_datetime,
-                    reason=reason,
-                    status='REQUESTED'
-                )
-        except IntegrityError:
-            messages.error(request, 'This slot was just booked by someone else. Please choose another.')
-            return redirect('book_appointment')
-
-        messages.success(request, 'Your appointment has been requested successfully.')
-        return redirect('patient_dashboard')
-
-    doctors = User.objects.filter(role='DOCTOR')
-
-    context = {
-        "doctors": doctors,
-        "selected_doctor_id": doctor_id
-    }
-    # return render(request, "appointments/book_appointment.html", {"doctor": doctors})
-    return render(request, "appointments/book_appointment.html", context)
-
 
 @login_required
 @role_required(["ADMIN"])

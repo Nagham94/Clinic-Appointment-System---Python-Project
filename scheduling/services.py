@@ -65,6 +65,15 @@ def generate_daily_slots(doctor, date):
         if slot not in booked_naive:
             available.append(slot)
 
+    # Filter out past slots if the date is today
+    if date == datetime.today().date():
+        now = datetime.now()
+        filtered = []
+        for slot_start, slot_end in available:
+            if slot_start > now:
+                filtered.append((slot_start, slot_end))
+        available = filtered
+
     return available
 
 

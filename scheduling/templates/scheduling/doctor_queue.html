@@ -139,16 +139,66 @@
             {% elif active_status == 'COMPLETED' %}
                 <div class="queue-item queue-item-completed">
             {% else %}
-                <div class="queue-item">
+                <div class="queue-item" style="align-items:flex-start;">
             {% endif %}
 
-                <!-- Left: Position + Patient Info -->
-                <div style="display:flex; align-items:center; gap:1rem; flex:1; min-width:250px;">
+            {% if active_status == 'CONFIRMED' %}
 
-                    <div class="queue-position-badge {% if active_status == 'COMPLETED' %}queue-badge-success{% elif active_status == 'CONFIRMED' %}queue-badge-info{% else %}queue-badge-accent{% endif %}">
+                <!-- CONFIRMED: position badge + full info column (name row has status badge inline) -->
+                <div style="display:flex; align-items:flex-start; gap:1rem; flex:1;">
+
+                    <div class="queue-position-badge queue-badge-info" style="margin-top:2px;">
                         {{ item.position }}
                     </div>
 
+                    <div style="flex:1;">
+                        <!-- Name row with status badge -->
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.25rem;">
+                            <p style="margin:0; font-weight:600; color:var(--text-main); font-size:0.98rem;">
+                                <i class="fa-solid fa-user" style="margin-right:0.3rem; font-size:0.82rem; opacity:0.5;"></i>
+                                {{ item.appointment.patient.get_full_name|default:item.appointment.patient.username }}
+                            </p>
+                            <span class="status confirmed" style="margin-left:1rem; flex-shrink:0;">Confirmed</span>
+                        </div>
+
+                        <p style="margin:0 0 0.15rem; font-size:0.82rem; color:var(--text-muted);">
+                            <i class="fa-regular fa-clock" style="margin-right:0.3rem;"></i>
+                            Appointment: {{ item.appointment.start_datetime|time:"h:i A" }} – {{ item.appointment.end_datetime|time:"h:i A" }}
+                        </p>
+                        {% if item.appointment.reason %}
+                        <p style="margin:0.2rem 0 0; font-size:0.78rem; color:var(--text-muted); font-style:italic;">
+                            <i class="fa-solid fa-comment" style="margin-right:0.25rem;"></i>
+                            {{ item.appointment.reason|truncatewords:12 }}
+                        </p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Buttons -->
+                <div style="display:flex; flex-direction:column; align-items:flex-end; gap:0.4rem; flex-shrink:0; margin-top:2px;">
+                    <form method="post" action="{% url 'checkin_patient' item.appointment.pk %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-small btn-icon" style="width:110px;"
+                            onclick="return confirm('Check in this appointment?');">
+                            <i class="fa-solid fa-check"></i> Check In
+                        </button>
+                    </form>
+                    <form method="post" action="{% url 'mark_no_show' item.appointment.pk %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger btn-small btn-icon" style="width:110px;"
+                            onclick="return confirm('Mark this appointment as no-show?');">
+                            <i class="fa-solid fa-user-slash"></i> No-Show
+                        </button>
+                    </form>
+                </div>
+
+            {% else %}
+
+                <!-- CHECKED_IN / COMPLETED: original layout -->
+                <div style="display:flex; align-items:center; gap:1rem; flex:1; min-width:250px;">
+                    <div class="queue-position-badge {% if active_status == 'COMPLETED' %}queue-badge-success{% else %}queue-badge-accent{% endif %}">
+                        {{ item.position }}
+                    </div>
                     <div>
                         <p style="margin:0 0 0.25rem; font-weight:600; color:var(--text-main); font-size:0.98rem;">
                             <i class="fa-solid fa-user" style="margin-right:0.3rem; font-size:0.82rem; opacity:0.5;"></i>
@@ -203,25 +253,16 @@
 
                     {% elif active_status == 'COMPLETED' %}
                         <a href="{% url 'consultation_detail' item.appointment.consultation.id %}"
-                        class="btn btn-icon btn-small" style="text-decoration:none; font-size:0.82rem;">
-                        <i class="fa-solid fa-file-waveform"></i> View Record
-                    </a>
+                            class="btn btn-icon btn-small" style="text-decoration:none; font-size:0.82rem;">
+                            <i class="fa-solid fa-file-waveform"></i> View Record
+                        </a>
                         <span class="status completed" style="display:inline-flex; align-items:center; gap:0.3rem;">
                             <i class="fa-solid fa-circle-check"></i> Completed
                         </span>
-
-                    {% else %}
-
-                     <form method="post" action="{% url 'mark_no_show' item.appointment.pk  %}">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-danger btn-small btn-icon" onclick="return confirm('Mark this appointment as no-show?');">
-                            <i class="fa-solid fa-user-slash"></i> No-Show
-                        </button>
-                    
-                        <span class="status confirmed" style="display:inline-block; ">Confirmed</span>
-                        
                     {% endif %}
                 </div>
+
+            {% endif %}
 
             </div>
         {% endfor %}
